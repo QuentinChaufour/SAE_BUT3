@@ -27,7 +27,7 @@ services:
     env_file:
       - .env
     volumes:
-      - postgres-data:/var/lib/postgresql/
+      - ./databases:/var/lib/postgresql/
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -37,9 +37,6 @@ services:
         - '5430:5432'
     networks:
       - global_dev
-
-volumes:
-  postgres-data:
 
 networks:
     global_dev:
