@@ -6,7 +6,9 @@ services:
       dockerfile: ./Dockerfile
       target: dev
     environment:
-      HOST: 0.0.0.0
+      - HOST=0.0.0.0
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
     volumes:
       - ./app:/src/app
       - ./public:/src/public
