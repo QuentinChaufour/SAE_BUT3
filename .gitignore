@@ -20,8 +20,6 @@ logs
 .agents
 .claude
 .windsurf
-docker-compose.yml
-*.sql
 
 # Local env files
 .env
