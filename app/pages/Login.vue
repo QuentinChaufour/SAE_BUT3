@@ -5,10 +5,10 @@ import { z } from 'zod'
 
 const fields = ref<AuthFormField[]>([
   {
-    name: 'email',
+    name: 'login',
     type: 'text',
-    label: 'Email',
-    placeholder: 'Votre email',
+    label: 'Login',
+    placeholder: 'Votre login',
     required: true
   },
   {
@@ -24,44 +24,39 @@ const fields = ref<AuthFormField[]>([
 
 // Define the schema
 const schema = z.object({
-  email: z.string().email('Email invalide'),
+  login: z.string().min(1, "Champs Obligatoire"),
   password: z.string().min(8, 'Minimum 8 caractères')
 })
 
 type Schema = z.output<typeof schema>
 
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
-  const { email, password } = payload.data
-  const response = await $fetch(`api/auth/login`, {
+  const { login, password } = payload.data
+  const response : any = await $fetch(`api/auth/login`, {
     method: 'POST',
     body: JSON.stringify({
-      email: email,
+      login: login,
       password: password
     })
   })
 
+  // TODO Toaster or something to show the error
   console.log(response)
   if (response.success) {
     console.log('Connexion réussie')
+
+// TODO redirect the user to a main page based on his role 
+//    await navigateTo("");
+
   } else if (!response.success) {
     console.log('Identifiants incorrects')
   }
 }
 
-// function check() {
-//   console.log(users.email, " - ", users.password)
-//   const miel = schema.parse(users);
-//   const result = schema.safeParse(users);
-//   if (!result.success) {
-//     console.log(result.error);   // ZodError instance
-//   } else {
-//     console.log(result.data);    // { username: string; xp: number }
-//   }
-// };
 </script>
 
 <template>
-  <div class="grid grid-cols-1 justify-center self-center h-full">
+  <div class="grid grid-cols-1 h-full">
     <UAuthForm
       title="Login"
       description="Enter your credentials to access your account."

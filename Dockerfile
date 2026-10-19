@@ -12,6 +12,7 @@ COPY public ./public
 COPY server ./server
 COPY shared ./shared
 COPY tsconfig.json nuxt.config.ts ./
+COPY generated ./generated
 
 # Développement
 FROM base AS dev
