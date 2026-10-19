@@ -17,8 +17,15 @@ logs
 .DS_Store
 .fleet
 .idea
+.agents
+.claude
+.windsurf
+docker-compose.yml
+*.sql
 
 # Local env files
 .env
 .env.*
 !.env.example
+
+/generated/prisma
