@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "nuxt:dev": "nuxt dev",
+    "start": "docker compose -f docker-compose.yml up -d --build",
+    "dev": "docker compose -f docker-compose.dev.yml up --build",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
