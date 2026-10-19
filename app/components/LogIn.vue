@@ -8,13 +8,15 @@ const fields = ref<AuthFormField[]>([
     name: 'email',
     type: 'text',
     label: 'Email',
-    placeholder: 'Votre email'
+    placeholder: 'Votre email',
+    required: true
   },
   {
     name: 'password',
     type: 'password',
     label: 'Password',
-    placeholder: 'Votre mot de passe'
+    placeholder: 'Votre mot de passe',
+    required: true
   }
 ])
 
@@ -28,33 +30,34 @@ const schema = z.object({
 
 type Schema = z.output<typeof schema>
 
-var database = false;
-// data to validate (a changer pour quil verifie tout les users de la BD)
-const users = reactive({
-  email: `${!database ? 'g@g.com' : ''}`,
-  password: `${!database ? 'azertyui' : ''}`
-});
-
-function onSubmit(payload: FormSubmitEvent<Schema>) {
+async function onSubmit(payload: FormSubmitEvent<Schema>) {
   const { email, password } = payload.data
+  const response = await $fetch(`api/auth/login`, {
+      method: "POST",
+      body: JSON.stringify({
+        email: email,
+        password: password
+      }),
+  });
 
-  if (email === users.email && password === users.password) {
+  console.log(response);
+  if (response.success) {
     console.log('Connexion réussie')
-  } else {
+  } else if (!response.success) {
     console.log('Identifiants incorrects')
   }
 }
 
-function check() {
-  console.log(users.email, " - ", users.password)
-  const miel = schema.parse(users);
-  const result = schema.safeParse(users);
-  if (!result.success) {
-    console.log(result.error);   // ZodError instance
-  } else {
-    console.log(result.data);    // { username: string; xp: number }
-  }
-};
+// function check() {
+//   console.log(users.email, " - ", users.password)
+//   const miel = schema.parse(users);
+//   const result = schema.safeParse(users);
+//   if (!result.success) {
+//     console.log(result.error);   // ZodError instance
+//   } else {
+//     console.log(result.data);    // { username: string; xp: number }
+//   }
+// };
 
 </script>
 
