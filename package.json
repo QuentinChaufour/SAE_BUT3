@@ -19,7 +19,8 @@
     "dotenv": "^18.0.8",
     "nuxt": "^4.6.1",
     "pg": "^8.23.1",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.3",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.17.0",

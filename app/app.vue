@@ -52,8 +52,9 @@ useSeoMeta({
       </template>
     </UHeader>
 
-    <UMain>
-      <NuxtPage />
+    <UMain class="flex justify-center">
+      <!-- <NuxtPage /> -->
+      <LogIn />
     </UMain>
 
     <USeparator icon="i-simple-icons-nuxtdotjs" />
