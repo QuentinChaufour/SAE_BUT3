@@ -1,0 +1,369 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model AnneeEnseignant {
+  numEnseignant       String              @db.VarChar
+  idDepartement       Int
+  annee               String              @db.VarChar
+  AnneeUniversitaire AnneeUniversitaire @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
+  Departement         Departement         @relation(fields: [idDepartement], references: [idDepartement], onDelete: NoAction, onUpdate: NoAction)
+  Enseignant          Enseignant          @relation(fields: [numEnseignant], references: [numEnseignant], onDelete: NoAction, onUpdate: NoAction)
+  QuotaEnseignant    QuotaEnseignant[]
+
+  @@id([numEnseignant, idDepartement, annee])
+}
+
+model AnneeUniversitaire {
+  annee                 String                  @id @db.VarChar
+  AnneeEnseignant      AnneeEnseignant[]
+  Departement           Departement[]
+  EnseignantEtuFavori EnseignantEtuFavori[]
+  Inscription           Inscription[]
+  RechercheStage       RechercheStage[]
+  Soutenance            Soutenance[]
+  Stage                 Stage[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model Appartenir {
+  idAppartenance Int         @id @default(autoincrement())
+  numPersonnel   String      @db.VarChar
+  idDepartement  Int
+  dateDebut      DateTime    @db.Date
+  dateFin        DateTime?   @db.Date
+  Departement    Departement @relation(fields: [idDepartement], references: [idDepartement], onDelete: NoAction, onUpdate: NoAction)
+  Personnel      Personnel   @relation(fields: [numPersonnel], references: [numPersonnel], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model Auth {
+  login         String      @id @db.VarChar
+  password      String?     @db.VarChar
+  numPersonnel  String?     @db.VarChar
+  numEnseignant String?     @db.VarChar
+  numEtu        String?     @db.VarChar
+  Enseignant    Enseignant? @relation(fields: [numEnseignant], references: [numEnseignant], onDelete: NoAction, onUpdate: NoAction)
+  Etudiant      Etudiant?   @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
+  Personnel     Personnel?  @relation(fields: [numPersonnel], references: [numPersonnel], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model DemarcheContact {
+  idContact                  Int                          @id @default(autoincrement())
+  nom                        String                       @db.VarChar
+  prenom                     String?                      @db.VarChar
+  fonction                   String?                      @db.VarChar
+  email                      String?                      @db.VarChar
+  telephone                  String?                      @db.VarChar
+  DemarcheRechercheContact DemarcheRechercheContact[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model DemarcheEvenement {
+  idDemarche                 Int                          @id @default(autoincrement())
+  description                String?
+  date                       DateTime                     @db.Date
+  status                     Recherche_Stage_Status?
+  source                     Demarche_Source
+  idRecherche                Int
+  RechercheStage            RechercheStage              @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
+  DemarcheRechercheContact DemarcheRechercheContact[]
+  LienPj                    LienPj[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model DemarcheRechercheContact {
+  idDemarche         Int
+  idContact          Int
+  DemarcheContact   DemarcheContact   @relation(fields: [idContact], references: [idContact], onDelete: NoAction, onUpdate: NoAction)
+  DemarcheEvenement DemarcheEvenement @relation(fields: [idDemarche], references: [idDemarche], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([idDemarche, idContact])
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model Departement {
+  idDepartement       Int                 @id @default(autoincrement())
+  nom                 String              @db.VarChar
+  anneeActuelle       String              @db.VarChar
+  AnneeEnseignant    AnneeEnseignant[]
+  Appartenir          Appartenir[]
+  AnneeUniversitaire AnneeUniversitaire @relation(fields: [anneeActuelle], references: [annee], onDelete: NoAction, onUpdate: NoAction)
+  DepartementTag     DepartementTag[]
+  Formation           Formation[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model DepartementTag {
+  idTag                     Int                         @id @default(autoincrement())
+  nomTag                    String                      @db.VarChar
+  idDepartement             Int
+  Departement               Departement                 @relation(fields: [idDepartement], references: [idDepartement], onDelete: NoAction, onUpdate: NoAction)
+  DepartementTagRecherche DepartementTagRecherche[]
+
+  @@unique([nomTag, idDepartement], map: "DEPARTEMENT_TAG_nomTag_idDepartement_idx")
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model DepartementTagRecherche {
+  idRecherche     Int
+  idTag           Int
+  RechercheStage RechercheStage @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
+  DepartementTag DepartementTag @relation(fields: [idTag], references: [idTag], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([idRecherche, idTag])
+}
+
+model Enseignant {
+  numEnseignant           String                    @id @db.VarChar
+  nom                     String?                   @db.VarChar
+  prenom                  String?                   @db.VarChar
+  email                   String?                   @db.VarChar
+  AnneeEnseignant        AnneeEnseignant[]
+  Auth                    Auth[]
+  EnseignantEtuFavori   EnseignantEtuFavori[]
+  EnseignantSoutenance   EnseignantSoutenance[]
+  PropositionTuteurUniv PropositionTuteurUniv[]
+  Stage                   Stage[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model EnseignantEtuFavori {
+  numEnseignant       String              @db.VarChar
+  numEtu              String              @db.VarChar
+  annee               String              @db.VarChar
+  AnneeUniversitaire AnneeUniversitaire @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
+  Enseignant          Enseignant          @relation(fields: [numEnseignant], references: [numEnseignant], onDelete: NoAction, onUpdate: NoAction)
+  Etudiant            Etudiant            @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([numEnseignant, numEtu, annee])
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model EnseignantSoutenance {
+  idSoutenance  Int
+  numEnseignant String     @db.VarChar
+  Soutenance    Soutenance @relation(fields: [idSoutenance], references: [idSoutenance], onDelete: NoAction, onUpdate: NoAction)
+  Enseignant    Enseignant @relation(fields: [numEnseignant], references: [numEnseignant], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([idSoutenance, numEnseignant])
+}
+
+model Entreprise {
+  idEntreprise      Int                 @id @default(autoincrement())
+  nom               String              @db.VarChar
+  adresse           String?             @db.VarChar
+  codePostal        String?             @db.VarChar
+  ville             String?             @db.VarChar
+  email             String?             @db.VarChar
+  telephone         String?             @db.VarChar
+  siret             String?             @db.VarChar
+  RechercheStage   RechercheStage[]
+  TuteurEntreprise TuteurEntreprise[]
+}
+
+model Etudiant {
+  numEtu                String                  @id @db.VarChar
+  nom                   String?                 @db.VarChar
+  prenom                String?                 @db.VarChar
+  email                 String?                 @db.VarChar
+  Auth                  Auth[]
+  EnseignantEtuFavori EnseignantEtuFavori[]
+  Inscription           Inscription[]
+  RechercheStage       RechercheStage[]
+  Stage                 Stage[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model Formation {
+  idFormation      Int                @id @default(autoincrement())
+  nomFormation     String?            @db.VarChar
+  alternance       Boolean
+  idDepartement    Int
+  Departement      Departement        @relation(fields: [idDepartement], references: [idDepartement], onDelete: NoAction, onUpdate: NoAction)
+  Inscription      Inscription[]
+  QuotaEnseignant QuotaEnseignant[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model Inscription {
+  numEtu              String              @db.VarChar
+  idFormation         Int
+  annee               String              @db.VarChar
+  dateInscription     DateTime            @db.Date
+  dateDepart          DateTime?           @db.Date
+  AnneeUniversitaire AnneeUniversitaire @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
+  Formation           Formation           @relation(fields: [idFormation], references: [idFormation], onDelete: NoAction, onUpdate: NoAction)
+  Etudiant            Etudiant            @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([numEtu, idFormation, annee])
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model LienPj {
+  idPieceJointe      Int
+  idDemarche         Int
+  DemarcheEvenement DemarcheEvenement @relation(fields: [idDemarche], references: [idDemarche], onDelete: NoAction, onUpdate: NoAction)
+  PieceJointe       PieceJointe       @relation(fields: [idPieceJointe], references: [idPieceJointe], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([idPieceJointe, idDemarche])
+}
+
+model Personnel {
+  numPersonnel String          @id @db.VarChar
+  nom          String?         @db.VarChar
+  prenom       String?         @db.VarChar
+  email        String?         @db.VarChar
+  role         Personnel_Role?
+  Appartenir   Appartenir[]
+  Auth         Auth[]
+}
+
+model PieceJointe {
+  idPieceJointe Int       @id @default(autoincrement())
+  nom           String?   @db.VarChar
+  chemin        String?   @db.VarChar
+  LienPj       LienPj[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model PropositionTuteurUniv {
+  idStage       Int
+  numEnseignant String                          @db.VarChar
+  status        Proposition_Tuteur_Univ_Status?
+  Stage         Stage                           @relation(fields: [idStage], references: [idStage], onDelete: NoAction, onUpdate: NoAction)
+  Enseignant    Enseignant                      @relation(fields: [numEnseignant], references: [numEnseignant], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([idStage, numEnseignant])
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model QuotaEnseignant {
+  numEnseignant    String           @db.VarChar
+  idDepartement    Int
+  annee            String           @db.VarChar
+  idFormation      Int
+  quotaTuteurs     Int
+  quotaCandides    Int
+  Formation        Formation        @relation(fields: [idFormation], references: [idFormation], onDelete: NoAction, onUpdate: NoAction)
+  AnneeEnseignant AnneeEnseignant @relation(fields: [numEnseignant, idDepartement, annee], references: [numEnseignant, idDepartement, annee], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([numEnseignant, idDepartement, annee, idFormation])
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model RechercheStage {
+  idRecherche               Int                         @id
+  titre                     String                      @db.VarChar
+  description               String?
+  alternance                Boolean
+  idEntreprise              Int
+  numEtu                    String                      @db.VarChar
+  annee                     String                      @db.VarChar
+  DemarcheEvenement        DemarcheEvenement[]
+  DepartementTagRecherche DepartementTagRecherche[]
+  AnneeUniversitaire       AnneeUniversitaire         @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
+  Entreprise                Entreprise                  @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: NoAction, onUpdate: NoAction)
+  Etudiant                  Etudiant                    @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model Salle {
+  idSalle    Int          @id @default(autoincrement())
+  nomSalle   String       @db.VarChar
+  batiment   String?      @db.VarChar
+  Soutenance Soutenance[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model Soutenance {
+  idSoutenance          Int                     @id @default(autoincrement())
+  dateDebut             DateTime?               @db.Date
+  dateFin               DateTime?               @db.Date
+  idSalle               Int
+  annee                 String                  @db.VarChar
+  EnseignantSoutenance EnseignantSoutenance[]
+  AnneeUniversitaire   AnneeUniversitaire     @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
+  Salle                 Salle                   @relation(fields: [idSalle], references: [idSalle], onDelete: NoAction, onUpdate: NoAction)
+  SoutenanceStage      SoutenanceStage[]
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model SoutenanceStage {
+  idSoutenance Int
+  idStage      Int
+  Soutenance   Soutenance @relation(fields: [idSoutenance], references: [idSoutenance], onDelete: NoAction, onUpdate: NoAction)
+  Stage        Stage      @relation(fields: [idStage], references: [idStage], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([idSoutenance, idStage])
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model Stage {
+  idStage                 Int                       @id @default(autoincrement())
+  dateDebut               DateTime?                 @db.Date
+  dateFin                 DateTime?                 @db.Date
+  titre                   String?                   @db.VarChar
+  description             String?
+  type                    Stage_Type?
+  confidentielle          Boolean                   @default(false)
+  numEtu                  String                    @db.VarChar
+  idTuteurEntreprise      Int
+  annee                   String                    @db.VarChar
+  numEnseignant           String?                   @db.VarChar
+  PropositionTuteurUniv PropositionTuteurUniv[]
+  SoutenanceStage        SoutenanceStage[]
+  AnneeUniversitaire     AnneeUniversitaire       @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
+  TuteurEntreprise       TuteurEntreprise         @relation(fields: [idTuteurEntreprise], references: [idTuteurEntreprise], onDelete: NoAction, onUpdate: NoAction)
+  Enseignant              Enseignant?               @relation(fields: [numEnseignant], references: [numEnseignant], onDelete: NoAction, onUpdate: NoAction)
+  Etudiant                Etudiant                  @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
+model TuteurEntreprise {
+  idTuteurEntreprise Int        @id @default(autoincrement())
+  nom                String?    @db.VarChar
+  prenom             String?    @db.VarChar
+  telephone          String?    @db.VarChar
+  email              String?    @db.VarChar
+  idEntreprise       Int
+  Stage              Stage[]
+  Entreprise         Entreprise @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: NoAction, onUpdate: NoAction)
+}
+
+enum Demarche_Source {
+  Email
+  Telephone
+  Presentiel
+  Visio
+}
+
+enum Personnel_Role {
+  admin
+  secretariat
+}
+
+enum Proposition_Tuteur_Univ_Status {
+  EnAttente
+  Refuse
+  Accepte
+}
+
+enum Recherche_Stage_Status {
+  Accepte
+  Refuse
+  Abandon
+  Entretien
+  AttenteReponse
+  AttenteEnvoi
+}
+
+enum Stage_Type {
+  stage
+  alternance
+}
