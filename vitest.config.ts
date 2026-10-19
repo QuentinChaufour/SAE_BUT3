@@ -5,11 +5,11 @@ export default defineConfig({
     coverage: {
       enabled: true,
       thresholds: {
-          lines: 80,
-          perFile: {
-            100: true,
-          },
-        },
-    },
-  },
+        lines: 80,
+        perFile: {
+          100: true
+        }
+      }
+    }
+  }
 })

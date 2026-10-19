@@ -1,4 +1,4 @@
-import type UserRole from "./role"
+import type UserRole from './role'
 
 declare module '#app' {
 
@@ -10,7 +10,7 @@ declare module '#app' {
    * l'application, ainsi que son nom/prénom
    */
   interface PageMeta {
-    role?: UserRole | UserRole[]; 
+    role?: UserRole | UserRole[]
   }
 }
 
