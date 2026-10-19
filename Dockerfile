@@ -9,6 +9,8 @@ RUN pnpm install --frozen-lockfile
 
 COPY app ./app
 COPY public ./public
+COPY server ./server
+COPY shared ./shared
 COPY tsconfig.json nuxt.config.ts ./
 
 # Développement

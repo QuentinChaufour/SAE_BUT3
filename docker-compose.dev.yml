@@ -10,6 +10,8 @@ services:
     volumes:
       - ./app:/src/app
       - ./public:/src/public
+      - ./server:/src/server
+      - ./shared:/src/shared
       - ./nuxt.config.ts:/src/nuxt.config.ts
     env_file:
       - .env
@@ -40,4 +42,3 @@ services:
 
 networks:
     global_dev:
-    
