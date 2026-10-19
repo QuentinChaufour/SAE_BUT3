@@ -1,9 +1,8 @@
-
 enum UserRoles {
-    Student = "student",
-    Secretary = "secretary",
-    Teacher = "teacher",
-    Admin = "admin"
+  Student = 'student',
+  Secretary = 'secretary',
+  Teacher = 'teacher',
+  Admin = 'admin'
 };
 
-export default UserRoles;
+export default UserRoles
