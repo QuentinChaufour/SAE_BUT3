@@ -17,6 +17,9 @@ logs
 .DS_Store
 .fleet
 .idea
+.agents
+.claude
+.windsurf
 
 # Local env files
 .env
@@ -25,3 +28,6 @@ logs
 
 # Databases
 databases/
+
+skills-lock.json
+/generated/prisma
