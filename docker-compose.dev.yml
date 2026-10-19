@@ -10,6 +10,8 @@ services:
     volumes:
       - ./app:/src/app
       - ./public:/src/public
+      - ./server:/src/server
+      - ./shared:/src/shared
       - ./nuxt.config.ts:/src/nuxt.config.ts
     env_file:
       - .env
@@ -27,7 +29,7 @@ services:
     env_file:
       - .env
     volumes:
-      - postgres-data:/var/lib/postgresql/
+      - ./databases:/var/lib/postgresql/
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -38,9 +40,5 @@ services:
     networks:
       - global_dev
 
-volumes:
-  postgres-data:
-
 networks:
     global_dev:
-    
