@@ -14,7 +14,6 @@ services:
       - ./public:/src/public
       - ./server:/src/server
       - ./shared:/src/shared
-      - ./prisma:/src/prisma
       - ./nuxt.config.ts:/src/nuxt.config.ts
     env_file:
       - .env
