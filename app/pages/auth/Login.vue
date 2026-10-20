@@ -33,14 +33,13 @@ const schema = z.object({
   password: z.string().min(8, 'Minimum 8 caractères')
 })
 
-const toaster = useToast();
-const loading = ref<boolean>(false);
+const toaster = useToast()
+const loading = ref<boolean>(false)
 
 type Schema = z.output<typeof schema>
 
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
-
-  let response: LoginResponse;
+  let response: LoginResponse
 
   try {
     response = await $fetch<LoginResponse>(`/api/auth/login`, {
@@ -48,23 +47,22 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       body: { login: payload.data.login, password: payload.data.password }
     })
 
-    console.log(response);
+    console.log(response)
 
     if ('success' in response && response.success) {
       toaster.add({
-            color: 'success',
-            title: 'Connexion réussi !'
-        })
+        color: 'success',
+        title: 'Connexion réussi !'
+      })
 
       // TODO redirect the user to a main page based on his role
       //    await navigateTo("");
     }
-  } catch (error) {
-
+  } catch {
     toaster.add({
-            color: 'error',
-            title: 'Connexion échoué !',
-        })
+      color: 'error',
+      title: 'Connexion échoué !'
+    })
   }
 }
 </script>

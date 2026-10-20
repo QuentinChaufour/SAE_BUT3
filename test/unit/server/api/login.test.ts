@@ -38,7 +38,6 @@ describe('POST /api/auth/login', () => {
   beforeEach(() => vi.clearAllMocks())
 
   it('sets the session on valid credentials for student', async () => {
-
     // specify the user to be returned when searched
     mocks.findFirst.mockResolvedValue({
       login: 'o00000001',
@@ -52,7 +51,7 @@ describe('POST /api/auth/login', () => {
     })
 
     // ensure the password verification pass
-    mocks.verifyPassword.mockResolvedValue(true);
+    mocks.verifyPassword.mockResolvedValue(true)
 
     // define the handler and call it
     const handler = (await import('~~/server/api/auth/login.post')).default
@@ -110,7 +109,6 @@ describe('POST /api/auth/login', () => {
   })
 
   it('sets the session on valid credentials for teacher', async () => {
-
     // specify the user to be returned when searched
     mocks.findFirst.mockResolvedValue({
       login: 'o00000001',
@@ -124,7 +122,7 @@ describe('POST /api/auth/login', () => {
     })
 
     // ensure the password verification pass
-    mocks.verifyPassword.mockResolvedValue(true);
+    mocks.verifyPassword.mockResolvedValue(true)
 
     // define the handler and call it
     const handler = (await import('~~/server/api/auth/login.post')).default
@@ -182,7 +180,6 @@ describe('POST /api/auth/login', () => {
   })
 
   it('sets the session on valid credentials for secretary', async () => {
-
     // specify the user to be returned when searched
     mocks.findFirst.mockResolvedValue({
       login: 'o00000001',
@@ -193,11 +190,11 @@ describe('POST /api/auth/login', () => {
         nom: 'Lyve',
         prenom: 'Sylvain',
         role: 'secretary'
-      },
+      }
     })
 
     // ensure the password verification pass
-    mocks.verifyPassword.mockResolvedValue(true);
+    mocks.verifyPassword.mockResolvedValue(true)
 
     // define the handler and call it
     const handler = (await import('~~/server/api/auth/login.post')).default
@@ -240,7 +237,7 @@ describe('POST /api/auth/login', () => {
         nom: null,
         prenom: null,
         role: 'secretary'
-      },
+      }
     })
 
     await handler({})
@@ -256,7 +253,6 @@ describe('POST /api/auth/login', () => {
   })
 
   it('sets the session on valid credentials for admin', async () => {
-
     // specify the user to be returned when searched
     mocks.findFirst.mockResolvedValue({
       login: 'o00000001',
@@ -267,11 +263,11 @@ describe('POST /api/auth/login', () => {
         nom: 'Lyve',
         prenom: 'Sylvain',
         role: 'admin'
-      },
+      }
     })
 
     // ensure the password verification pass
-    mocks.verifyPassword.mockResolvedValue(true);
+    mocks.verifyPassword.mockResolvedValue(true)
 
     // define the handler and call it
     const handler = (await import('~~/server/api/auth/login.post')).default
@@ -314,7 +310,7 @@ describe('POST /api/auth/login', () => {
         nom: null,
         prenom: null,
         role: 'admin'
-      },
+      }
     })
 
     await handler({})

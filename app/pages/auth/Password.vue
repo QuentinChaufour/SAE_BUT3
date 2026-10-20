@@ -39,49 +39,47 @@ const fields = ref<AuthFormField[]>([
 const schema = z.object({
   login: z.string().min(1, 'Champs Obligatoire'),
   oldPassword: z.string().min(8, 'Minimum 8 caractères'),
-  newPassword: z.string().min(8, 'Minimum 8 caractères'),
+  newPassword: z.string().min(8, 'Minimum 8 caractères')
 }).refine(
-  (obj) => obj.oldPassword !== obj.newPassword,
+  obj => obj.oldPassword !== obj.newPassword,
   {
     path: ['newPassword'],
     message: 'Nouveau et Ancien mot de passe doivent être différent'
   }
 )
 
-const toaster = useToast();
-const loading = ref<boolean>(false);
+const toaster = useToast()
+const loading = ref<boolean>(false)
 
 type Schema = z.output<typeof schema>
 
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
-
-  let response: LoginResponse;
+  let response: LoginResponse
 
   try {
     response = await $fetch<LoginResponse>(`/api/auth/password`, {
       method: 'POST',
-      body: { 
+      body: {
         login: payload.data.login,
         oldPassword: payload.data.oldPassword,
-        newPassword: payload.data.newPassword 
+        newPassword: payload.data.newPassword
       }
     })
 
     if ('success' in response && response.success) {
       toaster.add({
-            color: 'success',
-            title: 'Connexion réussi !'
-        })
+        color: 'success',
+        title: 'Connexion réussi !'
+      })
 
       // redirect the user to the login page
-      await navigateTo('/auth/login');
+      await navigateTo('/auth/login')
     }
-  } catch (error) {
-
+  } catch {
     toaster.add({
-            color: 'error',
-            title: 'Connexion échoué !',
-        })
+      color: 'error',
+      title: 'Connexion échoué !'
+    })
   }
 }
 </script>

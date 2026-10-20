@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
   })
 
   // Supprimer la session de l'utilisateur pour forcer la reconnexion
-  await clearUserSession(event);
+  await clearUserSession(event)
 
   return { success: true }
 })

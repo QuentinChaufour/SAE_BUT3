@@ -7,9 +7,7 @@ const loginSchema = z.object({
   password: z.string().min(8, 'Le mot de passe doit faire au minimum 8 caratère')
 })
 
-
 export default defineEventHandler(async (event) => {
-
   const body = await readValidatedBody(event, loginSchema.parse)
 
   const user = await prisma.auth.findFirst({
@@ -27,7 +25,7 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 401,
       statusMessage: 'Unauthorised'
-    });
+    })
   }
 
   const result = await verifyPassword(user.password, body.password)
@@ -35,7 +33,7 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 401,
       statusMessage: 'Unauthorised'
-    });
+    })
   }
 
   const userSession = {
@@ -43,7 +41,7 @@ export default defineEventHandler(async (event) => {
     role: '',
     nom: '',
     prenom: ''
-  };
+  }
 
   // Détermine le rôle de l'utilisateur au sein de l'app
   if (user.Enseignant) {

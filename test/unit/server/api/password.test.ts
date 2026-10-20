@@ -99,7 +99,6 @@ describe('POST /api/auth/password', () => {
 
     const handler = (await import('~~/server/api/auth/password.post')).default
 
-
     // check no user has been found
     await expect(handler({})).rejects.toMatchObject({
       statusCode: 401,

@@ -2,6 +2,8 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import Password from '~/pages/auth/Password.vue'
+
 const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
   navigateTo: vi.fn(),
@@ -15,9 +17,6 @@ mockNuxtImport('$fetch', () => mocks.fetch)
 mockNuxtImport('useToast', () => () => mocks.toast)
 mockNuxtImport('definePageMeta', () => vi.fn())
 mockNuxtImport('navigateTo', () => mocks.navigateTo)
-
-import Password from '~/pages/auth/Password.vue'
-
 
 // the form with filled values
 const UAuthFormStub = {
