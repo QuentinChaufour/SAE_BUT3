@@ -67,5 +67,7 @@ export default defineEventHandler(async (event) => {
     user: userSession
   })
 
+  // TODO redirect on server side instead of client side ?
+
   return { success: true }
 })

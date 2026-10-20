@@ -64,6 +64,11 @@ type Schema = z.output<typeof schema>
  * @param { FormSubmitEvent } payload the data from the form
  */
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
+  
+  if(!confirm('Voulez-vous vraiment modifier votre mot de passe ?')){
+    return;
+  }
+  
   let response: LoginResponse
 
   try {

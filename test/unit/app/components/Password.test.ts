@@ -9,8 +9,11 @@ const mocks = vi.hoisted(() => ({
   navigateTo: vi.fn(),
   toast: {
     add: vi.fn()
-  }
+  },
 }))
+
+const confirmMock = vi.fn()
+vi.stubGlobal('confirm', confirmMock)
 
 // mock nuxt auto-imports
 mockNuxtImport('$fetch', () => mocks.fetch)
@@ -54,6 +57,7 @@ describe('Password.vue', () => {
   it('POSTs the password change credentials to the API', async () => {
     mocks.fetch.mockResolvedValue({ success: true })
     mocks.navigateTo.mockResolvedValue(undefined)
+    confirmMock.mockReturnValue(true)
 
     const wrapper = mountPassword()
     const authForm = wrapper.findComponent({ name: 'UAuthForm' })
@@ -69,6 +73,10 @@ describe('Password.vue', () => {
     })
 
     await flushPromises()
+
+    expect(confirmMock).toHaveBeenCalledWith(
+      'Voulez-vous vraiment modifier votre mot de passe ?'
+    )
 
     expect(mocks.fetch).toHaveBeenCalledWith('/api/auth/password', {
       method: 'POST',
@@ -87,6 +95,7 @@ describe('Password.vue', () => {
 
   it('displays an error when the password change request fails', async () => {
     mocks.fetch.mockRejectedValue(new Error('Unauthorised'))
+    confirmMock.mockReturnValue(true)
 
     const wrapper = mountPassword()
     const authForm = wrapper.findComponent({ name: 'UAuthForm' })
@@ -125,6 +134,7 @@ describe('Password.vue', () => {
     const wrapper = mountPassword()
     const authForm = wrapper.findComponent({ name: 'UAuthForm' })
     const schema = authForm.props('schema')
+    confirmMock.mockReturnValue(true)
 
     const result = schema.safeParse({
       login: 'o00000001',
@@ -141,5 +151,22 @@ describe('Password.vue', () => {
         message: 'Le nouveau et l\'ancien mot de passe doivent être différent.'
       })
     }
+  })
+
+  it('prevent password modification if canceled',async () => {
+    confirmMock.mockReturnValue(false)
+
+    const wrapper = mountPassword()
+    const authForm = wrapper.findComponent({ name: 'UAuthForm' })
+
+    await authForm.vm.$emit('submit', {
+      data: {
+        login: 'o00000001',
+        oldPassword: 'password123',
+        newPassword: 'newPassword'
+      }
+    })
+
+    expect(mocks.fetch).not.toHaveBeenCalled()
   })
 })

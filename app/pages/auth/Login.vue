@@ -58,7 +58,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       })
 
       // TODO redirect the user to a main page based on his role
-      navigateTo('/example')
+      await navigateTo('/example')
     }
   } catch {
     toaster.add({

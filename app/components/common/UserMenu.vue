@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
-import PasswordUpdate from './PasswordUpdate.vue'
+import PasswordUpdate from '~/components/common/PasswordUpdate.vue'
 
 defineProps<{
   collapsed?: boolean
@@ -58,7 +58,15 @@ const items = computed<DropdownMenuItem[][]>(() => ([
     }],
   [{
     label: 'Déconnexion',
-    icon: 'i-lucide-log-out'
+    icon: 'i-lucide-log-out',
+    async onSelect(){
+      const { clear } = useUserSession();
+
+      // TODO confim logout ?
+
+      clear();
+      await navigateTo('/auth/login');
+    }
   }]]))
 </script>
 
