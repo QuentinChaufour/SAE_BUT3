@@ -18,14 +18,6 @@ export default defineNuxtConfig({
 
   compatibilityDate: '2026-06-30',
 
-  eslint: {
-    config: {
-      stylistic: {
-        commaDangle: 'never',
-        braceStyle: '1tbs'
-      }
-    }
-  },
   vite: {
     server: {
       watch: {
@@ -35,8 +27,17 @@ export default defineNuxtConfig({
     },
     optimizeDeps: {
       include: [
-        'zod',
+        'zod'
       ]
     }
   },
+
+  eslint: {
+    config: {
+      stylistic: {
+        commaDangle: 'never',
+        braceStyle: '1tbs'
+      }
+    }
+  }
 })

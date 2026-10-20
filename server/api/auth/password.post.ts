@@ -1,5 +1,5 @@
 import { z } from 'zod/v4'
-import { prisma } from '~~/server/utils/prisma';
+import { prisma } from '~~/server/utils/prisma'
 
 const loginSchema = z.object({
   // TODO check "o" -> students , "p" -> teacher etc ... => login credential required
@@ -17,14 +17,14 @@ const loginSchema = z.object({
 export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, loginSchema.parse)
 
-  const oldHashedPassword = await hashPassword(body.oldPassword);
-  const hashedPassword = await hashPassword(body.newPassword);
+  const oldHashedPassword = await hashPassword(body.oldPassword)
+  const hashedPassword = await hashPassword(body.newPassword)
 
   const user = await prisma.auth.findFirst({
     where: {
       login: body.login
     }
-  });
+  })
 
   if (!user) {
     throw createError({
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const result = await verifyPassword(oldHashedPassword, user.password!);
+  const result = await verifyPassword(oldHashedPassword, user.password!)
 
   if (!result) {
     throw createError({
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
     data: {
       password: hashedPassword
     }
-  });
+  })
 
   return { success: true }
 })
