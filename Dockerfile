@@ -11,8 +11,10 @@ COPY app ./app
 COPY public ./public
 COPY server ./server
 COPY shared ./shared
-COPY tsconfig.json nuxt.config.ts ./
-COPY generated ./generated
+COPY tsconfig.json nuxt.config.ts prisma7.config.ts ./
+COPY prisma ./prisma
+
+RUN npx prisma generate
 
 # Développement
 FROM base AS dev
