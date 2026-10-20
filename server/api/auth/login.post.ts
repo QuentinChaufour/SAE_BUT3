@@ -7,6 +7,7 @@ const loginSchema = z.object({
   password: z.string().min(8, 'Le mot de passe doit faire au minimum 8 caratère')
 })
 
+
 export default defineEventHandler(async (event) => {
 
   const body = await readValidatedBody(event, loginSchema.parse)

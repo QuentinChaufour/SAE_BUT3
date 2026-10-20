@@ -29,4 +29,8 @@ logs
 # Databases
 databases/
 
+# Tests
+coverage/
+.nuxtrc
+
 skills-lock.json

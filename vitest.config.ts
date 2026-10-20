@@ -1,14 +1,26 @@
-import { defineConfig } from 'vitest/config'
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { defineVitestConfig } from '@nuxt/test-utils/config'
 
-export default defineConfig({
+const projectRoot = fileURLToPath(new URL('.', import.meta.url))
+
+export default defineVitestConfig({
+  resolve: {
+    alias: {
+      '~~': projectRoot,
+      '~': resolve(projectRoot, 'app')
+    }
+  },
   test: {
+    environment: 'nuxt',
+
     coverage: {
       enabled: true,
       thresholds: {
         lines: 80,
-        perFile: {
-          100: true
-        }
+        branches: 80,
+        functions: 80,
+        statements: 80
       }
     }
   }

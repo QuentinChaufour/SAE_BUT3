@@ -90,7 +90,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
   <div class="flex min-h-screen justify-center items-center">
     <UAuthForm
       title="Changement de mot de passe"
-      description="Veuillez indiquer vos identifiant ainsi que votre nouveau mot de passe"
+      description="Veuillez indiquer vos identifiant ainsi que votre nouveau mot de passe."
       icon="i-lucide-user"
       :fields="fields"
       :schema="schema"
