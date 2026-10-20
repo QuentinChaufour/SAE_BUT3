@@ -3,8 +3,8 @@ import { prisma } from '~~/server/utils/prisma'
 import UserRole from '~~/shared/types/role'
 
 const loginSchema = z.object({
-  login: z.string().min(1, 'Le login doit faire au minimum 1 caratère'),
-  password: z.string().min(8, 'Le mot de passe doit faire au minimum 8 caratère')
+  login: z.string().trim().min(1, 'Le login doit faire au minimum 1 caratère'),
+  password: z.string().trim().min(8, 'Le mot de passe doit faire au minimum 8 caratère')
 })
 
 export default defineEventHandler(async (event) => {

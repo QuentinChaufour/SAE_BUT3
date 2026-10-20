@@ -2,9 +2,9 @@ import { z } from 'zod/v4'
 import { prisma } from '~~/server/utils/prisma'
 
 const loginSchema = z.object({
-  login: z.string().min(1, 'must be at least 1 character long'),
-  oldPassword: z.string().min(1, 'must be at least 1 character long'),
-  newPassword: z.string().min(1, 'must be at least 1 character long')
+  login: z.string().trim().min(1, 'Le login doit faire au minimum 1 caratère'),
+  oldPassword: z.string().trim().min(1, 'Le mot de passe doit faire au minimum 8 caratère'),
+  newPassword: z.string().trim().min(1, 'Le mot de passe doit faire au minimum 8 caratère')
 })
 
 export default defineEventHandler(async (event) => {
