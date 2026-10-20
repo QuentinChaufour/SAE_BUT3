@@ -3,13 +3,13 @@ import { prisma } from '~~/server/utils/prisma'
 import UserRole from '~~/shared/types/role'
 
 const loginSchema = z.object({
-  login: z.string().min(1, 'must be at least 1 character long'),
-  password: z.string().min(8, 'Password must be at least 8 characters long')
+  login: z.string().min(1, 'Le login doit faire au minimum 1 caratère'),
+  password: z.string().min(8, 'Le mot de passe doit faire au minimum 8 caratère')
 })
 
 export default defineEventHandler(async (event) => {
+
   const body = await readValidatedBody(event, loginSchema.parse)
-  const hashedPassword = await hashPassword(body.password)
 
   const user = await prisma.auth.findFirst({
     where: {
@@ -26,15 +26,15 @@ export default defineEventHandler(async (event) => {
     throw createError({
       statusCode: 401,
       statusMessage: 'Unauthorised'
-    })
+    });
   }
 
-  const result = await verifyPassword(hashedPassword, user.password!)
+  const result = await verifyPassword(user.password, body.password)
   if (!result) {
     throw createError({
       statusCode: 401,
       statusMessage: 'Unauthorised'
-    })
+    });
   }
 
   const userSession = {
@@ -42,7 +42,7 @@ export default defineEventHandler(async (event) => {
     role: '',
     nom: '',
     prenom: ''
-  }
+  };
 
   // Détermine le rôle de l'utilisateur au sein de l'app
   if (user.Enseignant) {
@@ -56,7 +56,7 @@ export default defineEventHandler(async (event) => {
   } else {
     userSession.nom = user.Personnel?.nom || ''
     userSession.prenom = user.Personnel?.prenom || ''
-    // TODO infer role by sting directly ?? maybe too dangerous in cas of changes
+
     if (user.Personnel?.role === 'admin') {
       userSession.role = UserRole.Admin
     } else {

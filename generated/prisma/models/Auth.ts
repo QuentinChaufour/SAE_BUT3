@@ -149,7 +149,7 @@ export type AuthGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 
 export type AuthGroupByOutputType = {
   login: string
-  password: string | null
+  password: string
   numPersonnel: string | null
   numEnseignant: string | null
   numEtu: string | null
@@ -178,7 +178,7 @@ export type AuthWhereInput = {
   OR?: Prisma.AuthWhereInput[]
   NOT?: Prisma.AuthWhereInput | Prisma.AuthWhereInput[]
   login?: Prisma.StringFilter<"Auth"> | string
-  password?: Prisma.StringNullableFilter<"Auth"> | string | null
+  password?: Prisma.StringFilter<"Auth"> | string
   numPersonnel?: Prisma.StringNullableFilter<"Auth"> | string | null
   numEnseignant?: Prisma.StringNullableFilter<"Auth"> | string | null
   numEtu?: Prisma.StringNullableFilter<"Auth"> | string | null
@@ -189,7 +189,7 @@ export type AuthWhereInput = {
 
 export type AuthOrderByWithRelationInput = {
   login?: Prisma.SortOrder
-  password?: Prisma.SortOrderInput | Prisma.SortOrder
+  password?: Prisma.SortOrder
   numPersonnel?: Prisma.SortOrderInput | Prisma.SortOrder
   numEnseignant?: Prisma.SortOrderInput | Prisma.SortOrder
   numEtu?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -203,7 +203,7 @@ export type AuthWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.AuthWhereInput | Prisma.AuthWhereInput[]
   OR?: Prisma.AuthWhereInput[]
   NOT?: Prisma.AuthWhereInput | Prisma.AuthWhereInput[]
-  password?: Prisma.StringNullableFilter<"Auth"> | string | null
+  password?: Prisma.StringFilter<"Auth"> | string
   numPersonnel?: Prisma.StringNullableFilter<"Auth"> | string | null
   numEnseignant?: Prisma.StringNullableFilter<"Auth"> | string | null
   numEtu?: Prisma.StringNullableFilter<"Auth"> | string | null
@@ -214,7 +214,7 @@ export type AuthWhereUniqueInput = Prisma.AtLeast<{
 
 export type AuthOrderByWithAggregationInput = {
   login?: Prisma.SortOrder
-  password?: Prisma.SortOrderInput | Prisma.SortOrder
+  password?: Prisma.SortOrder
   numPersonnel?: Prisma.SortOrderInput | Prisma.SortOrder
   numEnseignant?: Prisma.SortOrderInput | Prisma.SortOrder
   numEtu?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -228,7 +228,7 @@ export type AuthScalarWhereWithAggregatesInput = {
   OR?: Prisma.AuthScalarWhereWithAggregatesInput[]
   NOT?: Prisma.AuthScalarWhereWithAggregatesInput | Prisma.AuthScalarWhereWithAggregatesInput[]
   login?: Prisma.StringWithAggregatesFilter<"Auth"> | string
-  password?: Prisma.StringNullableWithAggregatesFilter<"Auth"> | string | null
+  password?: Prisma.StringWithAggregatesFilter<"Auth"> | string
   numPersonnel?: Prisma.StringNullableWithAggregatesFilter<"Auth"> | string | null
   numEnseignant?: Prisma.StringNullableWithAggregatesFilter<"Auth"> | string | null
   numEtu?: Prisma.StringNullableWithAggregatesFilter<"Auth"> | string | null
@@ -236,7 +236,7 @@ export type AuthScalarWhereWithAggregatesInput = {
 
 export type AuthCreateInput = {
   login: string
-  password?: string | null
+  password: string
   Enseignant?: Prisma.EnseignantCreateNestedOneWithoutAuthInput
   Etudiant?: Prisma.EtudiantCreateNestedOneWithoutAuthInput
   Personnel?: Prisma.PersonnelCreateNestedOneWithoutAuthInput
@@ -244,7 +244,7 @@ export type AuthCreateInput = {
 
 export type AuthUncheckedCreateInput = {
   login: string
-  password?: string | null
+  password: string
   numPersonnel?: string | null
   numEnseignant?: string | null
   numEtu?: string | null
@@ -252,7 +252,7 @@ export type AuthUncheckedCreateInput = {
 
 export type AuthUpdateInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   Enseignant?: Prisma.EnseignantUpdateOneWithoutAuthNestedInput
   Etudiant?: Prisma.EtudiantUpdateOneWithoutAuthNestedInput
   Personnel?: Prisma.PersonnelUpdateOneWithoutAuthNestedInput
@@ -260,7 +260,7 @@ export type AuthUpdateInput = {
 
 export type AuthUncheckedUpdateInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   numPersonnel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   numEnseignant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   numEtu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -268,7 +268,7 @@ export type AuthUncheckedUpdateInput = {
 
 export type AuthCreateManyInput = {
   login: string
-  password?: string | null
+  password: string
   numPersonnel?: string | null
   numEnseignant?: string | null
   numEtu?: string | null
@@ -276,12 +276,12 @@ export type AuthCreateManyInput = {
 
 export type AuthUpdateManyMutationInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type AuthUncheckedUpdateManyInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   numPersonnel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   numEnseignant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   numEtu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -453,14 +453,14 @@ export type AuthUncheckedUpdateManyWithoutPersonnelNestedInput = {
 
 export type AuthCreateWithoutEnseignantInput = {
   login: string
-  password?: string | null
+  password: string
   Etudiant?: Prisma.EtudiantCreateNestedOneWithoutAuthInput
   Personnel?: Prisma.PersonnelCreateNestedOneWithoutAuthInput
 }
 
 export type AuthUncheckedCreateWithoutEnseignantInput = {
   login: string
-  password?: string | null
+  password: string
   numPersonnel?: string | null
   numEtu?: string | null
 }
@@ -496,7 +496,7 @@ export type AuthScalarWhereInput = {
   OR?: Prisma.AuthScalarWhereInput[]
   NOT?: Prisma.AuthScalarWhereInput | Prisma.AuthScalarWhereInput[]
   login?: Prisma.StringFilter<"Auth"> | string
-  password?: Prisma.StringNullableFilter<"Auth"> | string | null
+  password?: Prisma.StringFilter<"Auth"> | string
   numPersonnel?: Prisma.StringNullableFilter<"Auth"> | string | null
   numEnseignant?: Prisma.StringNullableFilter<"Auth"> | string | null
   numEtu?: Prisma.StringNullableFilter<"Auth"> | string | null
@@ -504,14 +504,14 @@ export type AuthScalarWhereInput = {
 
 export type AuthCreateWithoutEtudiantInput = {
   login: string
-  password?: string | null
+  password: string
   Enseignant?: Prisma.EnseignantCreateNestedOneWithoutAuthInput
   Personnel?: Prisma.PersonnelCreateNestedOneWithoutAuthInput
 }
 
 export type AuthUncheckedCreateWithoutEtudiantInput = {
   login: string
-  password?: string | null
+  password: string
   numPersonnel?: string | null
   numEnseignant?: string | null
 }
@@ -544,14 +544,14 @@ export type AuthUpdateManyWithWhereWithoutEtudiantInput = {
 
 export type AuthCreateWithoutPersonnelInput = {
   login: string
-  password?: string | null
+  password: string
   Enseignant?: Prisma.EnseignantCreateNestedOneWithoutAuthInput
   Etudiant?: Prisma.EtudiantCreateNestedOneWithoutAuthInput
 }
 
 export type AuthUncheckedCreateWithoutPersonnelInput = {
   login: string
-  password?: string | null
+  password: string
   numEnseignant?: string | null
   numEtu?: string | null
 }
@@ -584,84 +584,84 @@ export type AuthUpdateManyWithWhereWithoutPersonnelInput = {
 
 export type AuthCreateManyEnseignantInput = {
   login: string
-  password?: string | null
+  password: string
   numPersonnel?: string | null
   numEtu?: string | null
 }
 
 export type AuthUpdateWithoutEnseignantInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   Etudiant?: Prisma.EtudiantUpdateOneWithoutAuthNestedInput
   Personnel?: Prisma.PersonnelUpdateOneWithoutAuthNestedInput
 }
 
 export type AuthUncheckedUpdateWithoutEnseignantInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   numPersonnel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   numEtu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AuthUncheckedUpdateManyWithoutEnseignantInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   numPersonnel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   numEtu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AuthCreateManyEtudiantInput = {
   login: string
-  password?: string | null
+  password: string
   numPersonnel?: string | null
   numEnseignant?: string | null
 }
 
 export type AuthUpdateWithoutEtudiantInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   Enseignant?: Prisma.EnseignantUpdateOneWithoutAuthNestedInput
   Personnel?: Prisma.PersonnelUpdateOneWithoutAuthNestedInput
 }
 
 export type AuthUncheckedUpdateWithoutEtudiantInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   numPersonnel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   numEnseignant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AuthUncheckedUpdateManyWithoutEtudiantInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   numPersonnel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   numEnseignant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AuthCreateManyPersonnelInput = {
   login: string
-  password?: string | null
+  password: string
   numEnseignant?: string | null
   numEtu?: string | null
 }
 
 export type AuthUpdateWithoutPersonnelInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   Enseignant?: Prisma.EnseignantUpdateOneWithoutAuthNestedInput
   Etudiant?: Prisma.EtudiantUpdateOneWithoutAuthNestedInput
 }
 
 export type AuthUncheckedUpdateWithoutPersonnelInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   numEnseignant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   numEtu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type AuthUncheckedUpdateManyWithoutPersonnelInput = {
   login?: Prisma.StringFieldUpdateOperationsInput | string
-  password?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  password?: Prisma.StringFieldUpdateOperationsInput | string
   numEnseignant?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   numEtu?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -735,7 +735,7 @@ export type $AuthPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     login: string
-    password: string | null
+    password: string
     numPersonnel: string | null
     numEnseignant: string | null
     numEtu: string | null
