@@ -139,7 +139,7 @@ describe('Password.vue', () => {
       expect(result.error.issues).toContainEqual({
         code: 'custom',
         path: ['newPassword'],
-        message: 'Nouveau et Ancien mot de passe doivent être différent'
+        message: 'Le nouveau et l\'ancien mot de passe doivent être différent.'
       })
     }
   })
