@@ -44,7 +44,7 @@ const schema = z.object({
   obj => obj.oldPassword !== obj.newPassword,
   {
     path: ['newPassword'],
-    message: 'Le nouveau et l'ancien mot de passe doivent être différent.'
+    message: 'Le nouveau et l\'ancien mot de passe doivent être différent.'
   }
 )
 

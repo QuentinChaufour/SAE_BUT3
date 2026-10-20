@@ -47,7 +47,6 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       body: { login: payload.data.login, password: payload.data.password }
     })
 
-
     if ('success' in response && response.success) {
       toaster.add({
         color: 'success',
