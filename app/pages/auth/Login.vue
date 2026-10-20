@@ -2,6 +2,10 @@
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui'
 import { z } from 'zod'
 
+/**
+ *
+ */
+
 definePageMeta({
   layout: 'empty'
 })
@@ -24,8 +28,6 @@ const fields = ref<AuthFormField[]>([
     required: true
   }
 ])
-
-// __________// Zod checks //__________//
 
 // Define the schema
 const schema = z.object({
@@ -54,7 +56,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       })
 
       // TODO redirect the user to a main page based on his role
-      //    await navigateTo("");
+      navigateTo('/example')
     }
   } catch {
     toaster.add({

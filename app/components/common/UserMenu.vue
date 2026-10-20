@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
+import PasswordUpdate from './PasswordUpdate.vue'
 
 defineProps<{
   collapsed?: boolean
@@ -8,6 +9,8 @@ defineProps<{
 const colorMode = useColorMode()
 
 const username = ref('Prénom Nom')
+
+const isPasswordModalOpen = ref<boolean>(false)
 
 const items = computed<DropdownMenuItem[][]>(() => ([
   [{
@@ -21,7 +24,9 @@ const items = computed<DropdownMenuItem[][]>(() => ([
     {
       label: 'Mot de passe',
       icon: 'i-lucide-lock',
-      to: '/account/password'
+      onSelect() {
+        isPasswordModalOpen.value = true
+      }
     },
     {
       label: 'Apparence',
@@ -79,4 +84,12 @@ const items = computed<DropdownMenuItem[][]>(() => ([
       }"
     />
   </UDropdownMenu>
+
+  <UModal
+    v-model:open="isPasswordModalOpen"
+  >
+    <template #body>
+      <PasswordUpdate @password-updated="isPasswordModalOpen = false" />
+    </template>
+  </UModal>
 </template>
