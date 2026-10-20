@@ -34,3 +34,4 @@ coverage/
 .nuxtrc
 
 skills-lock.json
+generated/
