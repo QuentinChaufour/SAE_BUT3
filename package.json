@@ -5,15 +5,20 @@
   "scripts": {
     "build": "nuxt build",
     "nuxt:dev": "nuxt dev",
-    "start": "docker compose -f docker-compose.yml up -d --build",
-    "dev": "docker compose -f docker-compose.dev.yml up --build",
+    "start": "docker compose -p ostages -f docker-compose.yml up -d --build",
+    "dev": "docker compose -p ostages_dev -f docker-compose.dev.yml up --build",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "nuxt typecheck",
     "test": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "dev:migrate": "docker exec -it website-dev npx prisma migrate dev",
+    "dev:migrate:reset": "docker exec -it website-dev npx prisma migrate reset",
+    "dev:generate": "docker exec -it website-dev npx prisma generate",
+    "db:migrate": "docker exec -it website npx prisma migrate deploy",
+    "db:generate": "docker exec -it website npx prisma generate"
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.142",
