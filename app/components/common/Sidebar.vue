@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
 import UserMenu from './UserMenu.vue'
+import UserRole from '~~/shared/types/role.js'
 
 const open = ref(true)
 
-enum UserRole {
-  Student = 'student',
-  Secretariat = 'secretariat',
-  Teacher = 'teacher',
-  Admin = 'admin'
-}
-
-const role = useState<UserRole>('current-user-role', () => UserRole.Secretariat)
+const role = useState<UserRole>('current-user-role', () => UserRole.Secretary)
 
 function getLinksByRole(role: UserRole): NavigationMenuItem[] {
   switch (role) {
@@ -21,7 +15,7 @@ function getLinksByRole(role: UserRole): NavigationMenuItem[] {
         icon: 'i-lucide-search',
         to: '/student/search/'
       }]
-    case UserRole.Secretariat:
+    case UserRole.Secretary:
       return [
         ...getLinksByRole(UserRole.Teacher),
         {
