@@ -14,6 +14,7 @@ services:
       - ./public:/src/public
       - ./server:/src/server
       - ./shared:/src/shared
+      - ./generated:/src/generated
       - ./nuxt.config.ts:/src/nuxt.config.ts
     env_file:
       - .env

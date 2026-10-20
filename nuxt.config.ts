@@ -25,5 +25,18 @@ export default defineNuxtConfig({
         braceStyle: '1tbs'
       }
     }
-  }
+  },
+  vite: {
+    server: {
+      watch: {
+        usePolling: true,
+        interval: 100
+      }
+    },
+    optimizeDeps: {
+      include: [
+        'zod',
+      ]
+    }
+  },
 })

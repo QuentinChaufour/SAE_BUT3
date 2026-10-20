@@ -45,7 +45,7 @@ model Appartenir {
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
 model Auth {
   login         String      @id @db.VarChar
-  password      String?     @db.VarChar
+  password      String      @db.VarChar
   numPersonnel  String?     @db.VarChar
   numEnseignant String?     @db.VarChar
   numEtu        String?     @db.VarChar

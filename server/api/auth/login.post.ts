@@ -3,9 +3,8 @@ import { prisma } from "~~/server/utils/prisma";
 import UserRole from '~~/shared/types/role';
 
 const loginSchema = z.object({
-  // TODO check "o" -> students , "p" -> teacher etc ... => login credential required
   login: z.string().min(1, 'must be at least 1 character long'),
-  password: z.string()
+  password: z.string().min(8, "Password must be at least 8 characters long")
 })
 
 export default defineEventHandler(async (event) => {
@@ -31,7 +30,6 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // TODO password not null in db
   const result = await verifyPassword(hashedPassword, user.password!)
   if (!result) {
     throw createError({
@@ -48,8 +46,6 @@ export default defineEventHandler(async (event) => {
   };
 
   // Détermine le rôle de l'utilisateur au sein de l'app
-
-  //TODO pas très propre
   if(user.Enseignant){
     userSession.role = UserRole.Teacher;
     userSession.nom = user.Enseignant?.nom || "";
@@ -64,7 +60,7 @@ export default defineEventHandler(async (event) => {
     userSession.nom = user.Personnel?.nom || "";
     userSession.prenom = user.Personnel?.prenom || "";
     // TODO infer role by sting directly ?? maybe too dangerous in cas of changes 
-    if(user.Personnel?.role == "admin"){
+    if(user.Personnel?.role === "admin"){
       userSession.role = UserRole.Admin;
     }
     else{
