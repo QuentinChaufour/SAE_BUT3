@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { Entreprise } from '~~/generated/prisma/client'
 import { refDebounced } from '@vueuse/core'
+import CreateCompanyModal from './CreateCompanyModal.vue'
 
 const idEntreprise = defineModel<number | undefined>('idEntreprise')
 
@@ -13,27 +14,53 @@ interface CompanyItem {
   value: number
 }
 
-const emit = defineEmits<{
-  createCompany: []
-}>()
-
-const searchTerm = ref('')
+const searchTerm = ref<string>('')
 const searchTermDebounced = refDebounced(searchTerm, 300)
-const isOpen = ref(false)
+const selectedCompany = ref<CompanyItem>()
+const pendingCompanyName = ref<string>('')
 
-const { data: companies, status } = await useLazyFetch('/api/companies', {
+const inputMenuKey = ref(0)
+
+const isOpen = ref(false)
+const isOpenCreateCompanyModal = ref(false)
+
+const { data: companies, status, execute } = await useLazyFetch('/api/companies', {
   key: 'companies-name-city',
   query: { search: searchTermDebounced },
   transform: (data: Company[]) => {
-    return data?.map(company => ({
-      label: company.nom,
-      city: company.ville,
-      codePostal: company.codePostal,
-      value: company.idEntreprise
-    }))
+    return data.map(toCompanyItem)
   },
-  immediate: false
+  immediate: false,
+  watch: false
 })
+
+watch(searchTermDebounced, (search) => {
+  if (!search.trim()) {
+    companies.value = []
+    return
+  }
+
+  execute()
+})
+
+const companyItems = computed<CompanyItem[]>(() => {
+  if (!searchTerm.value) return selectedCompany.value ? [selectedCompany.value] : []
+
+  return companies.value ?? []
+})
+
+watch(selectedCompany, (company) => {
+  idEntreprise.value = company?.value
+})
+
+function toCompanyItem(company: Company): CompanyItem {
+  return {
+    label: company.nom,
+    city: company.ville,
+    codePostal: company.codePostal,
+    value: company.idEntreprise
+  }
+}
 
 function displayCity(item: CompanyItem) {
   if (!item.city) return ''
@@ -44,19 +71,35 @@ function displayCity(item: CompanyItem) {
 }
 
 function createCompany() {
+  pendingCompanyName.value = searchTerm.value
+  searchTerm.value = ''
+
   isOpen.value = false
-  emit('createCompany')
+  inputMenuKey.value++
+  isOpenCreateCompanyModal.value = true
+}
+
+function onEnterpriseCreated(entreprise: Entreprise) {
+  const companyItem = toCompanyItem(entreprise)
+
+  companies.value = [
+    companyItem,
+    ...(companies.value ?? []).filter(company => company.value !== companyItem.value)
+  ]
+
+  selectedCompany.value = companyItem
+  inputMenuKey.value++
 }
 </script>
 
 <template>
   <UInputMenu
-    v-model="idEntreprise"
+    :key="inputMenuKey"
+    v-model="selectedCompany"
     v-model:open="isOpen"
     v-model:search-term="searchTerm"
-    :items="companies ?? []"
+    :items="companyItems"
     :loading="status === 'pending'"
-    value-key="value"
     ignore-filter
     placeholder="Sélectionner une entreprise"
     class="w-full"
@@ -79,4 +122,10 @@ function createCompany() {
       Aucune entreprise trouvée.
     </template>
   </UInputMenu>
+
+  <CreateCompanyModal
+    v-model:open="isOpenCreateCompanyModal"
+    :initial-nom-entreprise="pendingCompanyName"
+    @created="onEnterpriseCreated"
+  />
 </template>

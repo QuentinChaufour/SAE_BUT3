@@ -37,7 +37,9 @@ const emit = defineEmits<{
   created: [entreprise: Entreprise]
 }>()
 
-const state = reactive<EntrepriseStateType & { etranger: boolean }>({
+type EntrepriseStateReactive = EntrepriseStateType & { etranger: boolean }
+
+const defaultState: EntrepriseStateReactive = {
   nom: props.initialNomEntreprise ?? '',
   nomEtab: '',
   adresse: '',
@@ -46,6 +48,15 @@ const state = reactive<EntrepriseStateType & { etranger: boolean }>({
   siret: '',
   pays: 'France',
   etranger: false
+}
+
+const state = reactive<EntrepriseStateReactive>(defaultState)
+
+watch(() => isOpen.value, (open) => {
+  if (open) {
+    Object.assign(state, defaultState)
+    state.nom = props.initialNomEntreprise ?? ''
+  }
 })
 
 function isCreateButtonDisabled() {
@@ -56,12 +67,6 @@ function isCreateButtonDisabled() {
 }
 
 function entrepriseSiretFound(entreprise: EntrepriseStateType) {
-  toast.add({
-    title: 'Succès',
-    description: `Les données de l'entreprise ${entreprise.nom} ont été récupérées avec succès.\nVérifiez les informations récuperées.`,
-    color: 'success'
-  })
-
   state.siret = entreprise.siret
   state.nom = entreprise.nom
   state.nomEtab = entreprise.nomEtab
@@ -71,6 +76,12 @@ function entrepriseSiretFound(entreprise: EntrepriseStateType) {
 
   state.pays = entreprise.pays
   state.etranger = entreprise.pays !== 'France'
+
+  toast.add({
+    title: 'Succès',
+    description: `Les données de l'entreprise ${entreprise.nom} ont été récupérées avec succès.\nVérifiez les informations récuperées.`,
+    color: 'success'
+  })
 }
 
 const isLoading = ref(false)

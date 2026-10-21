@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { z } from 'zod'
-import CreateCompanyModal from '~/components/companies/CreateCompanyModal.vue'
 import SelectCompanyInput from '~/components/companies/SelectCompanyInput.vue'
 
 const schema = z.object({
@@ -13,8 +12,6 @@ const schema = z.object({
 type Schema = z.output<typeof schema>
 
 const isOpen = ref(false)
-const isOpenCreateCompanyModal = ref(false)
-
 interface StateType {
   titre: string
   description: string
@@ -46,12 +43,9 @@ const state = reactive<StateType>({
           name="entreprise"
         >
           <SelectCompanyInput
-            v-model="state.idEntreprise"
+            v-model:id-entreprise="state.idEntreprise"
             class="w-full"
-            @create-company="() => isOpenCreateCompanyModal = true"
           />
-
-          <CreateCompanyModal v-model:open="isOpenCreateCompanyModal" />
         </UFormField>
 
         <UFormField
