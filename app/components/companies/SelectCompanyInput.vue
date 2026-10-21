@@ -19,6 +19,7 @@ const emit = defineEmits<{
 
 const searchTerm = ref('')
 const searchTermDebounced = refDebounced(searchTerm, 300)
+const isOpen = ref(false)
 
 const { data: companies, status } = await useLazyFetch('/api/companies', {
   key: 'companies-name-city',
@@ -41,11 +42,17 @@ function displayCity(item: CompanyItem) {
 
   return `${item.city} (${item.codePostal})`
 }
+
+function createCompany() {
+  isOpen.value = false
+  emit('createCompany')
+}
 </script>
 
 <template>
   <UInputMenu
     v-model="idEntreprise"
+    v-model:open="isOpen"
     v-model:search-term="searchTerm"
     :items="companies ?? []"
     :loading="status === 'pending'"
@@ -54,7 +61,7 @@ function displayCity(item: CompanyItem) {
     placeholder="Sélectionner une entreprise"
     class="w-full"
     create-item="always"
-    @create="emit('createCompany')"
+    @create="createCompany"
   >
     <template #item-label="{ item }">
       {{ item.label }}
