@@ -1,66 +1,103 @@
 <script setup lang="ts">
-const currentStep = ref(1)
-const totalSteps = 3
+import { z } from 'zod'
+import CreateCompanyModal from '~/components/companies/CreateCompanyModal.vue'
+import SelectCompanyInput from '~/components/companies/SelectCompanyInput.vue'
 
-const nextStep = () => {
-  if (currentStep.value < totalSteps) {
-    currentStep.value++
-  }
+const schema = z.object({
+  titre: z.string().trim().min(5, 'Le titre doit faire au moins 5 caractères.').max(100, 'Le titre ne peut pas dépasser 100 caractères.'),
+  description: z.string().trim().max(2000, 'La description ne peut pas dépasser 2000 caractères'),
+  alternance: z.boolean().nonoptional(),
+  idEntreprise: z.number().nonoptional()
+})
+
+type Schema = z.output<typeof schema>
+
+const isOpen = ref(false)
+const isOpenCreateCompanyModal = ref(false)
+
+interface StateType {
+  titre: string
+  description: string
+  alternance: boolean
+  idEntreprise: number | undefined
 }
 
-const previousStep = () => {
-  if (currentStep.value > 1) {
-    currentStep.value--
-  }
-}
+const state = reactive<StateType>({
+  titre: '',
+  description: '',
+  alternance: false,
+  idEntreprise: undefined
+})
 </script>
 
 <template>
-  <UModal :title="'Ajouter une recherche'">
+  <UModal
+    v-model:open="isOpen"
+    title="Ajout d'une recherche de stage"
+  >
     <UButton icon="i-lucide-plus">
       Ajouter
     </UButton>
 
     <template #body>
-      <div>
-        <div v-if="currentStep === 1">
-          <h1>Étape 1 : Informations généraleAAs</h1>
-          <p>aaa</p>
-          <!-- Contenu de l'étape 1 -->
-        </div>
-        <div v-if="currentStep === 2">
-          <p>Étape 2 : Critères de recherche</p>
-          <!-- Contenu de l'étape 2 -->
-        </div>
-        <div v-if="currentStep === 3">
-          <p>Étape 3 : Confirmation</p>
-          <!-- Contenu de l'étape 3 -->
-        </div>
-      </div>
+      <UForm class="flex flex-col gap-3">
+        <UFormField
+          label="Entreprise"
+          name="entreprise"
+        >
+          <SelectCompanyInput
+            v-model="state.idEntreprise"
+            class="w-full"
+            @create-company="() => isOpenCreateCompanyModal = true"
+          />
+
+          <CreateCompanyModal v-model:open="isOpenCreateCompanyModal" />
+        </UFormField>
+
+        <UFormField
+          label="Titre"
+          name="titre"
+        >
+          <UInput
+            v-model="state.titre"
+            class="w-full"
+            :minlength="5"
+            :maxlength="100"
+            required
+          />
+        </UFormField>
+        <UFormField
+          label="Description"
+          name="description"
+        >
+          <UTextarea
+            v-model="state.description"
+            :rows="6"
+            class="w-full"
+            :ui="{ base: 'resize-none' }"
+            required
+          />
+        </UFormField>
+        <UFormField
+          label="Alternance"
+          name="alternance"
+        >
+          <UCheckbox
+            v-model="state.alternance"
+            label="La recherche concerne t-elle une alternance ?"
+          />
+        </UFormField>
+      </UForm>
     </template>
 
     <template #footer>
-      <UButton
-        :disabled="currentStep === 1"
-        color="secondary"
-        @click="previousStep"
-      >
-        Précédent
-      </UButton>
-
-      <UButton
-        v-if="currentStep < totalSteps"
-        @click="nextStep"
-      >
-        Suivant
-      </UButton>
-      <UButton
-        v-else
-        color="primary"
-        @click="$emit('submit')"
-      >
-        Créer
-      </UButton>
+      <div class="flex w-full justify-end">
+        <UButton
+          color="primary"
+        >
+          Créer
+        </UButton>
+      </div>
     </template>
   </UModal>
 </template>
