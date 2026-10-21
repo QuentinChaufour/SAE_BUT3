@@ -158,12 +158,12 @@ model EnseignantSoutenance {
 model Entreprise {
   idEntreprise     Int                @id @default(autoincrement())
   nom              String             @db.VarChar
-  adresse          String?            @db.VarChar
-  codePostal       String?            @db.VarChar
-  ville            String?            @db.VarChar
-  email            String?            @db.VarChar
-  telephone        String?            @db.VarChar
+  nomEtab          String?            @db.VarChar
+  adresse          String             @db.VarChar
+  codePostal       String             @db.VarChar
+  ville            String             @db.VarChar
   siret            String?            @db.VarChar
+  pays             String?            @db.VarChar
   RechercheStage   RechercheStage[]
   TuteurEntreprise TuteurEntreprise[]
 }
@@ -313,7 +313,7 @@ model Stage {
   dateFin               DateTime?               @db.Date
   titre                 String?                 @db.VarChar
   description           String?
-  type                  Stage_Type?
+  type                  Boolean                 @default(false)
   confidentielle        Boolean                 @default(false)
   numEtu                String                  @db.VarChar
   idTuteurEntreprise    Int
@@ -364,9 +364,4 @@ enum Recherche_Stage_Status {
   Entretien
   AttenteReponse
   AttenteEnvoi
-}
-
-enum Stage_Type {
-  stage
-  alternance
 }
