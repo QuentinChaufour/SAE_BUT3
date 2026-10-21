@@ -68,8 +68,8 @@ model DemarcheContact {
 model DemarcheEvenement {
   idDemarche               Int                        @id @default(autoincrement())
   description              String?
-  date                     DateTime                   @db.Date
-  status                   Recherche_Stage_Status?
+  date                     DateTime                   @default(now()) @db.Date
+  status                   Recherche_Stage_Status
   source                   Demarche_Source
   idRecherche              Int
   RechercheStage           RechercheStage             @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
@@ -259,18 +259,21 @@ model QuotaEnseignant {
 
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
 model RechercheStage {
-  idRecherche             Int                       @id
-  titre                   String                    @db.VarChar
-  description             String?
-  alternance              Boolean
-  idEntreprise            Int
-  numEtu                  String                    @db.VarChar
-  annee                   String                    @db.VarChar
-  DemarcheEvenement       DemarcheEvenement[]
-  DepartementTagRecherche DepartementTagRecherche[]
-  AnneeUniversitaire      AnneeUniversitaire        @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
-  Entreprise              Entreprise                @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: NoAction, onUpdate: NoAction)
-  Etudiant                Etudiant                  @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
+  idRecherche              Int                       @id
+  titre                    String                    @db.VarChar
+  description              String?
+  alternance               Boolean
+  idEntreprise             Int
+  numEtu                   String                    @db.VarChar
+  annee                    String                    @db.VarChar
+  dateCreation             DateTime                  @default(now()) @db.Date
+  dateDerniereModification DateTime                  @updatedAt
+  status                   Recherche_Stage_Status
+  DemarcheEvenement        DemarcheEvenement[]
+  DepartementTagRecherche  DepartementTagRecherche[]
+  AnneeUniversitaire       AnneeUniversitaire        @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
+  Entreprise               Entreprise                @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: NoAction, onUpdate: NoAction)
+  Etudiant                 Etudiant                  @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Salle {
