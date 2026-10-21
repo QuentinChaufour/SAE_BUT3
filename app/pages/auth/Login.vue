@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 /**
  * Login.vue
- * 
+ *
  * Page where the user enter his credential to get authenticated
  */
 

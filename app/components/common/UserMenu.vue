@@ -59,13 +59,13 @@ const items = computed<DropdownMenuItem[][]>(() => ([
   [{
     label: 'Déconnexion',
     icon: 'i-lucide-log-out',
-    async onSelect(){
-      const { clear } = useUserSession();
+    async onSelect() {
+      const { clear } = useUserSession()
 
       // TODO confim logout ?
 
-      clear();
-      await navigateTo('/auth/login');
+      clear()
+      await navigateTo('/auth/login')
     }
   }]]))
 </script>

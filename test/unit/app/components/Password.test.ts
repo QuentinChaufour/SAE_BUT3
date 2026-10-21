@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   navigateTo: vi.fn(),
   toast: {
     add: vi.fn()
-  },
+  }
 }))
 
 const confirmMock = vi.fn()
@@ -153,7 +153,7 @@ describe('Password.vue', () => {
     }
   })
 
-  it('prevent password modification if canceled',async () => {
+  it('prevent password modification if canceled', async () => {
     confirmMock.mockReturnValue(false)
 
     const wrapper = mountPassword()
