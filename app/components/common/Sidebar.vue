@@ -51,11 +51,6 @@ function getLinksByRole(role: UserRole): NavigationMenuItem[] {
       return []
   }
 }
-
-const sublinks: NavigationMenuItem[] = [{
-  label: 'Crédits',
-  icon: 'i-lucide-info'
-}]
 </script>
 
 <template>
@@ -82,14 +77,6 @@ const sublinks: NavigationMenuItem[] = [{
           orientation="vertical"
           tooltip
           popover
-        />
-
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="sublinks"
-          orientation="vertical"
-          tooltip
-          class="mt-auto"
         />
       </template>
 

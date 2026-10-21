@@ -50,7 +50,13 @@ const items = computed<DropdownMenuItem[][]>(() => ([
           e.preventDefault()
         }
       }]
-    }],
+    },
+    {
+      label: 'Crédits',
+      icon: 'i-lucide-info',
+      to: '/credits'
+    }
+  ],
   [{
     label: 'Déconnexion',
     icon: 'i-lucide-log-out'
