@@ -1,10 +1,11 @@
 import { prisma } from '~~/server/utils/prisma'
 import { z } from 'zod'
+import { studentIdSchema } from '~~/shared/schemas/student'
 
 // TODO: Protéger la route
 
 const paramsSchema = z.object({
-  numEtu: z.string().trim().nonempty()
+  numEtu: studentIdSchema
 })
 
 export default defineEventHandler(async (event) => {

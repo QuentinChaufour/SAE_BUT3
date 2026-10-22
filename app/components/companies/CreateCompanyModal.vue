@@ -1,20 +1,11 @@
 <script setup lang="ts">
-import { z } from 'zod'
+import type { z } from 'zod'
 import SearchCompanySiretForm from './forms/SearchCompanySiretForm.vue'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { Entreprise } from '~~/generated/prisma/client.ts'
+import { companyFields } from '~~/shared/schemas/company.ts'
 
-const schema = z.object({
-  nom: z.string().trim().min(2, 'Le nom de l\'entreprise doit faire au moins 2 caractères.').max(100, 'Le nom de l\'entreprise ne peut pas dépasser 100 caractères.'),
-  nomEtab: z.string().trim().max(100, 'Le nom de l\'établissement ne peut pas dépasser 100 caractères.').optional(),
-  siret: z.string().trim().length(14, 'Le SIRET doit contenir exactement 14 chiffres.').optional(),
-  pays: z.string().trim().max(100, 'Le nom du pays ne peut pas dépasser 100 caractères.').optional(),
-  adresse: z.string().trim().max(200, 'L\'adresse ne peut pas dépasser 200 caractères.').optional(),
-  ville: z.string().trim().max(100, 'La ville ne peut pas dépasser 100 caractères.').optional(),
-  codePostal: z.string().trim().max(10, 'Le code postal ne peut pas dépasser 10 caractères.').optional()
-})
-
-type Schema = z.output<typeof schema>
+type Schema = z.output<typeof companyFields>
 
 export interface EntrepriseStateType {
   nom: string
@@ -39,32 +30,34 @@ const emit = defineEmits<{
 
 type EntrepriseStateReactive = EntrepriseStateType & { etranger: boolean }
 
-const defaultState: EntrepriseStateReactive = {
-  nom: props.initialNomEntreprise ?? '',
-  nomEtab: '',
-  adresse: '',
-  ville: '',
-  codePostal: '',
-  siret: '',
-  pays: 'France',
-  etranger: false
+function createDefaultState(): EntrepriseStateReactive {
+  return {
+    nom: props.initialNomEntreprise ?? '',
+    nomEtab: '',
+    adresse: '',
+    ville: '',
+    codePostal: '',
+    siret: '',
+    pays: 'France',
+    etranger: false
+  }
 }
 
-const state = reactive<EntrepriseStateReactive>(defaultState)
+const state = reactive<EntrepriseStateReactive>(createDefaultState())
 
 watch(() => isOpen.value, (open) => {
-  if (open) {
-    Object.assign(state, defaultState)
-    state.nom = props.initialNomEntreprise ?? ''
-  }
+  if (open) Object.assign(state, createDefaultState())
 })
 
-function isCreateButtonDisabled() {
-  const elements = [state.nom, state.adresse, state.ville]
-  elements.push(state.etranger ? state.pays : state.codePostal)
+const validation = computed(() => companyFields.safeParse(state))
 
-  return elements.some(element => !element || element.trim() === '')
-}
+const isCreateButtonDisabled = computed(() => !validation.value.success)
+
+const validationMessage = computed(() => {
+  if (validation.value.success) return ''
+
+  return validation.value.error.issues[0]?.message
+})
 
 function entrepriseSiretFound(entreprise: EntrepriseStateType) {
   state.siret = entreprise.siret
@@ -143,7 +136,7 @@ function switchEtranger(status: boolean) {
       <UForm
         id="create-company-form"
         class="flex flex-col gap-3"
-        :schema="schema"
+        :schema="companyFields"
         :state="state"
         @submit="onSubmit"
       >
@@ -152,6 +145,9 @@ function switchEtranger(status: boolean) {
             v-model="state.nom"
             placeholder="Nom"
             class="w-full"
+            required
+            :minlength="2"
+            :maxlength="100"
           />
         </UFormField>
         <UFormField label="Nom de l'établissement (optionnel)">
@@ -159,6 +155,7 @@ function switchEtranger(status: boolean) {
             v-model="state.nomEtab"
             placeholder="Nom"
             class="w-full"
+            :maxlength="100"
           />
         </UFormField>
         <UFormField label="Adresse">
@@ -166,6 +163,8 @@ function switchEtranger(status: boolean) {
             v-model="state.adresse"
             placeholder="Adresse"
             class="w-full"
+            :maxlength="200"
+            required
           />
         </UFormField>
         <UFormField label="Code postal">
@@ -173,6 +172,7 @@ function switchEtranger(status: boolean) {
             v-model="state.codePostal"
             placeholder="Code postal"
             class="w-full"
+            :maxlength="10"
           />
         </UFormField>
         <UFormField label="Ville">
@@ -180,6 +180,8 @@ function switchEtranger(status: boolean) {
             v-model="state.ville"
             placeholder="Ville"
             class="w-full"
+            :maxlength="100"
+            required
           />
         </UFormField>
         <UFormField
@@ -200,6 +202,8 @@ function switchEtranger(status: boolean) {
             v-model="state.pays"
             placeholder="Pays"
             class="w-full"
+            :maxlength="100"
+            required
           />
         </UFormField>
       </UForm>
@@ -207,15 +211,20 @@ function switchEtranger(status: boolean) {
 
     <template #footer>
       <div class="flex w-full justify-end">
-        <UButton
-          color="primary"
-          type="submit"
-          form="create-company-form"
-          :disabled="isCreateButtonDisabled()"
-          :loading="isLoading"
+        <UTooltip
+          :text="validationMessage"
+          :disabled="!validationMessage"
         >
-          Créer
-        </UButton>
+          <UButton
+            color="primary"
+            type="submit"
+            form="create-company-form"
+            :disabled="isCreateButtonDisabled"
+            :loading="isLoading"
+          >
+            Créer
+          </UButton>
+        </UTooltip>
       </div>
     </template>
   </UModal>

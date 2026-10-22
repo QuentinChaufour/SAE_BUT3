@@ -119,7 +119,7 @@ function onEnterpriseCreated(entreprise: Entreprise) {
     </template>
 
     <template #empty>
-      Aucune entreprise trouvée.
+      {{ searchTerm.length ? `Aucune entreprise trouvée pour "${searchTerm}".` : 'Saisissez un nom d\'entreprise pour commencer.' }}
     </template>
   </UInputMenu>
 
