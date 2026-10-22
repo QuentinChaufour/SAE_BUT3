@@ -160,7 +160,7 @@ model Entreprise {
   nom              String             @db.VarChar
   nomEtab          String?            @db.VarChar
   adresse          String             @db.VarChar
-  codePostal       String             @db.VarChar
+  codePostal       String?            @db.VarChar
   ville            String             @db.VarChar
   siret            String?            @db.VarChar
   pays             String?            @db.VarChar
@@ -259,7 +259,7 @@ model QuotaEnseignant {
 
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
 model RechercheStage {
-  idRecherche              Int                       @id
+  idRecherche              Int                       @id @default(autoincrement())
   titre                    String                    @db.VarChar
   description              String?
   alternance               Boolean
@@ -268,7 +268,7 @@ model RechercheStage {
   annee                    String                    @db.VarChar
   dateCreation             DateTime                  @default(now()) @db.Date
   dateDerniereModification DateTime                  @updatedAt
-  status                   Recherche_Stage_Status
+  status                   Recherche_Stage_Status    @default(AttenteEnvoi)
   DemarcheEvenement        DemarcheEvenement[]
   DepartementTagRecherche  DepartementTagRecherche[]
   AnneeUniversitaire       AnneeUniversitaire        @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
