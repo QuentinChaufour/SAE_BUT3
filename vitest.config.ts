@@ -1,22 +1,34 @@
-import { resolve } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { defineVitestConfig } from '@nuxt/test-utils/config'
+import { defineConfig } from 'vitest/config'
+import { defineVitestProject } from '@nuxt/test-utils/config'
 
-const projectRoot = fileURLToPath(new URL('.', import.meta.url))
-
-export default defineVitestConfig({
-  resolve: {
-    alias: {
-      '~~': projectRoot,
-      '~': resolve(projectRoot, 'app')
-    }
-  },
+export default defineConfig({
   test: {
-    environment: 'nuxt',
-
+    projects: [
+      {
+        test: {
+          name: 'unit',
+          include: ['test/unit/**/*.{test,spec}.ts'],
+          environment: 'node'
+        }
+      },
+      {
+        test: {
+          name: 'e2e',
+          include: ['test/e2e/**/*.{test,spec}.ts'],
+          environment: 'node'
+        }
+      },
+      await defineVitestProject({
+        test: {
+          name: 'nuxt',
+          include: ['test/nuxt/**/*.{test,spec}.ts'],
+          environment: 'nuxt'
+        }
+      })
+    ],
     coverage: {
       enabled: true,
-      exclude: ['app/app.vue', 'server/utils/prisma.ts'],
+      exclude: ['app/app.vue', 'server/utils/prisma.ts', 'app/app.config.ts'],
       include: [
         'app/**/*.{ts,vue}',
         'server/**/*.ts',

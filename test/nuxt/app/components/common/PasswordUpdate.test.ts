@@ -2,7 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import Password from '~/components/common/PasswordUpdate.vue'
+import PasswordUpdate from '~/components/common/PasswordUpdate.vue'
 
 const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
@@ -39,13 +39,13 @@ const UAuthFormStub = {
   `
 }
 
-describe('Password.vue', () => {
+describe('PasswordUpdate', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   function mountPassword() {
-    return mount(Password, {
+    return mount(PasswordUpdate, {
       global: {
         stubs: {
           UAuthForm: UAuthFormStub
