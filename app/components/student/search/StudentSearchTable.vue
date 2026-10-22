@@ -2,7 +2,7 @@
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import { getPaginationRowModel, type Column, type SortingState } from '@tanstack/vue-table'
 import type { Entreprise, RechercheStage, DepartementTag } from '~~/generated/prisma/client'
-import { Recherche_Stage_Status } from '~~/generated/prisma/enums'
+import SearchStatusBadge from './SearchStatusBadge.vue'
 
 type RechercheStageWithEntreprise
   = Pick<RechercheStage, 'idRecherche' | 'titre' | 'dateDerniereModification' | 'alternance' | 'status'> & {
@@ -45,15 +45,6 @@ const filteredRechercheStage = computed(() => {
   })
 })
 
-const detailStatus = {
-  [Recherche_Stage_Status.Accepte]: { label: 'Accepté', color: 'success' as const },
-  [Recherche_Stage_Status.Abandon]: { label: 'Abandonné', color: 'error' as const },
-  [Recherche_Stage_Status.AttenteEnvoi]: { label: 'En attente d\'envoi', color: 'neutral' as const },
-  [Recherche_Stage_Status.Refuse]: { label: 'Refusé', color: 'warning' as const },
-  [Recherche_Stage_Status.AttenteReponse]: { label: 'En attente de réponse', color: 'error' as const },
-  [Recherche_Stage_Status.Entretien]: { label: 'Entretien', color: 'error' as const }
-}
-
 const columns: TableColumn<RechercheStageWithEntreprise>[] = [
   {
     accessorKey: 'dateDerniereModification',
@@ -90,10 +81,7 @@ const columns: TableColumn<RechercheStageWithEntreprise>[] = [
   {
     accessorKey: 'status',
     header: ({ column }) => getHeader(column, 'Status'),
-    cell: ({ row }) => {
-      const statusDetail = detailStatus[row.getValue('status') as Recherche_Stage_Status]
-      return h(UBadge, { class: 'capitalize', variant: 'subtle', color: statusDetail.color }, () => statusDetail.label)
-    }
+    cell: ({ row }) => h(SearchStatusBadge, { status: row.original.status })
   },
   {
     id: 'tags',
