@@ -15,6 +15,36 @@ const total = ref(500)
 //---------- Interfaces ----------//
 
 interface Stage {
+  TuteurEntreprise: {
+      Entreprise: {
+      idEntreprise: number,
+      siret: string,
+      telephone: string,
+      email: string,
+      ville: string,
+      codePostal: string,
+      adresse: string,
+      nom: string,
+    }
+    idEntreprise: number,
+    idTuteurEntreprise: number,
+    email: string,
+    telephone: string,
+    prenom: string,
+    nom: string,
+  }
+  Enseignant: {
+    email: string,
+    prenom: string,
+    nom: string,
+    numEnseignant: string,
+  };
+  Etudiant: {
+    numEtu: string,
+    nom: string,
+    prenom: string,
+    email: string,
+  }
   idStage: number;
   annee: string;
   confidentielle: boolean;
@@ -28,51 +58,20 @@ interface Stage {
   type: string;
 }
 
-interface Enseignant {
-  email: string,
-  prenom: string,
-  nom: string,
-  numEnseignant: string,
-}
-
-interface Etudiant {
-  numEtu: string,
-  nom: string,
-  prenom: string,
-  email: string,
-}
-
-interface Entreprise {
-  idEntreprise: number,
-  siret: string,
-  telephone: string,
-  email: string,
-  ville: string,
-  codePostal: string,
-  adresse: string,
-  nom: string,
-}
-
 
 //---------- Data & fetch ----------//
 
-const lesStages = ref<{listStage: Stage[], listProf: Enseignant[], listEtu: Etudiant[], listEntreprise: Entreprise[]}>({ listStage: [], listProf: [], listEtu: [], listEntreprise: []});
+const lesStages = ref<{listStage: Stage[]}>({ listStage: []});
 const stages = ref<Stage[]>([]);
-const profs = ref<Enseignant[]>([]);
-const etus = ref<Etudiant[]>([]);
-const entreprises = ref<Entreprise[]>([]);
 
 async function load(pageVal: number) {
   try {
-    const data = await $fetch<{listStage: Stage[], listProf: Enseignant[], listEtu: Etudiant[], listEntreprise: Entreprise[]}>(`/api/etu/etu-list`, {
+    const data = await $fetch<{listStage: Stage[]}>(`/api/etu/etu-list`, {
       query: { page: pageVal }
     });
 
     lesStages.value = data;
     stages.value = lesStages.value.listStage;
-    profs.value = lesStages.value.listProf;
-    etus.value = lesStages.value.listEtu;
-    entreprises.value = lesStages.value.listEntreprise;
   }
   catch (err){
     console.error(err);
@@ -86,6 +85,7 @@ async function update() {
 
 await load(page.value);
 
+console.log(stages.value)
 </script>
 
 <template>
@@ -112,14 +112,14 @@ await load(page.value);
         <EtuList
           :annee="item?.annee"
           :Tuteur="{
-            nom: profs[index]?.nom ?? '',
-            prenom: profs[index]?.prenom[0] ?? '',
+            nom: item?.Enseignant.nom ?? '',
+            prenom: item?.Enseignant.prenom[0] ?? '',
           }"
           :Etu="{
-            nom: etus[index]?.nom ?? '',
-            prenom: etus[index]?.prenom[0] ?? '',
+            nom: item?.Etudiant.nom ?? '',
+            prenom: item?.Etudiant.prenom[0] ?? '',
           }"
-          :entreprise="entreprises[index]?.nom"
+          :entreprise="item?.TuteurEntreprise.Entreprise.nom ?? ''"
         />
       </div>
 

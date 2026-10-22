@@ -36,4 +36,4 @@ coverage/
 skills-lock.json
 generated/
 
-server/dev/
+server/api/dev/

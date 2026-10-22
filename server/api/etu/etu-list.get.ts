@@ -10,19 +10,22 @@ export default defineEventHandler(async (event) => {
     skip: skpElem,
     take: 20, // Take the next 20 elements
 
+    include: {
+      TuteurEntreprise: {
+        include: {
+          Entreprise: true,
+        }
+      },
+      Enseignant: true,
+      AnneeUniversitaire: true,
+      Etudiant: true
+    }
+
     // Comditions a rajouter plus tard avec les filtres
     // where: {
     //   login: body.login
     // },
-    // include: {
-    //   Enseignant: true,
-    //   Etudiant: true,
-    //   Personnel: true
-    // }
   })
-  const profs = await prisma.enseignant.findMany({});
-  const etus = await prisma.etudiant.findMany({});
-  const entreprises = await prisma.entreprise.findMany({});
 
   if (!stages) {
     throw createError({
@@ -31,26 +34,5 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (!profs) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Prof not found'
-    })
-  }
-
-  if (!etus) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Etudiant not found'
-    })
-  }
-
-  if (!entreprises) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Entreprise not found'
-    })
-  }
-
-  return { listStage: stages, listProf: profs, listEtu: etus , listEntreprise: entreprises }
+  return { listStage: stages }
 })
