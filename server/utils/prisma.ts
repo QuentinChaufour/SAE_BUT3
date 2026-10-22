@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '~~/generated/prisma/client'
+import { PrismaClient } from '../../generated/prisma/client'
 
 const POSTGRES_HOST = process.env.POSTGRES_HOST || 'localhost'
 const POSTGRES_PORT = process.env.POSTGRES_PORT || '5432'
