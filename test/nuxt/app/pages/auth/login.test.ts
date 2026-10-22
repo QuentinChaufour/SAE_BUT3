@@ -118,4 +118,76 @@ describe('login', () => {
       title: 'Connexion échoué !'
     })
   })
+
+  it('fail POST the login credentials to the API - success: false', async () => {
+    // ensure the API reject the login
+    mocks.fetch.mockResolvedValue({ success: false })
+
+    // mount the page & extract the component
+    const wrapper = mountLogin()
+    const authForm = wrapper.findComponent({ name: 'UAuthForm' })
+
+    expect(authForm.exists()).toBe(true)
+
+    // submit form values to API
+    await authForm.vm.$emit('submit', {
+      data: {
+        login: 'o00000001',
+        password: 'password123'
+      }
+    })
+
+    await flushPromises()
+
+    // check that the right values have been used
+    expect(mocks.fetch).toHaveBeenCalledWith('/api/auth/login', {
+      method: 'POST',
+      body: {
+        login: 'o00000001',
+        password: 'password123'
+      }
+    })
+
+    // check that the error toast have been used
+    expect(mocks.toast.add).toHaveBeenCalledWith({
+      color: 'error',
+      title: 'Connexion échoué !'
+    })
+  })
+
+  it('fail POST the login credentials to the API - no success field', async () => {
+    // ensure the API reject the login
+    mocks.fetch.mockResolvedValue({ })
+
+    // mount the page & extract the component
+    const wrapper = mountLogin()
+    const authForm = wrapper.findComponent({ name: 'UAuthForm' })
+
+    expect(authForm.exists()).toBe(true)
+
+    // submit form values to API
+    await authForm.vm.$emit('submit', {
+      data: {
+        login: 'o00000001',
+        password: 'password123'
+      }
+    })
+
+    await flushPromises()
+
+    // check that the right values have been used
+    expect(mocks.fetch).toHaveBeenCalledWith('/api/auth/login', {
+      method: 'POST',
+      body: {
+        login: 'o00000001',
+        password: 'password123'
+      }
+    })
+
+    // check that the error toast have been used
+    expect(mocks.toast.add).toHaveBeenCalledWith({
+      color: 'error',
+      title: 'Connexion échoué !'
+    })
+  })
 })

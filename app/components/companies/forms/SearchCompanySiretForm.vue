@@ -1,7 +1,22 @@
 <script setup lang="ts">
 import type { EntrepriseStateType } from '../CreateCompanyModal.vue'
+import { z } from 'zod'
 
 const toast = useToast()
+
+const schema = z.object({
+  siret: z.string().regex(/^(?:\s*\d){14}\s*$/, { message: 'Le SIRET doit contenir 14 chiffres.' })
+})
+
+const validation = computed(() => schema.safeParse({ siret: siret.value }))
+
+const isCreateButtonDisabled = computed(() => !validation.value.success)
+
+const validationMessage = computed(() => {
+  if (validation.value.success) return ''
+
+  return validation.value.error.issues[0]?.message
+})
 
 interface RechercheEntrepriseAPIResponse {
   results: {
@@ -28,17 +43,13 @@ const emit = defineEmits<{
 const siret = ref<string>('')
 
 async function searchSiret() {
-  const cleanSiret = siret.value.replaceAll(' ', '')
-  if (cleanSiret.length !== 14) {
-    toast.add({ title: 'Erreur', description: `Le SIRET doit contenir 14 chiffres.`, color: 'error' })
+  const schemaValidation = schema.safeParse({ siret: siret.value })
+  if (!schemaValidation.success) {
+    toast.add({ title: 'Erreur', description: schemaValidation.error.issues[0]?.message, color: 'error' })
     return
   }
 
-  if (!/^\d+$/.test(cleanSiret)) {
-    toast.add({ title: 'Erreur', description: `Le SIRET ne doit contenir que des chiffres.`, color: 'error' })
-    return
-  }
-
+  const cleanSiret = schemaValidation.data.siret.replaceAll(' ', '')
   try {
     const response = await $fetch<RechercheEntrepriseAPIResponse>(`https://recherche-entreprises.api.gouv.fr/search`, {
       query: { q: cleanSiret, per_page: 1 }
@@ -62,7 +73,7 @@ async function searchSiret() {
       ville: entrepriseData.siege.libelle_commune,
       codePostal: entrepriseData.siege.code_postal,
       siret: entrepriseData.siege.siret,
-      pays: entrepriseData.siege.libelle_pays_etranger ?? 'France'
+      pays: entrepriseData.siege.libelle_pays_etranger || 'France'
     }
 
     emit('found', entreprise)
@@ -75,7 +86,10 @@ async function searchSiret() {
 
 <template>
   <div class="flex flex-col gap-3">
-    <UForm class="flex gap-3">
+    <UForm
+      class="flex gap-3"
+      :schema="schema"
+    >
       <UFormField
         label="Préremplir avec le SIRET"
         name="siret"
@@ -98,13 +112,18 @@ async function searchSiret() {
             class="flex-1"
           />
 
-          <UButton
-            color="primary"
-            class="mt-2"
-            icon="i-lucide-search"
-            :disabled="siret.length < 14"
-            @click="searchSiret"
-          />
+          <UTooltip
+            :text="validationMessage"
+            :disabled="!validationMessage"
+          >
+            <UButton
+              color="primary"
+              class="mt-2"
+              icon="i-lucide-search"
+              :disabled="isCreateButtonDisabled"
+              @click="searchSiret"
+            />
+          </UTooltip>
         </div>
       </UFormField>
     </UForm>

@@ -51,12 +51,14 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       body: { login: payload.data.login, password: payload.data.password }
     })
 
-    if ('success' in response && response.success) {
-      toaster.add({
-        color: 'success',
-        title: 'Connexion réussi !'
-      })
+    if (!('success' in response) || !response.success) {
+      throw new Error('Login failed')
     }
+
+    toaster.add({
+      color: 'success',
+      title: 'Connexion réussi !'
+    })
   } catch {
     toaster.add({
       color: 'error',

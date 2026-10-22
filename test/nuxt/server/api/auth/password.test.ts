@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { H3Event, EventHandlerRequest } from 'h3'
 
 const mocks = vi.hoisted(() => ({
   findFirst: vi.fn(),
@@ -45,7 +46,7 @@ describe('POST /api/auth/password', () => {
   })
 
   it('updates the password and clears the user session', async () => {
-    const event = {}
+    const event = {} as H3Event<EventHandlerRequest>
 
     mocks.hashPassword.mockResolvedValue('hashedNewPassword')
 
@@ -97,10 +98,12 @@ describe('POST /api/auth/password', () => {
     mocks.hashPassword.mockResolvedValue('hashedNewPassword')
     mocks.findFirst.mockResolvedValue(null)
 
+    const event = {} as H3Event<EventHandlerRequest>
+
     const handler = (await import('~~/server/api/auth/password.post')).default
 
     // check no user has been found
-    await expect(handler({})).rejects.toMatchObject({
+    await expect(handler(event)).rejects.toMatchObject({
       statusCode: 401,
       statusMessage: 'Unauthorised'
     })
@@ -124,8 +127,10 @@ describe('POST /api/auth/password', () => {
 
     const handler = (await import('~~/server/api/auth/password.post')).default
 
+    const event = {} as H3Event<EventHandlerRequest>
+
     // check old password aren't the same
-    await expect(handler({})).rejects.toMatchObject({
+    await expect(handler(event)).rejects.toMatchObject({
       statusCode: 401,
       statusMessage: 'Unauthorised'
     })

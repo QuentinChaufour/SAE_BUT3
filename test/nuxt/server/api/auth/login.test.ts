@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import type { H3Event, EventHandlerRequest } from 'h3'
 
 const mocks = vi.hoisted(() => ({
   findFirst: vi.fn(),
@@ -55,7 +56,7 @@ describe('POST /api/auth/login', () => {
 
     // define the handler and call it
     const handler = (await import('~~/server/api/auth/login.post')).default
-    const event = {}
+    const event = {} as H3Event<EventHandlerRequest>
     await handler(event)
 
     // check if the right query has been made
@@ -96,7 +97,7 @@ describe('POST /api/auth/login', () => {
       Personnel: null
     })
 
-    await handler({})
+    await handler(event)
 
     expect(mocks.setUserSession).toHaveBeenCalledWith(event, {
       user: {
@@ -126,7 +127,7 @@ describe('POST /api/auth/login', () => {
 
     // define the handler and call it
     const handler = (await import('~~/server/api/auth/login.post')).default
-    const event = {}
+    const event = {} as H3Event<EventHandlerRequest>
     await handler(event)
 
     // check if the right query has been made
@@ -167,7 +168,7 @@ describe('POST /api/auth/login', () => {
       Personnel: null
     })
 
-    await handler({})
+    await handler(event)
 
     expect(mocks.setUserSession).toHaveBeenCalledWith(event, {
       user: {
@@ -198,7 +199,7 @@ describe('POST /api/auth/login', () => {
 
     // define the handler and call it
     const handler = (await import('~~/server/api/auth/login.post')).default
-    const event = {}
+    const event = {} as H3Event<EventHandlerRequest>
     await handler(event)
 
     // check if the right query has been made
@@ -240,7 +241,7 @@ describe('POST /api/auth/login', () => {
       }
     })
 
-    await handler({})
+    await handler(event)
 
     expect(mocks.setUserSession).toHaveBeenCalledWith(event, {
       user: {
@@ -271,7 +272,7 @@ describe('POST /api/auth/login', () => {
 
     // define the handler and call it
     const handler = (await import('~~/server/api/auth/login.post')).default
-    const event = {}
+    const event = {} as H3Event<EventHandlerRequest>
     await handler(event)
 
     // check if the right query has been made
@@ -313,7 +314,7 @@ describe('POST /api/auth/login', () => {
       }
     })
 
-    await handler({})
+    await handler(event)
 
     expect(mocks.setUserSession).toHaveBeenCalledWith(event, {
       user: {
@@ -331,8 +332,10 @@ describe('POST /api/auth/login', () => {
     // define the API event handler
     const handler = (await import('~~/server/api/auth/login.post')).default
 
+    const event = {} as H3Event<EventHandlerRequest>
+
     // reject API call
-    await expect(handler({})).rejects.toMatchObject({
+    await expect(handler(event)).rejects.toMatchObject({
       statusCode: 401,
       statusMessage: 'Unauthorised'
     })
@@ -360,8 +363,10 @@ describe('POST /api/auth/login', () => {
     // define the API event handler
     const handler = (await import('~~/server/api/auth/login.post')).default
 
+    const event = {} as H3Event<EventHandlerRequest>
+
     // reject API call
-    await expect(handler({})).rejects.toMatchObject({
+    await expect(handler(event)).rejects.toMatchObject({
       statusCode: 401,
       statusMessage: 'Unauthorised'
     })
