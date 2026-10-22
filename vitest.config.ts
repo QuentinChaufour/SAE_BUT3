@@ -16,6 +16,12 @@ export default defineVitestConfig({
 
     coverage: {
       enabled: true,
+      exclude: ['app/app.vue', 'server/utils/prisma.ts'],
+      include: [
+        'app/**/*.{ts,vue}',
+        'server/**/*.ts',
+        'shared/**/*.ts'
+      ],
       thresholds: {
         lines: 80,
         branches: 80,
