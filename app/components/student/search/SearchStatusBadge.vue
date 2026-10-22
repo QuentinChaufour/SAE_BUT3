@@ -21,7 +21,6 @@ const statusDetail = computed(() => detailStatus[props.status])
 
 <template>
   <UBadge
-    class="capitalize"
     variant="subtle"
     :color="statusDetail.color"
   >
