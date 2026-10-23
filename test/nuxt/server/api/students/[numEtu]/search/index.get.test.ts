@@ -68,7 +68,7 @@ describe('GET /api/student/[numEtu]/search', () => {
 
     const event = {
       context: {
-        params: { numEtu: 'o22401314' }
+        params: { numEtu: 'o123456789' }
       }
     } as unknown as H3Event
 
@@ -76,7 +76,7 @@ describe('GET /api/student/[numEtu]/search', () => {
 
     expect(prisma.rechercheStage.findMany).toHaveBeenCalledTimes(1)
     expect(prisma.rechercheStage.findMany).toHaveBeenCalledWith({
-      where: { numEtu: 'o22401314' },
+      where: { numEtu: 'o123456789' },
       orderBy: { dateCreation: 'desc' },
       select: expect.any(Object)
     })

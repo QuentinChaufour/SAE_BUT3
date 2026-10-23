@@ -19,7 +19,7 @@ import StudentSearchTable from '~/components/student/search/StudentSearchTable.v
 
     <template #body>
       <StudentSearchTable
-        :etudiant-id="'o22401314'"
+        :etudiant-id="'o123456789'"
       />
     </template>
   </UDashboardPanel>

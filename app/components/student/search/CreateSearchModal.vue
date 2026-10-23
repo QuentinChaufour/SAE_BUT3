@@ -48,7 +48,7 @@ const isLoading = ref(false)
 async function onSubmit(_event: FormSubmitEvent<Schema>) {
   isLoading.value = true
 
-  const numEtu = 'o22401314' // TODO: Get the actual student number
+  const numEtu = 'o123456789' // TODO: Get the actual student number
 
   try {
     const response = await $fetch<RechercheStage>(`/api/students/${numEtu}/search`, {
