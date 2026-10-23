@@ -3,7 +3,7 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import SearchStatusBadge from '~/components/student/search/SearchStatusBadge.vue'
 import { Recherche_Stage_Status } from '~~/generated/prisma/enums'
 
-describe('SearchStatusBadge.vue', () => {
+describe('SearchStatusBadge', () => {
   it('show accepted badge', async () => {
     const wrapper = await mountSuspended(SearchStatusBadge, {
       props: {

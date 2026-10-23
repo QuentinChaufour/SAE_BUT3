@@ -95,13 +95,29 @@ describe('UserMenu', () => {
 
     sombreItem.onSelect(mockEventSombre)
     expect(mockEventSombre.preventDefault).toHaveBeenCalled()
-
-    sombreItem.onUpdateChecked(true)
     expect(mockColorMode.preference).toBe('dark')
 
     const logoutItem = items[2][0]
     await logoutItem.onSelect()
     expect(mockUserSession.clear).toHaveBeenCalled()
     expect(mockNavigateTo).toHaveBeenCalledWith('/auth/login')
+  })
+
+  it('check password modal opens and closes correctly', async () => {
+    const wrapper = await mountSuspended(UserMenu)
+
+    const dropdown = wrapper.findComponent({ name: 'UDropdownMenu' })
+    const items = dropdown.props('items')
+    const passwordItem = items[1][0]
+
+    passwordItem.onSelect()
+    await nextTick()
+
+    const modal = wrapper.findComponent({ name: 'UModal' })
+    expect(modal.props('open')).toBe(true)
+
+    modal.vm.$emit('update:open', false)
+    await nextTick()
+    expect(wrapper.findComponent({ name: 'UModal' }).props('open')).toBe(false)
   })
 })

@@ -28,7 +28,7 @@ const emit = defineEmits<{
   created: [entreprise: Entreprise]
 }>()
 
-type EntrepriseStateReactive = EntrepriseStateType & { etranger: boolean }
+export type EntrepriseStateReactive = EntrepriseStateType & { etranger: boolean }
 
 function createDefaultState(): EntrepriseStateReactive {
   return {
@@ -82,6 +82,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   isLoading.value = true
 
   try {
+    const data = companyFields.safeParse(event.data)
+    if (!data.success) throw new Error('Invalid data')
+
     const response = await $fetch<Entreprise>('/api/companies', {
       method: 'POST',
       body: {
@@ -109,7 +112,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
     toast.add({
       title: 'Erreur',
-      description: 'Impossible de créer l\'entreprise.',
+      description: 'Une erreur est survenue lors de la création de l\'entreprise.',
       color: 'error'
     })
   } finally {
