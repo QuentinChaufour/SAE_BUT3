@@ -9,7 +9,7 @@ definePageMeta({
 
 const page = ref(1)
 const itemsPerPage = ref(20)
-const total = ref(500)
+const total = ref(500) // Valeur par défault
 
 
 //---------- Interfaces ----------//
@@ -72,6 +72,8 @@ async function load(pageVal: number) {
 
     lesStages.value = data;
     stages.value = lesStages.value.listStage;
+
+    total.value = Math.round(stages.value.length / 20) + 1 // Maj de la taille de la pagination
   }
   catch (err){
     console.error(err);
@@ -85,7 +87,6 @@ async function update() {
 
 await load(page.value);
 
-console.log(stages.value)
 </script>
 
 <template>
