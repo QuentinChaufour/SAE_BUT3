@@ -104,8 +104,7 @@ await load(page.value);
         <p>Année d'étude</p>
         <p>Entreprise</p>
         <p>Tuteur de stage</p>
-        <p>None</p>
-        <p>None</p>
+        <p>Plus d'info</p>
       </div>
 
       <USeparator class="mb-3 mt-3"/>
