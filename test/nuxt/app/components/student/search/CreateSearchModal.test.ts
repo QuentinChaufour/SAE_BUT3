@@ -1,27 +1,18 @@
-import { UApp, UButton, UCheckbox, UForm, UFormField, UInput, UModal, UTextarea } from '#components'
-import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
+import { UButton, UCheckbox, UForm, UFormField, UInput, UModal, UTextarea } from '#components'
+import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import SelectCompanyInput from '~/components/companies/SelectCompanyInput.vue'
 import CreateSearchModal from '~/components/student/search/CreateSearchModal.vue'
+import { mountWithUApp, resetNuxtMocks, type Wrapper } from '../../../../utils/utils'
 
-const CreateSearchModalComponent = defineComponent({
-  setup() {
-    return () => h(UApp, null, { default: () => h(CreateSearchModal) })
-  }
-})
-
-const mockFetch = vi.hoisted(() => vi.fn())
-mockNuxtImport('$fetch', () => mockFetch)
-
-const mockToast = vi.hoisted(() => ({ add: vi.fn() }))
-mockNuxtImport('useToast', () => () => mockToast)
+const mocks = vi.hoisted(() => ({ fetch: vi.fn(), toast: { add: vi.fn() } }))
+mockNuxtImport('$fetch', () => mocks.fetch)
+mockNuxtImport('useToast', () => () => mocks.toast)
 
 const createdSearch = { idRecherche: 1, titre: 'Stage développeur', numEtu: 'o123456789' }
 
-type Wrapper = Awaited<ReturnType<typeof mountSuspended>>
-
 async function mountAndOpen() {
-  const wrapper = await mountSuspended(CreateSearchModalComponent)
+  const wrapper = await mountWithUApp(CreateSearchModal)
   const modal = wrapper.findComponent(UModal)
 
   await wrapper.findComponent({ name: 'UButton' }).trigger('click')
@@ -45,12 +36,11 @@ async function fillForm(wrapper: Wrapper) {
 
 describe('CreateSearchModal', () => {
   beforeEach(() => {
-    mockFetch.mockReset()
-    mockToast.add.mockClear()
+    resetNuxtMocks(mocks)
   })
 
   it('check content', async () => {
-    const wrapper = await mountSuspended(CreateSearchModalComponent)
+    const wrapper = await mountWithUApp(CreateSearchModal)
 
     const button = wrapper.findComponent({ name: 'UButton' })
     expect(button.exists()).toBe(true)
@@ -79,14 +69,14 @@ describe('CreateSearchModal', () => {
   })
 
   it('check body request', async () => {
-    mockFetch.mockResolvedValueOnce(createdSearch)
+    mocks.fetch.mockResolvedValueOnce(createdSearch)
     const { wrapper } = await mountAndOpen()
 
     await fillForm(wrapper)
     wrapper.findComponent(UForm).vm.$emit('submit')
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/students/o123456789/search', {
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/students/o123456789/search', {
         method: 'POST',
         body: {
           titre: 'Stage développeur',
@@ -101,7 +91,7 @@ describe('CreateSearchModal', () => {
 
   it('check loading state', async () => {
     let resolveRequest!: (value: unknown) => void
-    mockFetch.mockReturnValueOnce(new Promise((resolve) => {
+    mocks.fetch.mockReturnValueOnce(new Promise((resolve) => {
       resolveRequest = resolve
     }))
     const { wrapper, modal } = await mountAndOpen()
@@ -114,7 +104,7 @@ describe('CreateSearchModal', () => {
     expect(getCreateButton().props('loading')).toBe(true)
 
     resolveRequest(createdSearch)
-    await vi.waitFor(() => expect(mockToast.add).toHaveBeenCalledTimes(1))
+    await vi.waitFor(() => expect(mocks.toast.add).toHaveBeenCalledTimes(1))
     await vi.waitFor(() => expect(modal.props('open')).toBe(false))
 
     await wrapper.findComponent({ name: 'UButton' }).trigger('click')
@@ -126,20 +116,20 @@ describe('CreateSearchModal', () => {
   })
 
   it('show toast on success', async () => {
-    mockFetch.mockResolvedValueOnce(createdSearch)
+    mocks.fetch.mockResolvedValueOnce(createdSearch)
     const { wrapper, modal } = await mountAndOpen()
 
     await fillForm(wrapper)
     wrapper.findComponent(UForm).vm.$emit('submit')
 
     await vi.waitFor(() => {
-      expect(mockToast.add).toHaveBeenCalledWith({
+      expect(mocks.toast.add).toHaveBeenCalledWith({
         title: 'Recherche créée',
         description: 'Votre recherche a été créée avec succès.',
         color: 'success'
       })
     })
-    expect(mockToast.add).toHaveBeenCalledTimes(1)
+    expect(mocks.toast.add).toHaveBeenCalledTimes(1)
 
     const emitted = wrapper.findComponent(CreateSearchModal).emitted('created')
     expect(emitted).toHaveLength(1)
@@ -159,7 +149,7 @@ describe('CreateSearchModal', () => {
   })
 
   it('show error toast on failure', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network error'))
+    mocks.fetch.mockRejectedValueOnce(new Error('Network error'))
 
     const { wrapper, modal } = await mountAndOpen()
 
@@ -167,14 +157,14 @@ describe('CreateSearchModal', () => {
     wrapper.findComponent(UForm).vm.$emit('submit')
 
     await vi.waitFor(() => {
-      expect(mockToast.add).toHaveBeenCalledWith({
+      expect(mocks.toast.add).toHaveBeenCalledWith({
         title: 'Erreur',
         description: 'Impossible de créer votre recherche.',
         color: 'error'
       })
     })
 
-    expect(mockToast.add).toHaveBeenCalledTimes(1)
+    expect(mocks.toast.add).toHaveBeenCalledTimes(1)
     expect(wrapper.findComponent(CreateSearchModal).emitted('created')).toBeUndefined()
 
     expect(modal.props('open')).toBe(true)

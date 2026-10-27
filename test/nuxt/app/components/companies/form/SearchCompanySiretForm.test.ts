@@ -1,14 +1,11 @@
-import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
-import { describe, expect, it, vi } from 'vitest'
-import { defineComponent, h } from 'vue'
-import { UApp } from '#components'
+import { mockNuxtImport } from '@nuxt/test-utils/runtime'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import SearchCompanySiretForm from '~/components/companies/forms/SearchCompanySiretForm.vue'
+import { mountWithUApp, resetNuxtMocks } from '../../../../utils/utils'
 
-const mockFetch = vi.hoisted(() => vi.fn())
-mockNuxtImport('$fetch', () => mockFetch)
-
-const mockToast = vi.hoisted(() => ({ add: vi.fn() }))
-mockNuxtImport('useToast', () => () => mockToast)
+const mocks = vi.hoisted(() => ({ fetch: vi.fn(), toast: { add: vi.fn() } }))
+mockNuxtImport('$fetch', () => mocks.fetch)
+mockNuxtImport('useToast', () => () => mocks.toast)
 
 const mockApiResponse = {
   results: [
@@ -30,15 +27,13 @@ const mockApiResponse = {
   ]
 }
 
-const TestComponent = defineComponent({
-  setup() {
-    return () => h(UApp, null, { default: () => h(SearchCompanySiretForm) })
-  }
-})
-
 describe('SearchCompanySiretForm.vue', () => {
+  beforeEach(() => {
+    resetNuxtMocks(mocks)
+  })
+
   it('check content', async () => {
-    const wrapper = await mountSuspended(TestComponent)
+    const wrapper = await mountWithUApp(SearchCompanySiretForm)
     const form = wrapper.findComponent(SearchCompanySiretForm)
 
     const formField = form.findComponent({ name: 'UFormField' })
@@ -55,7 +50,7 @@ describe('SearchCompanySiretForm.vue', () => {
   })
 
   it('check button disabled with no siret', async () => {
-    const wrapper = await mountSuspended(TestComponent)
+    const wrapper = await mountWithUApp(SearchCompanySiretForm)
     const form = wrapper.findComponent(SearchCompanySiretForm)
 
     const input = form.find('input')
@@ -68,7 +63,7 @@ describe('SearchCompanySiretForm.vue', () => {
   })
 
   it('check button enabled with a valid siret', async () => {
-    const wrapper = await mountSuspended(TestComponent)
+    const wrapper = await mountWithUApp(SearchCompanySiretForm)
     const form = wrapper.findComponent(SearchCompanySiretForm)
 
     const input = form.find('input')
@@ -86,9 +81,9 @@ describe('SearchCompanySiretForm.vue', () => {
   })
 
   it('make a search with a valid SIRET', async () => {
-    mockFetch.mockResolvedValueOnce(mockApiResponse)
+    mocks.fetch.mockResolvedValueOnce(mockApiResponse)
 
-    const wrapper = await mountSuspended(TestComponent)
+    const wrapper = await mountWithUApp(SearchCompanySiretForm)
     const form = wrapper.findComponent(SearchCompanySiretForm)
 
     const input = form.find('input')
@@ -102,7 +97,7 @@ describe('SearchCompanySiretForm.vue', () => {
     await button.trigger('click')
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('https://recherche-entreprises.api.gouv.fr/search', {
+      expect(mocks.fetch).toHaveBeenCalledWith('https://recherche-entreprises.api.gouv.fr/search', {
         query: { q: '12345678901234', per_page: 1 }
       })
     })
@@ -122,9 +117,9 @@ describe('SearchCompanySiretForm.vue', () => {
   })
 
   it('make a search with a valid SIRET - foreign country', async () => {
-    mockFetch.mockResolvedValueOnce({ results: [{ ...mockApiResponse.results[0], siege: { ...mockApiResponse.results[0]!.siege, libelle_pays_etranger: 'Suisse', libelle_commune: 'Berne', code_postal: '' } }] })
+    mocks.fetch.mockResolvedValueOnce({ results: [{ ...mockApiResponse.results[0], siege: { ...mockApiResponse.results[0]!.siege, libelle_pays_etranger: 'Suisse', libelle_commune: 'Berne', code_postal: '' } }] })
 
-    const wrapper = await mountSuspended(TestComponent)
+    const wrapper = await mountWithUApp(SearchCompanySiretForm)
     const form = wrapper.findComponent(SearchCompanySiretForm)
 
     const input = form.find('input')
@@ -138,7 +133,7 @@ describe('SearchCompanySiretForm.vue', () => {
     await button.trigger('click')
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('https://recherche-entreprises.api.gouv.fr/search', {
+      expect(mocks.fetch).toHaveBeenCalledWith('https://recherche-entreprises.api.gouv.fr/search', {
         query: { q: '12345678901234', per_page: 1 }
       })
     })
@@ -158,9 +153,9 @@ describe('SearchCompanySiretForm.vue', () => {
   })
 
   it('make a search with a valid SIRET - no foreign country', async () => {
-    mockFetch.mockResolvedValueOnce({ results: [{ ...mockApiResponse.results[0], siege: { ...mockApiResponse.results[0]!.siege, libelle_pays_etranger: '', libelle_commune: 'Berne', code_postal: '' } }] })
+    mocks.fetch.mockResolvedValueOnce({ results: [{ ...mockApiResponse.results[0], siege: { ...mockApiResponse.results[0]!.siege, libelle_pays_etranger: '', libelle_commune: 'Berne', code_postal: '' } }] })
 
-    const wrapper = await mountSuspended(TestComponent)
+    const wrapper = await mountWithUApp(SearchCompanySiretForm)
     const form = wrapper.findComponent(SearchCompanySiretForm)
 
     const input = form.find('input')
@@ -174,7 +169,7 @@ describe('SearchCompanySiretForm.vue', () => {
     await button.trigger('click')
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('https://recherche-entreprises.api.gouv.fr/search', {
+      expect(mocks.fetch).toHaveBeenCalledWith('https://recherche-entreprises.api.gouv.fr/search', {
         query: { q: '12345678901234', per_page: 1 }
       })
     })
@@ -194,9 +189,9 @@ describe('SearchCompanySiretForm.vue', () => {
   })
 
   it('make a search with a valid SIRET - no nom etab', async () => {
-    mockFetch.mockResolvedValueOnce({ results: [{ ...mockApiResponse.results[0], matching_etablissements: [] }] })
+    mocks.fetch.mockResolvedValueOnce({ results: [{ ...mockApiResponse.results[0], matching_etablissements: [] }] })
 
-    const wrapper = await mountSuspended(TestComponent)
+    const wrapper = await mountWithUApp(SearchCompanySiretForm)
     const form = wrapper.findComponent(SearchCompanySiretForm)
 
     const input = form.find('input')
@@ -210,7 +205,7 @@ describe('SearchCompanySiretForm.vue', () => {
     await button.trigger('click')
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('https://recherche-entreprises.api.gouv.fr/search', {
+      expect(mocks.fetch).toHaveBeenCalledWith('https://recherche-entreprises.api.gouv.fr/search', {
         query: { q: '12345678901234', per_page: 1 }
       })
     })
@@ -230,9 +225,9 @@ describe('SearchCompanySiretForm.vue', () => {
   })
 
   it('make a search with a valid SIRET but no results', async () => {
-    mockFetch.mockResolvedValueOnce({ results: [] })
+    mocks.fetch.mockResolvedValueOnce({ results: [] })
 
-    const wrapper = await mountSuspended(TestComponent)
+    const wrapper = await mountWithUApp(SearchCompanySiretForm)
     const form = wrapper.findComponent(SearchCompanySiretForm)
 
     const input = form.find('input')
@@ -246,13 +241,13 @@ describe('SearchCompanySiretForm.vue', () => {
     await button.trigger('click')
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('https://recherche-entreprises.api.gouv.fr/search', {
+      expect(mocks.fetch).toHaveBeenCalledWith('https://recherche-entreprises.api.gouv.fr/search', {
         query: { q: '12345678901234', per_page: 1 }
       })
     })
 
     expect(form.emitted('found')).toBeFalsy()
-    expect(mockToast.add).toHaveBeenCalledWith({
+    expect(mocks.toast.add).toHaveBeenCalledWith({
       color: 'error',
       title: 'Erreur',
       description: 'Aucune entreprise trouvée avec le SIRET "12345678901234"'
@@ -260,9 +255,9 @@ describe('SearchCompanySiretForm.vue', () => {
   })
 
   it('make a search with a valid SIRET but no releasable data', async () => {
-    mockFetch.mockResolvedValueOnce({ results: [{ ...mockApiResponse.results[0], nom_complet: '[NON-DIFFUSIBLE]' }] })
+    mocks.fetch.mockResolvedValueOnce({ results: [{ ...mockApiResponse.results[0], nom_complet: '[NON-DIFFUSIBLE]' }] })
 
-    const wrapper = await mountSuspended(TestComponent)
+    const wrapper = await mountWithUApp(SearchCompanySiretForm)
     const form = wrapper.findComponent(SearchCompanySiretForm)
 
     const input = form.find('input')
@@ -276,13 +271,13 @@ describe('SearchCompanySiretForm.vue', () => {
     await button.trigger('click')
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('https://recherche-entreprises.api.gouv.fr/search', {
+      expect(mocks.fetch).toHaveBeenCalledWith('https://recherche-entreprises.api.gouv.fr/search', {
         query: { q: '12345678901234', per_page: 1 }
       })
     })
 
     expect(form.emitted('found')).toBeFalsy()
-    expect(mockToast.add).toHaveBeenCalledWith({
+    expect(mocks.toast.add).toHaveBeenCalledWith({
       color: 'error',
       title: 'Erreur',
       description: 'Les données de l\'entreprise pour le SIRET "12345678901234" sont non diffusibles.'
@@ -290,7 +285,7 @@ describe('SearchCompanySiretForm.vue', () => {
   })
 
   it('show error when SIRET is invalid', async () => {
-    const wrapper = await mountSuspended(TestComponent)
+    const wrapper = await mountWithUApp(SearchCompanySiretForm)
     const form = wrapper.findComponent(SearchCompanySiretForm)
 
     await form.find('input').setValue('1234567890123A')
@@ -299,13 +294,13 @@ describe('SearchCompanySiretForm.vue', () => {
     const button = form.findComponent({ name: 'UButton' })
 
     expect(button.props('disabled')).toBe(true)
-    expect(mockFetch).not.toHaveBeenCalled()
+    expect(mocks.fetch).not.toHaveBeenCalled()
   })
 
   it('show error when API search fails', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Erreur réseau'))
+    mocks.fetch.mockRejectedValueOnce(new Error('Erreur réseau'))
 
-    const wrapper = await mountSuspended(TestComponent)
+    const wrapper = await mountWithUApp(SearchCompanySiretForm)
     const form = wrapper.findComponent(SearchCompanySiretForm)
 
     await form.find('input').setValue('12345678901234')
@@ -314,10 +309,10 @@ describe('SearchCompanySiretForm.vue', () => {
     await form.findComponent({ name: 'UButton' }).trigger('click')
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalled()
+      expect(mocks.fetch).toHaveBeenCalled()
     })
 
-    expect(mockToast.add).toHaveBeenCalledWith({
+    expect(mocks.toast.add).toHaveBeenCalledWith({
       title: 'Erreur',
       description: 'Une erreur s\'est produite lors de la recherche du SIRET "12345678901234".',
       color: 'error'
@@ -325,7 +320,7 @@ describe('SearchCompanySiretForm.vue', () => {
   })
 
   it('show error when SIRET is invalid', async () => {
-    const wrapper = await mountSuspended(TestComponent)
+    const wrapper = await mountWithUApp(SearchCompanySiretForm)
     const form = wrapper.findComponent(SearchCompanySiretForm)
 
     const input = form.find('input')
@@ -339,8 +334,8 @@ describe('SearchCompanySiretForm.vue', () => {
     // Forcer le clic même si le bouton est désactivé
     await button.vm.$emit('click')
 
-    expect(mockFetch).not.toHaveBeenCalled()
-    expect(mockToast.add).toHaveBeenCalledWith({
+    expect(mocks.fetch).not.toHaveBeenCalled()
+    expect(mocks.toast.add).toHaveBeenCalledWith({
       title: 'Erreur',
       description: 'Le SIRET doit contenir 14 chiffres.',
       color: 'error'

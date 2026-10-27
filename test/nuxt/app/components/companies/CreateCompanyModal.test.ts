@@ -1,20 +1,13 @@
-import { UApp, UButton, UFormField, USeparator } from '#components'
-import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it, vi } from 'vitest'
+import { UButton, UFormField, USeparator } from '#components'
+import { mockNuxtImport } from '@nuxt/test-utils/runtime'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import CreateCompanyModal, { type EntrepriseStateReactive } from '~/components/companies/CreateCompanyModal.vue'
 import SearchCompanySiretForm from '~/components/companies/forms/SearchCompanySiretForm.vue'
+import { mountWithUApp, resetNuxtMocks } from '../../../utils/utils'
 
-const CreateCompanyModalComponent = (open: boolean = true, initialNomEntreprise: string = '') => defineComponent({
-  setup() {
-    return () => h(UApp, null, { default: () => h(CreateCompanyModal, { open, initialNomEntreprise }) })
-  }
-})
-
-const mockFetch = vi.hoisted(() => vi.fn())
-mockNuxtImport('$fetch', () => mockFetch)
-
-const mockToast = vi.hoisted(() => ({ add: vi.fn() }))
-mockNuxtImport('useToast', () => () => mockToast)
+const mocks = vi.hoisted(() => ({ fetch: vi.fn(), toast: { add: vi.fn() } }))
+mockNuxtImport('$fetch', () => mocks.fetch)
+mockNuxtImport('useToast', () => () => mocks.toast)
 
 const entrepriseExampleData = {
   nom: 'Test Company',
@@ -26,8 +19,12 @@ const entrepriseExampleData = {
 }
 
 describe('CreateCompanyModal', () => {
+  beforeEach(() => {
+    resetNuxtMocks(mocks)
+  })
+
   it('check if not open by default', async () => {
-    const wrapper = await mountSuspended(CreateCompanyModalComponent(false))
+    const wrapper = await mountWithUApp(CreateCompanyModal, { open: false })
 
     const modal = wrapper.findComponent({ name: 'UModal' })
     expect(modal.exists()).toBe(true)
@@ -35,7 +32,7 @@ describe('CreateCompanyModal', () => {
   })
 
   it('check content', async () => {
-    const wrapper = await mountSuspended(CreateCompanyModalComponent())
+    const wrapper = await mountWithUApp(CreateCompanyModal, { open: true, initialNomEntreprise: '' })
     const modal = wrapper.findComponent({ name: 'UModal' })
 
     expect(modal.exists()).toBe(true)
@@ -62,7 +59,7 @@ describe('CreateCompanyModal', () => {
 
   it('check initialNomEntreprise prop', async () => {
     const initialNomEntreprise = 'Test'
-    const wrapper = await mountSuspended(CreateCompanyModalComponent(true, initialNomEntreprise))
+    const wrapper = await mountWithUApp(CreateCompanyModal, { open: true, initialNomEntreprise })
 
     const nomEntrepriseField = wrapper.findAllComponents(UFormField).find(component => component.props('label') === 'Nom de l\'entreprise')
     expect(nomEntrepriseField).toBeDefined()
@@ -73,18 +70,14 @@ describe('CreateCompanyModal', () => {
   })
 
   it('uses an empty name when initialNomEntreprise is omitted', async () => {
-    const wrapper = await mountSuspended(defineComponent({
-      setup() {
-        return () => h(UApp, null, { default: () => h(CreateCompanyModal, { open: true }) })
-      }
-    }))
+    const wrapper = await mountWithUApp(CreateCompanyModal, { open: true })
 
     const nomEntrepriseField = wrapper.findAllComponents(UFormField).find(component => component.props('label') === 'Nom de l\'entreprise')
     expect(nomEntrepriseField?.find('input').element.value).toBe('')
   })
 
   it('check close and open modal - reset value', async () => {
-    const wrapper = await mountSuspended(CreateCompanyModalComponent(true, 'Test'))
+    const wrapper = await mountWithUApp(CreateCompanyModal, { open: true, initialNomEntreprise: 'Test' })
 
     const nomEntrepriseField = wrapper.findAllComponents(UFormField).find(component => component.props('label') === 'Nom de l\'entreprise')
     expect(nomEntrepriseField).toBeDefined()
@@ -111,7 +104,7 @@ describe('CreateCompanyModal', () => {
   })
 
   it('on entreprise found', async () => {
-    const wrapper = await mountSuspended(CreateCompanyModalComponent())
+    const wrapper = await mountWithUApp(CreateCompanyModal, { open: true, initialNomEntreprise: '' })
 
     const modal = wrapper.findComponent({ name: 'UModal' })
     expect(modal.exists()).toBe(true)
@@ -135,7 +128,7 @@ describe('CreateCompanyModal', () => {
   })
 
   it('check etranger switch', async () => {
-    const wrapper = await mountSuspended(CreateCompanyModalComponent())
+    const wrapper = await mountWithUApp(CreateCompanyModal, { open: true, initialNomEntreprise: '' })
 
     const modal = wrapper.findComponent({ name: 'UModal' })
     expect(modal.exists()).toBe(true)
@@ -159,9 +152,9 @@ describe('CreateCompanyModal', () => {
   })
 
   it('submit valid form', async () => {
-    mockFetch.mockResolvedValueOnce({ ...entrepriseExampleData, idEntreprise: 1 })
+    mocks.fetch.mockResolvedValueOnce({ ...entrepriseExampleData, idEntreprise: 1 })
 
-    const wrapper = await mountSuspended(CreateCompanyModalComponent())
+    const wrapper = await mountWithUApp(CreateCompanyModal, { open: true, initialNomEntreprise: '' })
 
     const modal = wrapper.findComponent({ name: 'UModal' })
     const searchForm = modal.findComponent(SearchCompanySiretForm)
@@ -173,7 +166,7 @@ describe('CreateCompanyModal', () => {
     form!.vm.$emit('submit', { data: entrepriseExampleData })
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/companies', {
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/companies', {
         method: 'POST',
         body: {
           ...entrepriseExampleData,
@@ -183,7 +176,7 @@ describe('CreateCompanyModal', () => {
       })
     })
 
-    expect(mockToast.add).toHaveBeenCalledWith({
+    expect(mocks.toast.add).toHaveBeenCalledWith({
       color: 'success',
       title: 'Entreprise créée',
       description: 'L\'entreprise a été créée avec succès.'
@@ -191,9 +184,9 @@ describe('CreateCompanyModal', () => {
   })
 
   it('submit form - network error', async () => {
-    mockFetch.mockRejectedValueOnce(new Error('Network error'))
+    mocks.fetch.mockRejectedValueOnce(new Error('Network error'))
 
-    const wrapper = await mountSuspended(CreateCompanyModalComponent())
+    const wrapper = await mountWithUApp(CreateCompanyModal, { open: true, initialNomEntreprise: '' })
 
     const modal = wrapper.findComponent({ name: 'UModal' })
     const searchForm = modal.findComponent(SearchCompanySiretForm)
@@ -205,7 +198,7 @@ describe('CreateCompanyModal', () => {
     form!.vm.$emit('submit', { data: entrepriseExampleData })
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/companies', {
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/companies', {
         method: 'POST',
         body: {
           ...entrepriseExampleData,
@@ -215,7 +208,7 @@ describe('CreateCompanyModal', () => {
       })
     })
 
-    expect(mockToast.add).toHaveBeenCalledWith({
+    expect(mocks.toast.add).toHaveBeenCalledWith({
       color: 'error',
       title: 'Erreur',
       description: 'Une erreur est survenue lors de la création de l\'entreprise.'
@@ -224,16 +217,16 @@ describe('CreateCompanyModal', () => {
 
   it('submits null when code postal is empty', async () => {
     const entrepriseWithoutCodePostal = { ...entrepriseExampleData, codePostal: '', pays: 'Suisse' }
-    mockFetch.mockResolvedValueOnce({ ...entrepriseWithoutCodePostal, idEntreprise: 1 })
+    mocks.fetch.mockResolvedValueOnce({ ...entrepriseWithoutCodePostal, idEntreprise: 1 })
 
-    const wrapper = await mountSuspended(CreateCompanyModalComponent())
+    const wrapper = await mountWithUApp(CreateCompanyModal, { open: true, initialNomEntreprise: '' })
     const form = wrapper.findAllComponents({ name: 'UForm' }).find(component => component.attributes('id') === 'create-company-form')
     expect(form).toBeDefined()
 
     form!.vm.$emit('submit', { data: entrepriseWithoutCodePostal })
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/companies', {
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/companies', {
         method: 'POST',
         body: {
           ...entrepriseWithoutCodePostal,
@@ -244,7 +237,7 @@ describe('CreateCompanyModal', () => {
       })
     })
 
-    expect(mockToast.add).toHaveBeenCalledWith({
+    expect(mocks.toast.add).toHaveBeenCalledWith({
       color: 'success',
       title: 'Entreprise créée',
       description: 'L\'entreprise a été créée avec succès.'
@@ -252,14 +245,14 @@ describe('CreateCompanyModal', () => {
   })
 
   it('rejects invalid form data before fetching', async () => {
-    const wrapper = await mountSuspended(CreateCompanyModalComponent())
+    const wrapper = await mountWithUApp(CreateCompanyModal, { open: true, initialNomEntreprise: '' })
     const form = wrapper.findAllComponents({ name: 'UForm' }).find(component => component.attributes('id') === 'create-company-form')
     expect(form).toBeDefined()
 
     form!.vm.$emit('submit', { data: { ...entrepriseExampleData, codePostal: '' } })
 
     await vi.waitFor(() => {
-      expect(mockToast.add).toHaveBeenCalledWith({
+      expect(mocks.toast.add).toHaveBeenCalledWith({
         color: 'error',
         title: 'Erreur',
         description: 'Une erreur est survenue lors de la création de l\'entreprise.'
@@ -268,7 +261,7 @@ describe('CreateCompanyModal', () => {
   })
 
   it('updates the state when fields change', async () => {
-    const wrapper = await mountSuspended(CreateCompanyModalComponent())
+    const wrapper = await mountWithUApp(CreateCompanyModal, { open: true, initialNomEntreprise: '' })
 
     const nomEntrepriseField = wrapper.findAllComponents(UFormField).find(component => component.props('label') === 'Nom de l\'entreprise')
     expect(nomEntrepriseField).toBeDefined()

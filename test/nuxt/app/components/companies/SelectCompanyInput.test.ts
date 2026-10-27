@@ -1,15 +1,15 @@
-import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
+import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { defineComponent, h } from 'vue'
-import { UApp } from '#components'
 import CreateCompanyModal from '~/components/companies/CreateCompanyModal.vue'
 import SelectCompanyInput from '~/components/companies/SelectCompanyInput.vue'
+import { mountWithUApp, resetNuxtMocks, type Wrapper } from '../../../utils/utils'
 
-const mockFetch = vi.hoisted(() => vi.fn())
-mockNuxtImport('$fetch', () => mockFetch)
-
-const mockToast = vi.hoisted(() => ({ add: vi.fn() }))
-mockNuxtImport('useToast', () => () => mockToast)
+const mocks = vi.hoisted(() => ({
+  fetch: vi.fn(),
+  toast: { add: vi.fn() }
+}))
+mockNuxtImport('$fetch', () => mocks.fetch)
+mockNuxtImport('useToast', () => () => mocks.toast)
 
 const apiCompanies = [
   { idEntreprise: 1, nom: 'Entreprise A', ville: 'Paris', codePostal: '75001' },
@@ -19,22 +19,15 @@ const apiCompanies = [
 const entreprise1Item = { label: 'Entreprise A', city: 'Paris', codePostal: '75001', value: 1 }
 const entreprise2Item = { label: 'Entreprise B', city: 'Lyon', codePostal: null, value: 2 }
 
-const TestComponent = defineComponent({
-  setup() {
-    return () => h(UApp, null, { default: () => h(SelectCompanyInput) })
-  }
-})
-
 describe('SelectCompanyInput', () => {
-  let wrapper: Awaited<ReturnType<typeof mountSuspended>>
+  let wrapper: Wrapper
   beforeEach(() => {
     wrapper?.unmount()
-    mockFetch.mockReset()
-    mockToast.add.mockReset()
+    resetNuxtMocks(mocks)
   })
 
   it('check content', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const select = wrapper.findComponent(SelectCompanyInput)
     expect(select.exists()).toBe(true)
 
@@ -48,7 +41,7 @@ describe('SelectCompanyInput', () => {
   })
 
   it('has the right initial state', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
     const modal = wrapper.findComponent(CreateCompanyModal)
 
@@ -57,30 +50,30 @@ describe('SelectCompanyInput', () => {
     expect(input.props('createItem')).toBe('always')
     expect(input.props('ignoreFilter')).toBe(true)
     expect(modal.props('open')).toBe(false)
-    expect(mockFetch).not.toHaveBeenCalled()
+    expect(mocks.fetch).not.toHaveBeenCalled()
   })
 
   it('fetches companies after the debounce when typing a search term', async () => {
-    mockFetch.mockResolvedValueOnce(apiCompanies)
+    mocks.fetch.mockResolvedValueOnce(apiCompanies)
 
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
 
     input.vm.$emit('update:searchTerm', 'acme')
     await nextTick()
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/companies', expect.objectContaining({
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/companies', expect.objectContaining({
         query: expect.objectContaining({ search: 'acme' })
       }))
     })
-    expect(mockFetch).toHaveBeenCalledTimes(1)
+    expect(mocks.fetch).toHaveBeenCalledTimes(1)
   })
 
   it('maps API results to items', async () => {
-    mockFetch.mockResolvedValueOnce(apiCompanies)
+    mocks.fetch.mockResolvedValueOnce(apiCompanies)
 
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
 
     input.vm.$emit('update:searchTerm', 'a')
@@ -92,21 +85,21 @@ describe('SelectCompanyInput', () => {
   })
 
   it('does not fetch when the search term is blank', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
 
     input.vm.$emit('update:searchTerm', '   ')
     await nextTick()
     await new Promise(resolve => setTimeout(resolve, 400))
 
-    expect(mockFetch).not.toHaveBeenCalled()
+    expect(mocks.fetch).not.toHaveBeenCalled()
     expect(input.props('items')).toEqual([])
   })
 
   it('shows the create option when no company matches', async () => {
-    mockFetch.mockResolvedValueOnce([])
+    mocks.fetch.mockResolvedValueOnce([])
 
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
 
     const menu = wrapper.findComponent({ name: 'UInputMenu' })
     await menu.get('button[aria-label="Show options"]').trigger('click')
@@ -116,7 +109,7 @@ describe('SelectCompanyInput', () => {
     await nextTick()
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/companies', expect.objectContaining({
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/companies', expect.objectContaining({
         query: expect.objectContaining({ search: 'a' })
       }))
       expect(menu.props('items')).toHaveLength(0)
@@ -126,9 +119,9 @@ describe('SelectCompanyInput', () => {
   })
 
   it('clears the results when the search term is emptied', async () => {
-    mockFetch.mockResolvedValueOnce(apiCompanies)
+    mocks.fetch.mockResolvedValueOnce(apiCompanies)
 
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
     await input.get('button[aria-label="Show options"]').trigger('click')
     await nextTick()
@@ -145,13 +138,13 @@ describe('SelectCompanyInput', () => {
     await vi.waitFor(() => {
       expect(input.props('items')).toEqual([])
     })
-    expect(mockFetch).toHaveBeenCalledTimes(1)
+    expect(mocks.fetch).toHaveBeenCalledTimes(1)
   })
 
   it('debounces successive searches into a single call', async () => {
-    mockFetch.mockResolvedValueOnce(apiCompanies)
+    mocks.fetch.mockResolvedValueOnce(apiCompanies)
 
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
 
     input.vm.$emit('update:searchTerm', 'a')
@@ -164,16 +157,16 @@ describe('SelectCompanyInput', () => {
     await nextTick()
 
     await vi.waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith('/api/companies', expect.objectContaining({
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/companies', expect.objectContaining({
         query: expect.objectContaining({ search: 'acm' })
       }))
     })
 
-    expect(mockFetch).toHaveBeenCalledTimes(1)
+    expect(mocks.fetch).toHaveBeenCalledTimes(1)
   })
 
   it('updates idEntreprise when a company is selected', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const select = wrapper.findComponent(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
 
@@ -185,7 +178,7 @@ describe('SelectCompanyInput', () => {
   })
 
   it('resets idEntreprise when the selection is cleared', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const select = wrapper.findComponent(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
 
@@ -198,7 +191,7 @@ describe('SelectCompanyInput', () => {
   })
 
   it('only exposes the selected company when the search term is empty', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const select = wrapper.findComponent(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
 
@@ -215,7 +208,7 @@ describe('SelectCompanyInput', () => {
   })
 
   it('opens the creation modal with the typed name', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
 
     input.vm.$emit('update:searchTerm', 'Test Entreprise')
@@ -230,7 +223,7 @@ describe('SelectCompanyInput', () => {
   })
 
   it('resets the search term and closes the menu when creating', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
 
     input.vm.$emit('update:searchTerm', 'Test Entreprise')
@@ -245,7 +238,7 @@ describe('SelectCompanyInput', () => {
   })
 
   it('closes the modal when it asks for it', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
 
     input.vm.$emit('update:searchTerm', 'Test Entreprise')
@@ -261,7 +254,7 @@ describe('SelectCompanyInput', () => {
   })
 
   it('selects the company once created', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const select = wrapper.findComponent(SelectCompanyInput)
 
     wrapper.findComponent(CreateCompanyModal).vm.$emit('created', {
@@ -281,9 +274,9 @@ describe('SelectCompanyInput', () => {
   })
 
   it('puts the created company first in the list without duplicating it', async () => {
-    mockFetch.mockResolvedValueOnce(apiCompanies)
+    mocks.fetch.mockResolvedValueOnce(apiCompanies)
 
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const input = wrapper.findComponent({ name: 'UInputMenu' })
 
     input.vm.$emit('update:searchTerm', 'a')
@@ -306,21 +299,21 @@ describe('SelectCompanyInput', () => {
   })
 
   it('displays the city with its postal code', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const vm = wrapper.findComponent(SelectCompanyInput).vm as unknown as { displayCity: (item: object) => string }
 
     expect(vm.displayCity(entreprise1Item)).toBe('Paris (75001)')
   })
 
   it('displays only the city when there is no postal code', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const vm = wrapper.findComponent(SelectCompanyInput).vm as unknown as { displayCity: (item: object) => string }
 
     expect(vm.displayCity(entreprise2Item)).toBe('Lyon')
   })
 
   it('displays nothing when there is no city', async () => {
-    wrapper = await mountSuspended(TestComponent)
+    wrapper = await mountWithUApp(SelectCompanyInput)
     const vm = wrapper.findComponent(SelectCompanyInput).vm as unknown as { displayCity: (item: object) => string }
 
     expect(vm.displayCity({ label: 'Entreprise B', city: null, codePostal: '69000', value: 2 })).toBe('')

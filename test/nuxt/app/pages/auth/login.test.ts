@@ -3,15 +3,15 @@ import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import login from '~/pages/auth/login.vue'
+import { resetNuxtMocks } from '../../../utils/utils'
 
 const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
+  navigateTo: vi.fn(),
   toast: {
     add: vi.fn()
   }
 }))
-
-// mock nuxt auto-imports
 mockNuxtImport('$fetch', () => mocks.fetch)
 mockNuxtImport('useToast', () => () => mocks.toast)
 mockNuxtImport('definePageMeta', () => vi.fn())
@@ -34,7 +34,7 @@ const UAuthFormStub = {
 
 describe('login', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    resetNuxtMocks(mocks)
   })
 
   function mountLogin() {

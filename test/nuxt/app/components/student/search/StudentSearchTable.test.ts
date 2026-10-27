@@ -2,8 +2,8 @@ import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
 import StudentSearchTable from '~/components/student/search/StudentSearchTable.vue'
 
-const mockUseFetch = vi.hoisted(() => vi.fn())
-mockNuxtImport('useFetch', () => mockUseFetch)
+const mocks = vi.hoisted(() => ({ useFetch: vi.fn() }))
+mockNuxtImport('useFetch', () => mocks.useFetch)
 
 const searches = [
   {
@@ -28,10 +28,10 @@ const searches = [
 
 describe('StudentSearchTable', () => {
   it('renders rows and cell values', async () => {
-    mockUseFetch.mockReturnValue({ data: ref(searches) })
+    mocks.useFetch.mockReturnValue({ data: ref(searches) })
     const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
 
-    expect(mockUseFetch).toHaveBeenCalledWith('/api/students/o123456789/search', expect.any(String))
+    expect(mocks.useFetch).toHaveBeenCalledWith('/api/students/o123456789/search', expect.any(String))
     const rows = wrapper.findComponent({ name: 'UTable' }).findAll('tbody tr')
 
     expect(rows).toHaveLength(2)
@@ -51,7 +51,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('check content', async () => {
-    mockUseFetch.mockReturnValue({ data: ref(searches) })
+    mocks.useFetch.mockReturnValue({ data: ref(searches) })
     const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
 
     const searchbar = wrapper.findComponent({ name: 'UInput' })
@@ -77,7 +77,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('filters elements', async () => {
-    mockUseFetch.mockReturnValue({ data: ref(searches) })
+    mocks.useFetch.mockReturnValue({ data: ref(searches) })
     const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
     const input = wrapper.findComponent({ name: 'UInput' }).find('input')
 
@@ -94,7 +94,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('emits edit and delete actions', async () => {
-    mockUseFetch.mockReturnValue({ data: ref(searches) })
+    mocks.useFetch.mockReturnValue({ data: ref(searches) })
     const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
     const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
       const items = menu.props('items') as { label: string, onSelect: () => void }[][]
@@ -111,7 +111,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('check read-only mode', async () => {
-    mockUseFetch.mockReturnValue({ data: ref(searches) })
+    mocks.useFetch.mockReturnValue({ data: ref(searches) })
     const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789', readOnly: true } })
     const viewButton = wrapper.find('button[aria-label="Voir"]')
 
@@ -123,7 +123,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('updates pagination and sorting', async () => {
-    mockUseFetch.mockReturnValue({ data: ref(searches) })
+    mocks.useFetch.mockReturnValue({ data: ref(searches) })
 
     const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
     const table = wrapper.findComponent({ name: 'UTable' })

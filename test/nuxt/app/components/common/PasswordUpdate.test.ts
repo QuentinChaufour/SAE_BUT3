@@ -3,6 +3,7 @@ import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import PasswordUpdate from '~/components/common/PasswordUpdate.vue'
+import { resetNuxtMocks } from '../../../utils/utils'
 
 const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
@@ -11,15 +12,13 @@ const mocks = vi.hoisted(() => ({
     add: vi.fn()
   }
 }))
-
-const confirmMock = vi.fn()
-vi.stubGlobal('confirm', confirmMock)
-
-// mock nuxt auto-imports
 mockNuxtImport('$fetch', () => mocks.fetch)
 mockNuxtImport('useToast', () => () => mocks.toast)
 mockNuxtImport('definePageMeta', () => vi.fn())
 mockNuxtImport('navigateTo', () => mocks.navigateTo)
+
+const confirmMock = vi.fn()
+vi.stubGlobal('confirm', confirmMock)
 
 // the form with filled values
 const UAuthFormStub = {
@@ -41,7 +40,7 @@ const UAuthFormStub = {
 
 describe('PasswordUpdate', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    resetNuxtMocks(mocks)
   })
 
   function mountPassword() {
