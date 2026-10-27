@@ -130,6 +130,30 @@ describe('PasswordUpdate', () => {
     expect(wrapper.emitted('passwordUpdated'))
   })
 
+  it('does not emit success when the API returns an error response', async () => {
+    mocks.fetch.mockResolvedValue({ error: false, message: 'Invalid password' })
+    confirmMock.mockReturnValue(true)
+
+    const wrapper = mountPassword()
+    const authForm = wrapper.findComponent({ name: 'UAuthForm' })
+
+    await authForm.vm.$emit('submit', {
+      data: {
+        login: 'o00000001',
+        oldPassword: 'password123',
+        newPassword: 'newPassword'
+      }
+    })
+
+    await flushPromises()
+
+    expect(wrapper.emitted('passwordUpdated')).toBeUndefined()
+    expect(mocks.toast.add).toHaveBeenCalledWith({
+      color: 'error',
+      title: 'Connexion échoué !'
+    })
+  })
+
   it('rejects the new password when it matches the old password', () => {
     const wrapper = mountPassword()
     const authForm = wrapper.findComponent({ name: 'UAuthForm' })
