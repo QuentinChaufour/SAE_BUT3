@@ -38,7 +38,7 @@ export default defineEventHandler(async (event) => {
 
   const userSession = {
     numId: user.login,
-    role: '',
+    role: UserRole.Student,
     nom: '',
     prenom: ''
   }

@@ -8,7 +8,9 @@ defineProps<{
 
 const colorMode = useColorMode()
 
-const username = ref('Prénom Nom')
+const session = useUserSession()
+
+const username = ref(`${session.user.value?.prenom} ${session.user.value?.nom}`)
 
 const isPasswordModalOpen = ref<boolean>(false)
 

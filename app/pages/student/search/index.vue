@@ -1,6 +1,14 @@
 <script setup lang="ts">
 import CreateSearchModal from '~/components/student/search/CreateSearchModal.vue'
 import StudentSearchTable from '~/components/student/search/StudentSearchTable.vue'
+import UserRole from '~~/shared/types/role'
+
+const session = useUserSession()
+
+definePageMeta({
+  middleware: ['auth', 'role'],
+  role: UserRole.Student
+})
 </script>
 
 <template>
@@ -19,7 +27,7 @@ import StudentSearchTable from '~/components/student/search/StudentSearchTable.v
 
     <template #body>
       <StudentSearchTable
-        :etudiant-id="'o123456789'"
+        :etudiant-id="session.user.value!.numId"
       />
     </template>
   </UDashboardPanel>

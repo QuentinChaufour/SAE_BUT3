@@ -1,13 +1,16 @@
 import { mountSuspended } from '@nuxt/test-utils/runtime'
-import type { vi } from 'vitest'
+import { vi } from 'vitest'
 import type { Component } from 'vue'
 import { h, defineComponent } from 'vue'
 import { UApp } from '#components'
+import type { User } from '#auth-utils'
 
 export type NuxtMocks = {
-  fetch: ReturnType<typeof vi.fn>
+  fetch?: ReturnType<typeof vi.fn>
   navigateTo?: ReturnType<typeof vi.fn>
-  toast: {
+  userSession?: ReturnType<typeof vi.fn>
+  colorMode?: { value: string, preference: string }
+  toast?: {
     add: ReturnType<typeof vi.fn>
   }
 }
@@ -27,7 +30,23 @@ export function mountWithUApp(component: Component, props?: Record<string, unkno
 }
 
 export function resetNuxtMocks(mocks: NuxtMocks) {
-  mocks.fetch.mockReset()
+  mocks.fetch?.mockReset()
   mocks.navigateTo?.mockReset()
-  mocks.toast.add.mockReset()
+  mocks.userSession?.mockReset()
+  mocks.toast?.add.mockReset()
+}
+
+export function mockUserSession(
+  mock: ReturnType<typeof vi.fn>,
+  user: User | null
+) {
+  const userRef = ref(user)
+  const session = {
+    loggedIn: computed(() => userRef.value !== null),
+    user: userRef,
+    fetch: vi.fn(),
+    clear: vi.fn()
+  }
+  mock.mockReturnValue(session)
+  return session
 }

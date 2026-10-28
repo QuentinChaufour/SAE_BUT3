@@ -1,26 +1,39 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { nextTick } from 'vue'
 import UserMenu from '~/components/common/UserMenu.vue'
 import PasswordUpdate from '~/components/common/PasswordUpdate.vue'
+import UserRole from '~~/shared/types/role'
+import { mockUserSession, resetNuxtMocks } from '~~/test/nuxt/utils/utils'
 
-const { mockColorMode, mockNavigateTo, mockUserSession } = vi.hoisted(() => ({
-  mockColorMode: {
-    value: 'light',
-    preference: 'light'
-  },
-  mockNavigateTo: vi.fn(),
-  mockUserSession: {
-    user: { value: { numId: '12345' } },
-    clear: vi.fn()
-  }
+const mocks = vi.hoisted(() => ({
+  navigateTo: vi.fn(),
+  userSession: vi.fn(),
+  colorMode: { value: 'light', preference: 'light' }
 }))
 
-mockNuxtImport('useColorMode', () => () => mockColorMode)
-mockNuxtImport('useUserSession', () => () => mockUserSession)
-mockNuxtImport('navigateTo', () => mockNavigateTo)
+const student = {
+  numId: 'o123456789',
+  role: UserRole.Student,
+  nom: 'Nom',
+  prenom: 'Prénom'
+}
+
+let session: ReturnType<typeof mockUserSession>
+
+mockNuxtImport('useColorMode', () => () => mocks.colorMode)
+mockNuxtImport('useUserSession', () => mocks.userSession)
+mockNuxtImport('navigateTo', () => mocks.navigateTo)
 
 describe('UserMenu', () => {
+  beforeEach(() => {
+    resetNuxtMocks(mocks)
+    session = mockUserSession(mocks.userSession, student)
+
+    mocks.colorMode.value = 'light'
+    mocks.colorMode.preference = 'light'
+  })
+
   it('show button with name and button is not collapsed', async () => {
     const wrapper = await mountSuspended(UserMenu, { props: { collapsed: false } })
 
@@ -88,19 +101,20 @@ describe('UserMenu', () => {
     clairItem.onSelect(mockEventClair)
 
     expect(mockEventClair.preventDefault).toHaveBeenCalled()
-    expect(mockColorMode.preference).toBe('light')
+    expect(mocks.colorMode.preference).toBe('light')
 
     const sombreItem = apparenceItem.children[1]
     const mockEventSombre = { preventDefault: vi.fn() }
 
     sombreItem.onSelect(mockEventSombre)
     expect(mockEventSombre.preventDefault).toHaveBeenCalled()
-    expect(mockColorMode.preference).toBe('dark')
+    expect(mocks.colorMode.preference).toBe('dark')
 
     const logoutItem = items[2][0]
     await logoutItem.onSelect()
-    expect(mockUserSession.clear).toHaveBeenCalled()
-    expect(mockNavigateTo).toHaveBeenCalledWith('/auth/login')
+
+    expect(session.clear).toHaveBeenCalled()
+    expect(mocks.navigateTo).toHaveBeenCalledWith('/auth/login')
   })
 
   it('check password modal opens and closes correctly', async () => {

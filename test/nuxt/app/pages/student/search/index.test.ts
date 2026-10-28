@@ -1,11 +1,31 @@
-import { describe, it, expect } from 'vitest'
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 
 import StudentSearchPage from '~/pages/student/search/index.vue'
 import StudentSearchTable from '~/components/student/search/StudentSearchTable.vue'
 import CreateSearchModal from '~/components/student/search/CreateSearchModal.vue'
+import UserRole from '~~/shared/types/role'
+import { mockUserSession, resetNuxtMocks } from '~~/test/nuxt/utils/utils'
+
+const mocks = vi.hoisted(() => ({
+  userSession: vi.fn()
+}))
+
+const student = {
+  numId: 'o123456789',
+  role: UserRole.Student,
+  nom: 'Nom',
+  prenom: 'Prénom'
+}
+
+mockNuxtImport('useUserSession', () => mocks.userSession)
 
 describe('Student Search Index Page', () => {
+  beforeEach(() => {
+    resetNuxtMocks(mocks)
+    mockUserSession(mocks.userSession, student)
+  })
+
   it('check header components', async () => {
     const wrapper = await mountSuspended(StudentSearchPage)
 
