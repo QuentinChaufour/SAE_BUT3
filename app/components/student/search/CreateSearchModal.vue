@@ -58,7 +58,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
         description: state.description,
         alternance: state.alternance,
         idEntreprise: state.idEntreprise as number,
-        annee: '2026' // TODO: récupérer l'année actuelle (via pinia?)
+        annee: '2026-2027' // TODO: récupérer l'année actuelle (via pinia?)
       } satisfies Omit<RechercheStageUncheckedCreateInput, 'numEtu'>
     })
 
