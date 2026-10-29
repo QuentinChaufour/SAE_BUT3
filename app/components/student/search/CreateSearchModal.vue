@@ -38,7 +38,6 @@ const isCreateButtonDisabled = computed(() => !validation.value.success)
 
 const validationMessage = computed(() => {
   if (validation.value.success) return ''
-
   return validation.value.error.issues[0]?.message
 })
 
@@ -48,7 +47,8 @@ const isLoading = ref(false)
 async function onSubmit(_event: FormSubmitEvent<Schema>) {
   isLoading.value = true
 
-  const numEtu = 'o123456789' // TODO: Get the actual student number
+  const session = useUserSession()
+  const numEtu = session.user.value!.numId
 
   try {
     const response = await $fetch<RechercheStage>(`/api/students/${numEtu}/search`, {
@@ -58,7 +58,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
         description: state.description,
         alternance: state.alternance,
         idEntreprise: state.idEntreprise as number,
-        annee: '2026' // TODO
+        annee: '2026' // TODO: récupérer l'année actuelle (via pinia?)
       } satisfies Omit<RechercheStageUncheckedCreateInput, 'numEtu'>
     })
 
