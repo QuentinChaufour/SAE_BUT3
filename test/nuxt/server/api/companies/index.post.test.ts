@@ -22,6 +22,7 @@ vi.mock('~~/server/utils/prisma', () => ({
 }))
 
 vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
+vi.stubGlobal('defineRouteMeta', () => {})
 vi.stubGlobal(
   'readValidatedBody',
   async (

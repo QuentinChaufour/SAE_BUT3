@@ -19,6 +19,7 @@ vi.mock('~~/server/utils/prisma', () => ({
 }))
 
 vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
+vi.stubGlobal('defineRouteMeta', () => {})
 vi.stubGlobal('hashPassword', mocks.hashPassword)
 vi.stubGlobal('verifyPassword', mocks.verifyPassword)
 vi.stubGlobal('clearUserSession', mocks.clearUserSession)

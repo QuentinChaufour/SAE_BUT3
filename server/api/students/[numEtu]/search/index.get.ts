@@ -2,7 +2,7 @@ import { prisma } from '~~/server/utils/prisma'
 import { z } from 'zod'
 import { studentIdSchema } from '~~/shared/schemas/student'
 import UserRole from '~~/shared/types/role'
-import { checkAuth } from '~~/server/utils/middleware'
+import { checkAuthWithOnlySelfStudentData } from '~~/server/utils/middleware'
 
 const paramsSchema = z.object({
   numEtu: studentIdSchema
@@ -83,13 +83,7 @@ export default defineEventHandler(async (event) => {
   const params = await getValidatedRouterParams(event, paramsSchema.parse)
   const numEtu = params.numEtu
 
-  const session = await checkAuth(event, [UserRole.Student, UserRole.Secretary, UserRole.Admin])
-  if (session.user.role === UserRole.Student && session.user.numId !== numEtu) {
-    throw createError({
-      statusCode: 403,
-      statusMessage: 'Forbidden'
-    })
-  }
+  await checkAuthWithOnlySelfStudentData(event, numEtu, [UserRole.Student, UserRole.Secretary, UserRole.Admin])
 
   const searchResults = await prisma.rechercheStage.findMany({
     where: { numEtu },
