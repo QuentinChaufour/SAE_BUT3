@@ -3,10 +3,17 @@ import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import SelectCompanyInput from '~/components/companies/SelectCompanyInput.vue'
 import CreateSearchModal from '~/components/student/search/CreateSearchModal.vue'
-import { mountWithUApp, resetNuxtMocks, type Wrapper } from '../../../../utils/utils'
+import { mockUserSession, mountWithUApp, resetNuxtMocks, type Wrapper } from '../../../../utils/utils'
+import UserRole from '~~/shared/types/role'
 
-const mocks = vi.hoisted(() => ({ fetch: vi.fn(), toast: { add: vi.fn() } }))
+const mocks = vi.hoisted(() => ({
+  fetch: vi.fn(),
+  userSession: vi.fn(),
+  toast: { add: vi.fn() }
+}))
+
 mockNuxtImport('$fetch', () => mocks.fetch)
+mockNuxtImport('useUserSession', () => mocks.userSession)
 mockNuxtImport('useToast', () => () => mocks.toast)
 
 const createdSearch = { idRecherche: 1, titre: 'Stage développeur', numEtu: 'o123456789' }
@@ -37,6 +44,12 @@ async function fillForm(wrapper: Wrapper) {
 describe('CreateSearchModal', () => {
   beforeEach(() => {
     resetNuxtMocks(mocks)
+    mockUserSession(mocks.userSession, {
+      numId: 'o123456789',
+      role: UserRole.Student,
+      nom: 'Nom',
+      prenom: 'Prénom'
+    })
   })
 
   it('check content', async () => {
@@ -83,7 +96,7 @@ describe('CreateSearchModal', () => {
           description: 'Une description',
           alternance: true,
           idEntreprise: 42,
-          annee: '2026'
+          annee: '2026-2027'
         }
       })
     })
