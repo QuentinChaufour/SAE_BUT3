@@ -3,6 +3,7 @@ import type { H3Event } from 'h3'
 
 import { prisma } from '~~/server/utils/prisma'
 import type { Recherche_Stage_Status } from '~~/generated/prisma/enums'
+import UserRole from '~~/shared/types/role'
 
 interface RechercheStageType {
   idRecherche: number
@@ -37,6 +38,9 @@ vi.stubGlobal(
     parse: (params: unknown) => unknown
   ) => parse(event.context.params)
 )
+vi.stubGlobal('requireUserSession', async () => ({
+  user: { role: UserRole.Student, numId: 'o123456789' }
+}))
 
 let handler: typeof import('~~/server/api/students/[numEtu]/search/index.get')['default']
 

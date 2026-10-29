@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { H3Event } from 'h3'
 
 import { prisma } from '~~/server/utils/prisma'
+import UserRole from '~~/shared/types/role'
 
 vi.mock('~~/server/utils/prisma', () => ({
   prisma: {
@@ -20,6 +21,9 @@ vi.stubGlobal(
   'readValidatedBody',
   async (event: H3Event, parse: (body: unknown) => unknown) => parse(event.context.body)
 )
+vi.stubGlobal('requireUserSession', async () => ({
+  user: { role: UserRole.Student, numId: 'o123456789' }
+}))
 
 let handler: typeof import('~~/server/api/students/[numEtu]/search/index.post')['default']
 
