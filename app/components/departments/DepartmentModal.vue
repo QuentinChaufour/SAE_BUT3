@@ -5,6 +5,16 @@ import type { Departement } from '~~/generated/prisma/client.ts'
 import type { DepartementUncheckedCreateInput } from '~~/generated/prisma/models'
 import { nomDepartementSchema } from '~~/shared/schemas/department'
 
+type DepartementType = Pick<Departement, 'idDepartement' | 'nom'>
+
+const props = defineProps<{
+  editDepartment?: DepartementType
+}>()
+
+const isOpen = defineModel<boolean>('open', { default: false })
+
+const isEditing = computed(() => !!props.editDepartment)
+
 const schemaFields = z.object({
   nom: nomDepartementSchema
 })
@@ -12,23 +22,22 @@ const schemaFields = z.object({
 type Schema = z.output<typeof schemaFields>
 
 const emit = defineEmits<{
-  created: [search: Departement]
+  saved: [department: Departement]
 }>()
 
-const isOpen = ref(false)
-interface StateType {
-  nom: string
-}
-
+type StateType = { nom: string }
 function createDefaultState(): StateType {
-  return { nom: '' }
+  return { nom: props.editDepartment?.nom ?? '' }
 }
 
 const state = reactive<StateType>(createDefaultState())
 
-const validation = computed(() => schemaFields.safeParse(state))
+function resetState() {
+  state.nom = props.editDepartment?.nom ?? ''
+}
 
-const isCreateButtonDisabled = computed(() => !validation.value.success)
+const validation = computed(() => schemaFields.safeParse(state))
+const isSaveButtonDisabled = computed(() => !validation.value.success)
 
 const validationMessage = computed(() => {
   if (validation.value.success) return ''
@@ -36,34 +45,47 @@ const validationMessage = computed(() => {
 })
 
 const toast = useToast()
-
 const isLoading = ref(false)
+
 async function onSubmit(_event: FormSubmitEvent<Schema>) {
   isLoading.value = true
 
   try {
-    const response = await $fetch<Departement>('/api/departments', {
-      method: 'POST',
+    const url = isEditing.value
+      ? `/api/departments/${props.editDepartment!.idDepartement}`
+      : '/api/departments'
+
+    const response = await $fetch<Departement>(url, {
+      method: isEditing.value ? 'PATCH' : 'POST',
       body: { nom: state.nom } satisfies Pick<DepartementUncheckedCreateInput, 'nom'>
     })
 
     toast.add({
-      title: 'Département créé',
-      description: `Le département ${response.nom} a été créé avec succès.`,
-      color: 'success'
+      title: isEditing.value ? 'Département mis à jour' : 'Département créé',
+      description: `Le département ${response.nom} a été ${isEditing.value ? 'mis à jour' : 'créé'} avec succès.`,
+      color: 'success',
+      duration: isEditing.value ? 5_000 : 7_000,
+      actions: isEditing.value
+        ? []
+        : [{
+            color: 'neutral',
+            variant: 'outline',
+            icon: 'i-lucide-users',
+            label: 'Ajouter une personne aux secrétariats',
+            onClick: () => navigateTo(`/departments/${response.idDepartement}/secretariats`)
+          }]
     })
 
-    emit('created', response)
+    emit('saved', response)
 
-    Object.assign(state, createDefaultState())
+    resetState()
 
     isOpen.value = false
   } catch (error) {
     console.error(error)
-
     toast.add({
       title: 'Erreur',
-      description: 'Impossible de créer le département.',
+      description: isEditing.value ? 'Impossible de mettre à jour le département.' : 'Impossible de créer le département.',
       color: 'error'
     })
   } finally {
@@ -75,9 +97,13 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
 <template>
   <UModal
     v-model:open="isOpen"
-    title="Création d'un département"
+    :title="isEditing ? `Modification du département ${props.editDepartment?.nom}` : 'Création d\'un département'"
+    @update:open="(open) => { if (!open) resetState() }"
   >
-    <UButton icon="i-lucide-plus">
+    <UButton
+      v-if="!isEditing"
+      icon="i-lucide-plus"
+    >
       Ajouter
     </UButton>
 
@@ -114,10 +140,10 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
             form="create-search-form"
             type="submit"
             color="primary"
-            :disabled="isCreateButtonDisabled"
+            :disabled="isSaveButtonDisabled"
             :loading="isLoading"
           >
-            Créer
+            {{ isEditing ? 'Modifier' : 'Créer' }}
           </UButton>
         </UTooltip>
       </div>

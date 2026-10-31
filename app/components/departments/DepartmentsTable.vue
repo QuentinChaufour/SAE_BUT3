@@ -3,15 +3,23 @@ import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import type { Departement } from '~~/generated/prisma/client'
 import ConfirmModal from '../common/ConfirmModal.vue'
 import DataTable from '../common/DataTable.vue'
+import DepartmentModal from './DepartmentModal.vue'
 
 type DepartementType = Pick<Departement, 'idDepartement' | 'nom'>
 
-const emit = defineEmits<{ edit: [departement: DepartementType] }>()
+const emit = defineEmits<{
+  'secretariats': [departement: DepartementType]
+  'edit-name': [departement: DepartementType]
+}>()
 
-const { data: departments, refresh } = await useFetch<DepartementType[]>('/api/departments')
+const { data: departments, refresh } = useFetch<DepartementType[]>('/api/departments')
+
+defineExpose({ refresh })
 
 const isDeleteModalOpen = ref(false)
+
 const departmentToDelete = ref<DepartementType | null>(null)
+const departmentToEdit = ref<DepartementType | null>(null)
 
 const toast = useToast()
 
@@ -25,6 +33,11 @@ const searchFields = (department: DepartementType) => [department.nom]
 function openDeleteModal(department: DepartementType) {
   departmentToDelete.value = department
   isDeleteModalOpen.value = true
+}
+
+function openEditModal(department: DepartementType) {
+  departmentToEdit.value = department
+  emit('edit-name', department)
 }
 
 async function handleConfirmDelete() {
@@ -47,9 +60,14 @@ function getDropdownActions(department: DepartementType): DropdownMenuItem[][] {
   return [
     [
       {
-        label: 'Modifier',
-        icon: 'i-lucide-edit',
-        onSelect: () => emit('edit', department)
+        label: 'Modifier le nom',
+        icon: 'i-lucide-edit-2',
+        onSelect: () => openEditModal(department)
+      },
+      {
+        label: 'Secrétariats',
+        icon: 'i-lucide-users',
+        onSelect: () => emit('secretariats', department)
       },
       {
         label: 'Supprimer',
@@ -88,6 +106,14 @@ function getDescription(): string {
         </UDropdownMenu>
       </template>
     </DataTable>
+
+    <DepartmentModal
+      v-if="departmentToEdit"
+      :open="true"
+      :edit-department="departmentToEdit"
+      @update:open="(open) => { if (!open) departmentToEdit = null }"
+      @saved="() => refresh()"
+    />
 
     <ConfirmModal
       :open="isDeleteModalOpen"

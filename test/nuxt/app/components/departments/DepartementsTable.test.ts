@@ -1,7 +1,9 @@
-import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
+import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { describe, expect, it, vi } from 'vitest'
 import ConfirmModal from '~/components/common/ConfirmModal.vue'
+import DepartmentModal from '~/components/departments/DepartmentModal.vue'
 import DepartmentsTable from '~/components/departments/DepartmentsTable.vue'
+import { mountWithUApp } from '../../../utils/utils'
 
 const mocks = vi.hoisted(() => ({
   useFetch: vi.fn(),
@@ -25,7 +27,7 @@ async function mountTable() {
     refresh: mocks.refresh
   })
 
-  return mountSuspended(DepartmentsTable)
+  return mountWithUApp(DepartmentsTable)
 }
 
 describe('DepartementsTable', () => {
@@ -59,12 +61,12 @@ describe('DepartementsTable', () => {
     expect(wrapper.findComponent({ name: 'UTable' }).findAll('tbody tr')).toHaveLength(2)
   })
 
-  it('emits edit action', async () => {
+  it('emits edit action and opens edit modal', async () => {
     const wrapper = await mountTable()
 
     const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
       const items = menu.props('items') as { label: string, onSelect: () => void }[][]
-      return items[0]?.[0]?.label === 'Modifier'
+      return items[0]?.[0]?.label === 'Modifier le nom'
     })
 
     expect(dropdown).toBeDefined()
@@ -72,7 +74,48 @@ describe('DepartementsTable', () => {
     const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
     actions[0]![0]!.onSelect()
 
-    expect(wrapper.emitted('edit')?.[0]).toEqual([departmeents[0]])
+    expect(wrapper.findComponent(DepartmentsTable).emitted('edit-name')?.[0]).toEqual([departmeents[0]])
+
+    await nextTick()
+
+    const modal = wrapper.findComponent(DepartmentModal)
+    expect(modal.exists()).toBe(true)
+    expect(modal.props('open')).toBe(true)
+    expect(modal.props('editDepartment')).toEqual(departmeents[0])
+  })
+
+  it('refresh departments on modal saved', async () => {
+    const wrapper = await mountTable()
+
+    const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
+      const items = menu.props('items') as { label: string, onSelect: () => void }[][]
+      return items[0]?.[0]?.label === 'Modifier le nom'
+    })
+
+    const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
+    actions[0]![0]!.onSelect()
+    await nextTick()
+
+    const modal = wrapper.findComponent(DepartmentModal)
+    modal.vm.$emit('saved')
+
+    expect(mocks.refresh).toHaveBeenCalledTimes(1)
+  })
+
+  it('emits secretariats action', async () => {
+    const wrapper = await mountTable()
+
+    const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
+      const items = menu.props('items') as { label: string, onSelect: () => void }[][]
+      return items[0]?.[1]?.label === 'Secrétariats'
+    })
+
+    expect(dropdown).toBeDefined()
+
+    const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
+    actions[0]![1]!.onSelect()
+
+    expect(wrapper.findComponent(DepartmentsTable).emitted('secretariats')?.[0]).toEqual([departmeents[0]])
   })
 
   it('opens delete modal with selected department', async () => {
@@ -80,13 +123,13 @@ describe('DepartementsTable', () => {
 
     const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
       const items = menu.props('items') as { label: string, onSelect: () => void }[][]
-      return items[0]?.[1]?.label === 'Supprimer'
+      return items[0]?.[2]?.label === 'Supprimer'
     })
 
     expect(dropdown).toBeDefined()
 
     const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
-    actions[0]![1]!.onSelect()
+    actions[0]![2]!.onSelect()
 
     await nextTick()
 
@@ -105,11 +148,11 @@ describe('DepartementsTable', () => {
 
     const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
       const items = menu.props('items') as { label: string, onSelect: () => void }[][]
-      return items[0]?.[1]?.label === 'Supprimer'
+      return items[0]?.[2]?.label === 'Supprimer'
     })
 
     const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
-    actions[0]![1]!.onSelect()
+    actions[0]![2]!.onSelect()
 
     const modal = wrapper.findComponent(ConfirmModal)
 
@@ -135,11 +178,11 @@ describe('DepartementsTable', () => {
 
     const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
       const items = menu.props('items') as { label: string, onSelect: () => void }[][]
-      return items[0]?.[1]?.label === 'Supprimer'
+      return items[0]?.[2]?.label === 'Supprimer'
     })
 
     const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
-    actions[0]![1]!.onSelect()
+    actions[0]![2]!.onSelect()
     await nextTick()
 
     const modal = wrapper.findComponent(ConfirmModal)

@@ -1,9 +1,12 @@
-import { describe, it, expect } from 'vitest'
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { describe, it, expect, vi } from 'vitest'
+import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 
 import DepartmentsPage from '~/pages/departments/index.vue'
 import DepartementsTable from '~/components/departments/DepartmentsTable.vue'
-import CreateDepartmentModal from '~/components/departments/CreateDepartmentModal.vue'
+import DepartmentModal from '~/components/departments/DepartmentModal.vue'
+
+const getDepartments = vi.fn(() => [{ idDepartement: 1, nom: 'Informatique' }])
+registerEndpoint('/api/departments', getDepartments)
 
 describe('Departments List', () => {
   it('check header components', async () => {
@@ -16,7 +19,7 @@ describe('Departments List', () => {
     expect(navbar.exists()).toBe(true)
     expect(navbar.props('title')).toBe('Départements')
 
-    const searchModal = wrapper.findComponent(CreateDepartmentModal)
+    const searchModal = wrapper.findComponent(DepartmentModal)
     expect(searchModal.exists()).toBe(true)
 
     const sidebarCollapse = wrapper.findComponent({ name: 'UDashboardSidebarCollapse' })
@@ -28,5 +31,17 @@ describe('Departments List', () => {
 
     const createModal = wrapper.findComponent(DepartementsTable)
     expect(createModal.exists()).toBe(true)
+  })
+
+  it('refreshes table when department is created/saved', async () => {
+    const wrapper = await mountSuspended(DepartmentsPage)
+    const callsBefore = getDepartments.mock.calls.length
+
+    const searchModal = wrapper.findComponent(DepartmentModal)
+    searchModal.vm.$emit('saved')
+
+    await vi.waitFor(() => {
+      expect(getDepartments).toHaveBeenCalledTimes(callsBefore + 1)
+    })
   })
 })

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import CreateDepartmentModal from '~/components/departments/CreateDepartmentModal.vue'
+import DepartmentModal from '~/components/departments/DepartmentModal.vue'
 import DepartmentsTable from '~/components/departments/DepartmentsTable.vue'
 import UserRole from '~~/shared/types/role'
 
@@ -8,9 +8,11 @@ definePageMeta({
   role: UserRole.Admin
 })
 
-function handleEdit(department: { idDepartement: number, nom: string }) {
-  return navigateTo(`/departments/${department.idDepartement}/`)
+function handleSecretariats(department: { idDepartement: number, nom: string }) {
+  return navigateTo(`/departments/${department.idDepartement}/secretariats`)
 }
+
+const departmentsTable = useTemplateRef('departmentsTable')
 </script>
 
 <template>
@@ -22,13 +24,16 @@ function handleEdit(department: { idDepartement: number, nom: string }) {
         </template>
 
         <template #right>
-          <CreateDepartmentModal />
+          <DepartmentModal @saved="departmentsTable?.refresh()" />
         </template>
       </UDashboardNavbar>
     </template>
 
     <template #body>
-      <DepartmentsTable @edit="handleEdit" />
+      <DepartmentsTable
+        ref="departmentsTable"
+        @secretariats="handleSecretariats"
+      />
     </template>
   </UDashboardPanel>
 </template>
