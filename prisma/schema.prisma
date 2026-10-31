@@ -90,7 +90,7 @@ model DemarcheRechercheContact {
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
 model Departement {
   idDepartement      Int                @id @default(autoincrement())
-  nom                String             @db.VarChar
+  nom                String             @db.VarChar @unique
   anneeActuelle      String             @db.VarChar
   AnneeEnseignant    AnneeEnseignant[]
   Appartenir         Appartenir[]

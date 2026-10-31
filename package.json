@@ -21,6 +21,7 @@
     "dev:migrate": "docker exec -it website-dev npx prisma migrate dev",
     "dev:migrate:reset": "docker exec -it website-dev npx prisma migrate reset",
     "dev:generate": "docker exec -it website-dev npx prisma generate",
+    "dev:populate": "curl -X POST \"http://localhost:3000/api/dev/dbpopulate\"",
     "db:migrate": "docker exec -it website npx prisma migrate deploy",
     "db:generate": "docker exec -it website npx prisma generate"
   },
