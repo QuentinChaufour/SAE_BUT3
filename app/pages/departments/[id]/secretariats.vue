@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { UBreadcrumb, USeparator } from '#components'
+import PersonnelsTable from '~/components/personnels/PersonnelsTable.vue'
 import type { Departement } from '~~/generated/prisma/client'
 import UserRole from '~~/shared/types/role'
 
@@ -22,12 +24,21 @@ const { data } = await useFetch<DepartmentFetchData>(`/api/departments/${route.p
 if (!data.value) {
   throw createError({ statusCode: 404, statusMessage: 'Unknown department' })
 }
+
+const breadcrumbs = [
+  { label: 'Départements', to: '/departments' },
+  { label: 'Secrétariats', to: `/departments/${route.params.id}/secretariats` }
+]
 </script>
 
 <template>
   <UDashboardPanel>
     <template #header>
-      <UDashboardNavbar :title="`Département ${data?.nom}`">
+      <UDashboardNavbar>
+        <template #trailing>
+          <UBreadcrumb :items="breadcrumbs" />
+        </template>
+
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
@@ -35,7 +46,11 @@ if (!data.value) {
     </template>
 
     <template #body>
-      <p>page</p>
+      <USeparator />
+      <PersonnelsTable
+        :type="'secretariat'"
+        :department="data!"
+      />
     </template>
   </UDashboardPanel>
 </template>
