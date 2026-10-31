@@ -8,7 +8,9 @@ defineProps<{
 
 const colorMode = useColorMode()
 
-const username = ref('Prénom Nom')
+const session = useUserSession()
+
+const username = ref(`${session.user.value?.prenom} ${session.user.value?.nom}`)
 
 const isPasswordModalOpen = ref<boolean>(false)
 
@@ -46,16 +48,19 @@ const items = computed<DropdownMenuItem[][]>(() => ([
         icon: 'i-lucide-moon',
         type: 'checkbox',
         checked: colorMode.value === 'dark',
-        onUpdateChecked(checked: boolean) {
-          if (checked) {
-            colorMode.preference = 'dark'
-          }
-        },
         onSelect(e: Event) {
           e.preventDefault()
+
+          colorMode.preference = 'dark'
         }
       }]
-    }],
+    },
+    {
+      label: 'Crédits',
+      icon: 'i-lucide-info',
+      to: '/credits'
+    }
+  ],
   [{
     label: 'Déconnexion',
     icon: 'i-lucide-log-out',

@@ -10,7 +10,10 @@ export default defineNuxtRouteMiddleware((to, _from) => {
     return
   }
 
-  const hasRole = Array.isArray(role) ? role.includes(session.user.value?.role) : role == session.user.value?.role
+  const sessionRole = session.user.value?.role
+  const hasRole = sessionRole
+    ? Array.isArray(role) ? role.includes(sessionRole) : role === sessionRole
+    : false
 
   if (!hasRole) {
     throw abortNavigation(createError({

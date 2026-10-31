@@ -80,15 +80,17 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       }
     })
 
-    if ('success' in response && response.success) {
-      toaster.add({
-        color: 'success',
-        title: 'Connexion réussi !'
-      })
-
-      // the password has successfully been updated
-      emits('passwordUpdated')
+    if (!('success' in response) || !response.success) {
+      throw new Error('Password change failed')
     }
+
+    toaster.add({
+      color: 'success',
+      title: 'Connexion réussi !'
+    })
+
+    // the password has successfully been updated
+    emits('passwordUpdated')
   } catch {
     toaster.add({
       color: 'error',

@@ -1,3 +1,5 @@
+import type UserRole from './role'
+
 declare module '#auth-utils' {
 
   /**
@@ -9,7 +11,7 @@ declare module '#auth-utils' {
    */
   interface User {
     numId: string
-    role: UserRoles
+    role: UserRole
     nom: string
     prenom: string
   }
