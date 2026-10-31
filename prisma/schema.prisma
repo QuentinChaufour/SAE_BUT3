@@ -90,7 +90,7 @@ model DemarcheRechercheContact {
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
 model Departement {
   idDepartement      Int                @id @default(autoincrement())
-  nom                String             @db.VarChar @unique
+  nom                String             @unique @db.VarChar
   anneeActuelle      String             @db.VarChar
   AnneeEnseignant    AnneeEnseignant[]
   Appartenir         Appartenir[]
@@ -122,9 +122,8 @@ model DepartementTagRecherche {
 
 model Enseignant {
   numEnseignant         String                  @id @db.VarChar
-  nom                   String?                 @db.VarChar
-  prenom                String?                 @db.VarChar
-  email                 String?                 @db.VarChar
+  nom                   String                  @db.VarChar
+  prenom                String                  @db.VarChar
   AnneeEnseignant       AnneeEnseignant[]
   Auth                  Auth?
   EnseignantEtuFavori   EnseignantEtuFavori[]
@@ -170,9 +169,8 @@ model Entreprise {
 
 model Etudiant {
   numEtu              String                @id @db.VarChar
-  nom                 String?               @db.VarChar
-  prenom              String?               @db.VarChar
-  email               String?               @db.VarChar
+  nom                 String                @db.VarChar
+  prenom              String                @db.VarChar
   Auth                Auth?
   EnseignantEtuFavori EnseignantEtuFavori[]
   Inscription         Inscription[]
@@ -217,9 +215,8 @@ model LienPj {
 
 model Personnel {
   numPersonnel String          @id @db.VarChar
-  nom          String?         @db.VarChar
-  prenom       String?         @db.VarChar
-  email        String?         @db.VarChar
+  nom          String          @db.VarChar
+  prenom       String          @db.VarChar
   role         Personnel_Role?
   Appartenir   Appartenir[]
   Auth         Auth?
@@ -227,8 +224,8 @@ model Personnel {
 
 model PieceJointe {
   idPieceJointe Int      @id @default(autoincrement())
-  nom           String?  @db.VarChar
-  chemin        String?  @db.VarChar
+  nom           String   @db.VarChar
+  chemin        String   @db.VarChar
   LienPj        LienPj[]
 }
 

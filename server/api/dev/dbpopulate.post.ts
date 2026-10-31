@@ -97,9 +97,9 @@ async function createFormation(idDepartement: number) {
 
 async function createEnseignants() {
   const data = [
-    { numEnseignant: 'p1001', nom: 'Martin', prenom: 'Claire', email: 'claire.martin@mail.fr' },
-    { numEnseignant: 'p1002', nom: 'Bernard', prenom: 'Thomas', email: 'thomas.bernard@mail.fr' },
-    { numEnseignant: 'p1003', nom: 'Petit', prenom: 'Sophie', email: 'sophie.petit@mail.fr' }
+    { numEnseignant: 'p1001', nom: 'Martin', prenom: 'Claire' },
+    { numEnseignant: 'p1002', nom: 'Bernard', prenom: 'Thomas' },
+    { numEnseignant: 'p1003', nom: 'Petit', prenom: 'Sophie' }
   ]
 
   return Promise.all(data.map(item => prisma.enseignant.upsert({
@@ -111,9 +111,9 @@ async function createEnseignants() {
 
 async function createEtudiants() {
   const data = [
-    { numEtu: 'o12345678', nom: 'Durand', prenom: 'Lucas', email: 'lucas.durand@mail.fr' },
-    { numEtu: 'o12345679', nom: 'Leroy', prenom: 'Emma', email: 'emma.leroy@mail.fr' },
-    { numEtu: 'o12345670', nom: 'Moreau', prenom: 'Hugo', email: 'hugo.moreau@mail.fr' }
+    { numEtu: 'o12345678', nom: 'Durand', prenom: 'Lucas' },
+    { numEtu: 'o12345679', nom: 'Leroy', prenom: 'Emma' },
+    { numEtu: 'o12345670', nom: 'Moreau', prenom: 'Hugo' }
   ]
 
   return Promise.all(data.map(item => prisma.etudiant.upsert({
@@ -125,8 +125,8 @@ async function createEtudiants() {
 
 async function createPersonnels() {
   const data = [
-    { numPersonnel: 'p9001', nom: 'Lefevre', prenom: 'Julie', email: 'julie.lefevre@mail.fr', role: Personnel_Role.admin },
-    { numPersonnel: 'p9002', nom: 'Garcia', prenom: 'Paul', email: 'paul.garcia@mail.fr', role: Personnel_Role.secretariat }
+    { numPersonnel: 'p9001', nom: 'Lefevre', prenom: 'Julie', role: Personnel_Role.admin },
+    { numPersonnel: 'p9002', nom: 'Garcia', prenom: 'Paul', role: Personnel_Role.secretariat }
   ]
 
   return Promise.all(data.map(item => prisma.personnel.upsert({
