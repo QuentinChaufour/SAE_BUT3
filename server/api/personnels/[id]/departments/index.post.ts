@@ -75,6 +75,21 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const existingAppartenance = await prisma.appartenir.findFirst({
+    where: {
+      numPersonnel: params.id,
+      idDepartement: body.departement_id,
+      dateFin: null
+    }
+  })
+
+  if (existingAppartenance) {
+    throw createError({
+      statusCode: 400,
+      message: 'Le personnel est déjà rattaché à ce département.'
+    })
+  }
+
   const appartenir = await prisma.appartenir.create({
     data: {
       numPersonnel: params.id,

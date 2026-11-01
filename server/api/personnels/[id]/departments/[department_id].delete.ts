@@ -30,7 +30,8 @@ export default defineEventHandler(async (event) => {
   const appartenir = await prisma.appartenir.findFirst({
     where: {
       numPersonnel: params.id,
-      idDepartement: params.departement_id
+      idDepartement: params.departement_id,
+      dateFin: null
     }
   })
 
@@ -41,7 +42,10 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  await prisma.appartenir.delete({ where: { idAppartenance: appartenir.idAppartenance } })
+  await prisma.appartenir.update({
+    where: { idAppartenance: appartenir.idAppartenance },
+    data: { dateFin: new Date() }
+  })
 
   return sendNoContent(event)
 })

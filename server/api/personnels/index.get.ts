@@ -61,8 +61,16 @@ export default defineEventHandler(async (event) => {
   const query = await getValidatedQuery(event, querySchema.parse)
 
   const where: PersonnelWhereInput = {}
-  if (query.department_id) where['Appartenir'] = { some: { idDepartement: query.department_id } }
   if (query.role) where['role'] = query.role
+  if (query.department_id) {
+    where['Appartenir'] = {
+      some: {
+        idDepartement: query.department_id,
+        dateDebut: { lte: new Date() },
+        dateFin: { lt: new Date() }
+      }
+    }
+  }
 
   const personnels = await prisma.personnel.findMany({
     where,

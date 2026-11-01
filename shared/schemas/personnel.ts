@@ -1,10 +1,7 @@
 import { z } from 'zod'
 import { Personnel_Role } from '~~/generated/prisma/client'
 
-export const numPersonnelSchema = z
-  .string()
-  .min(1, 'Le numéro du personnel est requis.')
-  .trim()
+export const numPersonnelSchema = z.string().regex(/^p\d{1,12}$/m, 'Le numéro de personnel doit commencer par "p" suivi de 1 à 12 chiffres.')
 
 export const personnelBodySchema = z.object({
   numPersonnel: numPersonnelSchema,
