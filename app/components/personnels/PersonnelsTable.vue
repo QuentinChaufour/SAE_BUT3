@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import type { Departement, Personnel } from '~~/generated/prisma/client'
-import { Personnel_Role } from '~~/generated/prisma/client'
+
 import ConfirmModal from '../common/ConfirmModal.vue'
 import DataTable from '../common/DataTable.vue'
+
+const Personnel_Role = {
+  admin: 'admin',
+  secretariat: 'secretariat'
+} as const
 
 type PropsType
   = { type: typeof Personnel_Role.admin } | {
@@ -59,17 +64,27 @@ async function handleConfirmDelete() {
     deleteUrl += `/departements/${props.department.idDepartement}`
   }
 
-  await $fetch(deleteUrl, { method: 'DELETE' })
-  await refresh()
+  try {
+    await $fetch(deleteUrl, { method: 'DELETE' })
 
-  toast.add({
-    title: 'Personnel supprimée',
-    description: `Le personnel ${personnelToDelete.value.nom} a été supprimé avec succès.`,
-    color: 'success'
-  })
+    await refresh()
 
-  isDeleteModalOpen.value = false
-  personnelToDelete.value = null
+    toast.add({
+      title: 'Personnel supprimée',
+      description: `Le personnel ${personnelToDelete.value.prenom} ${personnelToDelete.value.nom} a été supprimé avec succès.`,
+      color: 'success'
+    })
+
+    isDeleteModalOpen.value = false
+    personnelToDelete.value = null
+  } catch (error) {
+    console.error(error)
+    toast.add({
+      title: 'Erreur',
+      description: `Une erreur est survenue lors de la suppression du personnel ${personnelToDelete.value!.prenom} ${personnelToDelete.value!.nom}.`,
+      color: 'error'
+    })
+  }
 }
 
 function getDropdownActions(personnel: Personnel): DropdownMenuItem[][] {
@@ -93,10 +108,9 @@ function getDropdownActions(personnel: Personnel): DropdownMenuItem[][] {
 function getDescription(): string {
   if (!personnelToDelete.value) return ''
   return [
-    `Êtes-vous sûr de vouloir supprimer la personne ${personnelToDelete.value?.nom} ?`,
-    props.type === Personnel_Role.secretariat && 'Si cette personne est présente dans un autre département, son compte ne sera pas supprimé.',
+    `Êtes-vous sûr de vouloir supprimer le personnel ${personnelToDelete.value!.prenom} ${personnelToDelete.value!.nom} ${props.type === Personnel_Role.secretariat ? `du département ${props.department.nom}` : ''} ?`,
     'Cette action est irréversible.'
-  ].filter(Boolean).join('\n')
+  ].join('\n')
 }
 </script>
 

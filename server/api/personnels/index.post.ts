@@ -19,7 +19,7 @@ defineRouteMeta({
               nom: { type: 'string', description: 'Nom du personnel' },
               prenom: { type: 'string', description: 'Prénom du personnel' },
               role: { type: 'string', enum: ['admin', 'secretariat'], description: 'Rôle du personnel' },
-              departement_ids: {
+              department_ids: {
                 type: 'array',
                 items: { type: 'number' },
                 description: 'Liste optionnelle des identifiants de départements à rattacher (uniquement secrétariat)'
@@ -67,9 +67,9 @@ export default defineEventHandler(async (event) => {
       }
     })
 
-    if (body.role === 'secretariat' && body.departement_ids && body.departement_ids.length > 0) {
+    if (body.role === 'secretariat' && body.department_ids && body.department_ids.length > 0) {
       await tx.appartenir.createMany({
-        data: body.departement_ids.map(idDepartement => ({
+        data: body.department_ids.map(idDepartement => ({
           numPersonnel: body.numPersonnel,
           idDepartement,
           dateDebut: new Date()

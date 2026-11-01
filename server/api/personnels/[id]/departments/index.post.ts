@@ -71,7 +71,7 @@ export default defineEventHandler(async (event) => {
   if (!personnel) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Personnel non trouvé.'
+      message: 'Personnel non trouvé.'
     })
   }
 

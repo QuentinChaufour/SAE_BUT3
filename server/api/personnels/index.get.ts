@@ -6,17 +6,17 @@ import { Personnel_Role } from '~~/generated/prisma/enums'
 import type { PersonnelWhereInput } from '~~/generated/prisma/models'
 
 const querySchema = z.object({
-  departement_id: z.coerce.number().int().positive().optional(),
+  department_id: z.coerce.number().int().positive().optional(),
   role: z.enum(Personnel_Role).optional()
 })
 
 defineRouteMeta({
   openAPI: {
     tags: ['personnels'],
-    description: 'Obtenir la liste des personnels, avec filtrage optionnel par département.',
+    description: 'Obtenir la liste des personnels.',
     parameters: [
       {
-        name: 'departement_id',
+        name: 'department_id',
         in: 'query',
         description: 'Filtrer les personnels rattachés à un département spécifique.',
         required: false,
@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
   const query = await getValidatedQuery(event, querySchema.parse)
 
   const where: PersonnelWhereInput = {}
-  if (query.departement_id) where['Appartenir'] = { some: { idDepartement: query.departement_id } }
+  if (query.department_id) where['Appartenir'] = { some: { idDepartement: query.department_id } }
   if (query.role) where['role'] = query.role
 
   const personnels = await prisma.personnel.findMany({

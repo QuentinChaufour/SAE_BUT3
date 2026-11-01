@@ -155,6 +155,8 @@ async function createAuth(enseignants: Enseignant[], etudiants: Etudiant[], pers
 
 async function createAppartenances(idDepartement: number, personnels: Personnel[]) {
   for (const [index, personnel] of personnels.entries()) {
+    if (personnel.role === Personnel_Role.admin) continue
+
     await ensure(
       () => prisma.appartenir.findFirst({ where: { numPersonnel: personnel.numPersonnel, idDepartement, dateDebut: DATE_DEBUT } }),
       () => prisma.appartenir.create({

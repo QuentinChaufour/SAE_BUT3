@@ -11,5 +11,5 @@ export const personnelBodySchema = z.object({
   nom: z.string().min(1, 'Le nom est requis.').max(100).trim(),
   prenom: z.string().min(1, 'Le prénom est requis.').max(100).trim(),
   role: z.enum(Personnel_Role, { message: 'Le rôle doit être soit "admin" soit "secretariat".' }),
-  departement_ids: z.array(z.number().int().positive()).optional()
+  department_ids: z.array(z.number().int().positive()).optional()
 })

@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
   if (!appartenir) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Rattachement non trouvé.'
+      message: 'Rattachement non trouvé.'
     })
   }
 
