@@ -7,7 +7,8 @@ import type { PersonnelWhereInput } from '~~/generated/prisma/models'
 
 const querySchema = z.object({
   department_id: z.coerce.number().int().positive().optional(),
-  role: z.enum(Personnel_Role).optional()
+  role: z.enum(Personnel_Role).optional(),
+  search: z.string().max(100, { message: 'La recherche ne peut pas dépasser 100 caractères.' }).optional()
 })
 
 defineRouteMeta({
@@ -28,6 +29,13 @@ defineRouteMeta({
         description: 'Filtrer les personnels par rôle (admin ou secrétariat).',
         required: false,
         schema: { type: 'string', enum: ['admin', 'secretariat'] }
+      },
+      {
+        name: 'search',
+        in: 'query',
+        description: 'Filtrer les personnels par nom, prénom ou numéro de personnel.',
+        required: false,
+        schema: { type: 'string' }
       }
     ],
     responses: {
@@ -73,6 +81,13 @@ export default defineEventHandler(async (event) => {
         ]
       }
     }
+  }
+  if (query.search) {
+    where['OR'] = [
+      { nom: { contains: query.search, mode: 'insensitive' } },
+      { prenom: { contains: query.search, mode: 'insensitive' } },
+      { numPersonnel: { contains: query.search, mode: 'insensitive' } }
+    ]
   }
 
   const personnels = await prisma.personnel.findMany({

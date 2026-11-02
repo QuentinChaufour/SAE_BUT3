@@ -78,6 +78,21 @@ describe('GET /api/personnels', () => {
     })
   })
 
+  it('filter by search', async () => {
+    await callHandler({ search: 'Dupont' })
+
+    expect(prisma.personnel.findMany).toHaveBeenCalledWith({
+      ...baseArgs,
+      where: {
+        OR: [
+          { nom: { contains: 'Dupont', mode: 'insensitive' } },
+          { prenom: { contains: 'Dupont', mode: 'insensitive' } },
+          { numPersonnel: { contains: 'Dupont', mode: 'insensitive' } }
+        ]
+      }
+    })
+  })
+
   it.each([Personnel_Role.admin, Personnel_Role.secretariat])('filter by role', async (role) => {
     await callHandler({ role })
     expect(prisma.personnel.findMany).toHaveBeenCalledWith({
