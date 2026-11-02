@@ -16,7 +16,6 @@ import {
 
 const ANNEE = '2026-2027'
 const DATE_DEBUT = new Date('2026-09-01T00:00:00.000Z')
-const DATE_FIN = new Date('2027-06-30T00:00:00.000Z')
 
 defineRouteMeta({
   openAPI: {
@@ -154,7 +153,7 @@ async function createAuth(enseignants: Enseignant[], etudiants: Etudiant[], pers
 }
 
 async function createAppartenances(idDepartement: number, personnels: Personnel[]) {
-  for (const [index, personnel] of personnels.entries()) {
+  for (const personnel of personnels) {
     if (personnel.role === Personnel_Role.admin) continue
 
     await ensure(
@@ -163,8 +162,7 @@ async function createAppartenances(idDepartement: number, personnels: Personnel[
         data: {
           numPersonnel: personnel.numPersonnel,
           idDepartement,
-          dateDebut: DATE_DEBUT,
-          dateFin: index === 0 ? null : DATE_FIN
+          dateDebut: DATE_DEBUT
         }
       })
     )
