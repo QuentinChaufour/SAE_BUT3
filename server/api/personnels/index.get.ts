@@ -67,7 +67,10 @@ export default defineEventHandler(async (event) => {
       some: {
         idDepartement: query.department_id,
         dateDebut: { lte: new Date() },
-        dateFin: { lt: new Date() }
+        OR: [
+          { dateFin: { gt: new Date() } },
+          { dateFin: null }
+        ]
       }
     }
   }
