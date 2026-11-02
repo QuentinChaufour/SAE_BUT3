@@ -30,10 +30,9 @@ function createDefaultState(): StateType {
   return { nom: props.editDepartment?.nom ?? '' }
 }
 
-const state = reactive<StateType>(createDefaultState())
-
+let state = reactive<StateType>(createDefaultState())
 function resetState() {
-  state.nom = props.editDepartment?.nom ?? ''
+  state = createDefaultState()
 }
 
 const validation = computed(() => schemaFields.safeParse(state))
@@ -98,7 +97,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
   <UModal
     v-model:open="isOpen"
     :title="isEditing ? `Modification du département ${props.editDepartment?.nom}` : 'Création d\'un département'"
-    @update:open="(open) => { if (!open) resetState() }"
+    @update:open="(open: boolean) => { if (!open) resetState() }"
   >
     <UButton
       v-if="!isEditing"

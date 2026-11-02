@@ -4,14 +4,15 @@ const emit = defineEmits(['confirm', 'cancel'])
 defineProps<{
   title: string
   description: string
-  open: boolean
 }>()
+
+const isOpen = defineModel<boolean>('open', { default: false })
 </script>
 
 <template>
   <UModal
+    v-model:open="isOpen"
     :title="title"
-    :open="open"
   >
     <template #body>
       <p>{{ description }}</p>

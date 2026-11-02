@@ -4,15 +4,16 @@ import type { Departement, Personnel } from '~~/generated/prisma/client'
 
 import ConfirmModal from '../common/ConfirmModal.vue'
 import DataTable from '../common/DataTable.vue'
+import PersonnelEditModal from './PersonnelEditModal.vue'
 
-const Personnel_Role = {
+const PersonnelRole = {
   admin: 'admin',
   secretariat: 'secretariat'
 } as const
 
 type PropsType
-  = { type: typeof Personnel_Role.admin } | {
-    type: typeof Personnel_Role.secretariat
+  = { type: typeof PersonnelRole.admin } | {
+    type: typeof PersonnelRole.secretariat
     department: Departement
   }
 const props = defineProps<PropsType>()
@@ -22,7 +23,7 @@ const emit = defineEmits<{
 }>()
 
 let route = `/api/personnels?role=${props.type}`
-if (props.type === Personnel_Role.secretariat) {
+if (props.type === PersonnelRole.secretariat) {
   route += `&department_id=${props.department.idDepartement}`
 }
 
@@ -60,7 +61,7 @@ async function handleConfirmDelete() {
   if (!personnelToDelete.value) return
 
   let deleteUrl = `/api/personnels/${personnelToDelete.value.numPersonnel}`
-  if (props.type === Personnel_Role.secretariat) {
+  if (props.type === PersonnelRole.secretariat) {
     deleteUrl += `/departements/${props.department.idDepartement}`
   }
 
@@ -108,7 +109,7 @@ function getDropdownActions(personnel: Personnel): DropdownMenuItem[][] {
 function getDescription(): string {
   if (!personnelToDelete.value) return ''
   return [
-    `Êtes-vous sûr de vouloir supprimer le personnel ${personnelToDelete.value!.prenom} ${personnelToDelete.value!.nom} ${props.type === Personnel_Role.secretariat ? `du département ${props.department.nom}` : ''} ?`,
+    `Êtes-vous sûr de vouloir supprimer le personnel ${personnelToDelete.value!.prenom} ${personnelToDelete.value!.nom}${props.type === PersonnelRole.secretariat ? ` du département ${props.department.nom}` : ''} ?`,
     'Cette action est irréversible.'
   ].join('\n')
 }
@@ -132,6 +133,14 @@ function getDescription(): string {
         </UDropdownMenu>
       </template>
     </DataTable>
+
+    <PersonnelEditModal
+      v-if="personnelToEdit"
+      :open="!!personnelToEdit"
+      :edit-personnel="personnelToEdit"
+      @update:open="(open: boolean) => { if (!open) personnelToEdit = null }"
+      @saved="refresh()"
+    />
 
     <ConfirmModal
       :open="isDeleteModalOpen"

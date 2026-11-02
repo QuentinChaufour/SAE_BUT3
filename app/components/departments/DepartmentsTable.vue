@@ -43,17 +43,26 @@ function openEditModal(department: DepartementType) {
 async function handleConfirmDelete() {
   if (!departmentToDelete.value) return
 
-  await $fetch(`/api/departments/${departmentToDelete.value.idDepartement}`, { method: 'DELETE' })
-  await refresh()
+  try {
+    await $fetch(`/api/departments/${departmentToDelete.value.idDepartement}`, { method: 'DELETE' })
+    await refresh()
 
-  toast.add({
-    title: 'Département supprimé',
-    description: `Le département ${departmentToDelete.value.nom} a été supprimé avec succès.`,
-    color: 'success'
-  })
+    toast.add({
+      title: 'Département supprimé',
+      description: `Le département ${departmentToDelete.value.nom} a été supprimé avec succès.`,
+      color: 'success'
+    })
 
-  isDeleteModalOpen.value = false
-  departmentToDelete.value = null
+    isDeleteModalOpen.value = false
+    departmentToDelete.value = null
+  } catch (error) {
+    console.error(error)
+    toast.add({
+      title: 'Erreur',
+      description: `Une erreur est survenue lors de la suppression du département ${departmentToDelete.value!.nom}.`,
+      color: 'error'
+    })
+  }
 }
 
 function getDropdownActions(department: DepartementType): DropdownMenuItem[][] {

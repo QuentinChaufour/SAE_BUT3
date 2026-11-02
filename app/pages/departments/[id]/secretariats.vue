@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UBreadcrumb, USeparator } from '#components'
+import { UBreadcrumb } from '#components'
 import PersonnelsTable from '~/components/personnels/PersonnelsTable.vue'
 import type { Departement } from '~~/generated/prisma/client'
 import UserRole from '~~/shared/types/role'
@@ -22,7 +22,7 @@ const route = useRoute()
 const { data } = await useFetch<DepartmentFetchData>(`/api/departments/${route.params.id}`)
 
 if (!data.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Unknown department' })
+  throw createError({ statusCode: 404, statusMessage: 'Unknown department', fatal: true })
 }
 
 const breadcrumbs = [
@@ -46,7 +46,8 @@ const breadcrumbs = [
     </template>
 
     <template #body>
-      <USeparator />
+      <!-- TODO: Ajouter tags départment -->
+      <!-- <USeparator /> -->
       <PersonnelsTable
         :type="'secretariat'"
         :department="data!"
