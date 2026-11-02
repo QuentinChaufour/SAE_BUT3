@@ -63,7 +63,18 @@ describe('GET /api/personnels', () => {
 
     expect(prisma.personnel.findMany).toHaveBeenCalledWith({
       ...baseArgs,
-      where: { Appartenir: { some: { idDepartement: 3, dateDebut: { lte: new Date() }, dateFin: { lt: new Date() } } } }
+      where: {
+        Appartenir: {
+          some: {
+            idDepartement: 3,
+            dateDebut: { lte: new Date() },
+            OR: [
+              { dateFin: { gt: new Date() } },
+              { dateFin: null }
+            ]
+          }
+        }
+      }
     })
   })
 
@@ -81,7 +92,16 @@ describe('GET /api/personnels', () => {
     expect(prisma.personnel.findMany).toHaveBeenCalledWith({
       ...baseArgs,
       where: {
-        Appartenir: { some: { idDepartement: 2, dateDebut: { lte: new Date() }, dateFin: { lt: new Date() } } },
+        Appartenir: {
+          some: {
+            idDepartement: 2,
+            dateDebut: { lte: new Date() },
+            OR: [
+              { dateFin: { gt: new Date() } },
+              { dateFin: null }
+            ]
+          }
+        },
         role: Personnel_Role.secretariat
       }
     })

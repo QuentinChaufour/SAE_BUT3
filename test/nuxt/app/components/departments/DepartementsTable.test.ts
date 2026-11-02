@@ -16,14 +16,14 @@ mockNuxtImport('useFetch', () => mocks.useFetch)
 mockNuxtImport('$fetch', () => mocks.fetch)
 mockNuxtImport('useToast', () => () => mocks.toast)
 
-const departmeents = [
+const departments = [
   { idDepartement: 1, nom: 'Informatique' },
   { idDepartement: 2, nom: 'Chimie' }
 ]
 
 async function mountTable() {
   mocks.useFetch.mockReturnValue({
-    data: ref(departmeents),
+    data: ref(departments),
     refresh: mocks.refresh
   })
 
@@ -74,14 +74,14 @@ describe('DepartementsTable', () => {
     const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
     actions[0]![0]!.onSelect()
 
-    expect(wrapper.findComponent(DepartmentsTable).emitted('edit-name')?.[0]).toEqual([departmeents[0]])
+    expect(wrapper.findComponent(DepartmentsTable).emitted('edit-name')?.[0]).toEqual([departments[0]])
 
     await nextTick()
 
     const modal = wrapper.findComponent(DepartmentModal)
     expect(modal.exists()).toBe(true)
     expect(modal.props('open')).toBe(true)
-    expect(modal.props('editDepartment')).toEqual(departmeents[0])
+    expect(modal.props('editDepartment')).toEqual(departments[0])
   })
 
   it('refresh departments on modal saved', async () => {
@@ -115,7 +115,7 @@ describe('DepartementsTable', () => {
     const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
     actions[0]![1]!.onSelect()
 
-    expect(wrapper.findComponent(DepartmentsTable).emitted('secretariats')?.[0]).toEqual([departmeents[0]])
+    expect(wrapper.findComponent(DepartmentsTable).emitted('secretariats')?.[0]).toEqual([departments[0]])
   })
 
   it('opens delete modal with selected department', async () => {
@@ -169,6 +169,36 @@ describe('DepartementsTable', () => {
         title: 'Département supprimé',
         description: 'Le département Informatique a été supprimé avec succès.',
         color: 'success'
+      })
+    })
+  })
+
+  it('network error on deletes department on modal confirm', async () => {
+    const wrapper = await mountTable()
+    mocks.fetch.mockRejectedValueOnce(new Error('Network error'))
+
+    const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
+      const items = menu.props('items') as { label: string, onSelect: () => void }[][]
+      return items[0]?.[2]?.label === 'Supprimer'
+    })
+
+    const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
+    actions[0]![2]!.onSelect()
+
+    const modal = wrapper.findComponent(ConfirmModal)
+
+    modal.vm.$emit('confirm')
+
+    expect($fetch).toHaveBeenCalledWith(
+      '/api/departments/1',
+      { method: 'DELETE' }
+    )
+
+    await vi.waitFor(() => {
+      expect(mocks.toast.add).toHaveBeenCalledWith({
+        title: 'Erreur',
+        description: 'Une erreur est survenue lors de la suppression du département Informatique.',
+        color: 'error'
       })
     })
   })
