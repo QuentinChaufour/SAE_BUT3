@@ -34,11 +34,11 @@ interface Stage {
     nom: string,
   }
   Enseignant: {
-    email: string,
-    prenom: string,
-    nom: string,
+    email: string | null,
+    prenom: string | null,
+    nom: string | null,
     numEnseignant: string,
-  };
+  } | null;
   Etudiant: {
     numEtu: string,
     nom: string,
@@ -74,6 +74,7 @@ async function load(pageVal: number) {
     stages.value = lesStages.value.listStage;
 
     total.value = Math.round(stages.value.length / 20) + 1 // Maj de la taille de la pagination
+    // console.log(stages.value)
   }
   catch (err){
     console.error(err);
@@ -113,8 +114,8 @@ await load(page.value);
           :num-etu="item?.Etudiant.numEtu"
           :annee="item?.annee"
           :Tuteur="{
-            nom: item?.Enseignant.nom ?? '',
-            prenom: item?.Enseignant.prenom[0] ?? '',
+            nom: item?.Enseignant?.nom ?? '',
+            prenom: item?.Enseignant?.prenom?.[0] ?? '',
           }"
           :Etu="{
             nom: item?.Etudiant.nom ?? '',

@@ -13,47 +13,47 @@ export default defineEventHandler(async () => {
 
   const enseignantBD = await prisma.enseignant.create({
     data: {
-      email: "cricri@prof.com",
-      prenom: "Thomas",
-      nom: "Pinsard",
-      numEnseignant: "p42659",
+      email: "jaques@prof.com",
+      prenom: "Jaques",
+      nom: "Chabin",
+      numEnseignant: "p594217",
     },
   });
 
   const entrepriseBD = await prisma.entreprise.create({
     data: {
-      idEntreprise: 2,
-      siret: "345 130 488 00018",
-      telephone: "04 59 65 12 16",
-      email: "leclerc@paris.com",
-      ville: "Paris",
-      codePostal: "75001",
-      adresse: "2 rue des petits herissons",
-      nom: "E. Leclerc Paris",
+      idEntreprise: 3,
+      siret: "562 130 568 02005",
+      telephone: "07 21 34 98 97",
+      email: "atos@orleans.com",
+      ville: "Orleans",
+      codePostal: "45000",
+      adresse: "15 rue François Mitterant",
+      nom: "Atos",
     },
   });
 
   const tuteurBD = await prisma.tuteurEntreprise.create({
     data: {
-      idEntreprise: 2,
-      idTuteurEntreprise: 2,
-      email: "gille@tuteur.com",
-      telephone: "07 69 32 35 54",
-      prenom: "Joan",
-      nom: "Calis",
+      idEntreprise: 3,
+      idTuteurEntreprise: 3,
+      email: "gerome@tuteur.com",
+      telephone: "07 47 11 09 62",
+      prenom: "Gerome",
+      nom: "Martin",
     },
   });
 
   const user = await prisma.etudiant.create({
     data: {
-      numEtu: "o22403491",
-      nom: "Gloua",
-      prenom: "Donatien",
-      email: "donatien@etu.fr",
+      numEtu: "o22403492",
+      nom: "Martinez",
+      prenom: "Martino",
+      email: "martino@etu.fr",
       Auth: {
         create: {
-          login: "o22403491",
-          password: await hashPassword("qsdfghjk"),
+          login: "o22403492",
+          password: await hashPassword("wxcvbnwx"),
         },
       },
     },
@@ -63,13 +63,13 @@ export default defineEventHandler(async () => {
   const stageBD = await prisma.stage.create({
     data: {
       confidentielle: false,
-      idTuteurEntreprise: 2, //
-      idStage: 2,
-      description: "Je suis la fleur",
-      numEnseignant: "p42659", //
+      idTuteurEntreprise: 3, //
+      idStage: 3,
+      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+      numEnseignant: null, //
       annee: "2026", //
-      numEtu: "o22403491", //
-      titre: "Developpement d'application",
+      numEtu: "o22403492", //
+      titre: "Stage Développeur Full-Stack (Java / React)",
       dateFin: new Date("2026-06-20"),
       dateDebut: new Date("2026-04-06"),
       type: "stage",
