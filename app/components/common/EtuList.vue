@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
-defineProps<{
+const props = defineProps<{
+  numEtu: string
   annee?: string
   Tuteur?: {nom: string, prenom: string}
   Etu?: {nom: string, prenom: string}
@@ -8,7 +9,7 @@ defineProps<{
 }>()
 
 async function navigateProfile() {
-  await navigateTo('/etudiant')
+  await navigateTo(`/etudiants/${encodeURIComponent(props.numEtu)}`) // faire une redirection d'erreur
 }
 
 </script>

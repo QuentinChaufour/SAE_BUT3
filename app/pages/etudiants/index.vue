@@ -110,6 +110,7 @@ await load(page.value);
       <USeparator class="mb-3 mt-3"/>
       <div v-for="(item, index) in stages" class="pt-5 p-3">
         <EtuList
+          :num-etu="item?.Etudiant.numEtu"
           :annee="item?.annee"
           :Tuteur="{
             nom: item?.Enseignant.nom ?? '',
