@@ -44,6 +44,8 @@ function callHandler(query: Record<string, unknown> = {}) {
 describe('GET /api/personnels', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
+    vi.useFakeTimers()
+
     vi.mocked(prisma.personnel.findMany).mockResolvedValue(mockResults as never)
     handler = (await import('~~/server/api/personnels/index.get')).default
   })

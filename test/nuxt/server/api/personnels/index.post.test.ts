@@ -52,6 +52,7 @@ function callRoute(body: Record<string, unknown> = {}) {
 describe('POST /api/personnels', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
+    vi.useFakeTimers()
 
     vi.mocked(prisma.$transaction).mockImplementation((async (callback: (tx: typeof mocks.tx) => unknown) => callback(mocks.tx)) as never)
     mocks.tx.personnel.create.mockImplementation(async ({ data }: { data: unknown }) => data)
