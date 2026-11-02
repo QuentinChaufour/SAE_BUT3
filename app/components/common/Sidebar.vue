@@ -13,7 +13,7 @@ function getLinksByRole(role: UserRole): NavigationMenuItem[] {
       return [{
         label: 'Recherche de stages',
         icon: 'i-lucide-search',
-        to: '/student/search/'
+        to: '/'
       }]
     case UserRole.Secretary:
       return [
@@ -21,7 +21,7 @@ function getLinksByRole(role: UserRole): NavigationMenuItem[] {
         {
           label: 'Enseignants',
           icon: 'i-lucide-users',
-          to: '/teachers/'
+          to: '/'
         }
       ]
     case UserRole.Teacher:
@@ -33,19 +33,19 @@ function getLinksByRole(role: UserRole): NavigationMenuItem[] {
         }, {
           label: 'Étudiants',
           icon: 'i-lucide-users',
-          to: '/students/'
+          to: '/'
         },
         {
           label: 'Soutenances',
           icon: 'i-lucide-calendar',
-          to: '/soutenances/'
+          to: '/'
         }
       ]
     case UserRole.Admin:
       return [{
         label: 'Secrétariats',
         icon: 'i-lucide-users',
-        to: '/secretariats/'
+        to: '/'
       }]
     default:
       return []

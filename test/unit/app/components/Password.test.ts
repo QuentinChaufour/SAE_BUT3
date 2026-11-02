@@ -2,7 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import Password from '~/components/common/PasswordUpdate.vue'
+import Password from '~/components/forms/PasswordUpdate.vue'
 
 const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),

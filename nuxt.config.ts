@@ -27,7 +27,7 @@ export default defineNuxtConfig({
     },
     optimizeDeps: {
       include: [
-        'zod'
+        'zod/v4'
       ]
     }
   },

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
-import PasswordUpdate from '~/components/common/PasswordUpdate.vue'
+import PasswordUpdate from '~/components/forms/PasswordUpdate.vue'
 
 defineProps<{
   collapsed?: boolean
