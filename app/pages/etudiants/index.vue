@@ -18,44 +18,44 @@ interface Stage {
   TuteurEntreprise: {
       Entreprise: {
       idEntreprise: number,
-      siret: string,
-      telephone: string,
-      email: string,
-      ville: string,
-      codePostal: string,
-      adresse: string,
+      siret: string | null,
+      telephone: string | null,
+      email: string | null,
+      ville: string | null,
+      codePostal: string | null,
+      adresse: string | null,
       nom: string,
     }
     idEntreprise: number,
     idTuteurEntreprise: number,
-    email: string,
-    telephone: string,
-    prenom: string,
-    nom: string,
+    email: string | null,
+    telephone: string | null,
+    prenom: string | null,
+    nom: string | null,
   }
   Enseignant: {
     email: string | null,
     prenom: string | null,
     nom: string | null,
     numEnseignant: string,
-  } | null;
+  }
   Etudiant: {
     numEtu: string,
-    nom: string,
-    prenom: string,
-    email: string,
+    nom: string | null,
+    prenom: string | null,
+    email: string | null,
   }
   idStage: number;
   annee: string;
   confidentielle: boolean;
-  dateDebut: string;
-  dateFin: string;
-  description: string;
+  dateDebut: string | null,
+  dateFin: string | null,
+  description: string | null,
   idTuteurEntreprise: number;
-  numEnseignant: string;
+  numEnseignant: string | null,
   numEtu: string;
-  titre: string;
-  type: string;
+  titre: string | null,
+  type: string | null,
 }
 
 
@@ -118,8 +118,8 @@ await load(page.value);
             prenom: item?.Enseignant?.prenom?.[0] ?? '',
           }"
           :Etu="{
-            nom: item?.Etudiant.nom ?? '',
-            prenom: item?.Etudiant.prenom[0] ?? '',
+            nom: item?.Etudiant?.nom ?? '',
+            prenom: item?.Etudiant?.prenom?.[0] ?? '',
           }"
           :entreprise="item?.TuteurEntreprise.Entreprise.nom ?? ''"
         />
