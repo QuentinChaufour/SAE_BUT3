@@ -4,18 +4,12 @@ import SearchCompanySiretForm from './forms/SearchCompanySiretForm.vue'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { Entreprise } from '~~/generated/prisma/client.ts'
 import { companyFields } from '~~/shared/schemas/company.ts'
+import type { EntrepriseStateType } from '~~/shared/types/company.js'
 
 type Schema = z.output<typeof companyFields>
 
-export interface EntrepriseStateType {
-  nom: string
-  nomEtab?: string
-  adresse: string
-  ville: string
-  codePostal: string
-  pays: string
-  siret: string
-}
+const isLoading = ref(false)
+const state = reactive<EntrepriseStateReactive>(createDefaultState())
 
 const isOpen = defineModel<boolean>('open', { default: false })
 const toast = useToast()
@@ -42,8 +36,6 @@ function createDefaultState(): EntrepriseStateReactive {
     etranger: false
   }
 }
-
-const state = reactive<EntrepriseStateReactive>(createDefaultState())
 
 watch(() => isOpen.value, (open) => {
   if (open) Object.assign(state, createDefaultState())
@@ -77,7 +69,6 @@ function entrepriseSiretFound(entreprise: EntrepriseStateType) {
   })
 }
 
-const isLoading = ref(false)
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   isLoading.value = true
 

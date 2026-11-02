@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { EntrepriseStateType } from '../CreateCompanyModal.vue'
 import { z } from 'zod'
+import type { EntrepriseStateType } from '~~/shared/types/company'
 
 const toast = useToast()
 
