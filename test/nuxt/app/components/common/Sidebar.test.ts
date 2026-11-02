@@ -1,15 +1,21 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
 import UserRole from '~~/shared/types/role.js'
 import Sidebar from '~/components/common/Sidebar.vue'
 
+const mockUser = ref<{ role: UserRole | string | undefined } | null>(null)
+
+mockNuxtImport('useUserSession', () => {
+  return () => ({ user: mockUser })
+})
+
 describe('Sidebar', () => {
   beforeEach(() => {
-    clearNuxtState('current-user-role')
+    mockUser.value = null
   })
 
   it('show links for a student', async () => {
-    useState('current-user-role', () => UserRole.Student)
+    mockUser.value = { role: UserRole.Student }
 
     const wrapper = await mountSuspended(Sidebar)
 
@@ -24,7 +30,7 @@ describe('Sidebar', () => {
   })
 
   it('show links for a teacher', async () => {
-    useState('current-user-role', () => UserRole.Teacher)
+    mockUser.value = { role: UserRole.Teacher }
 
     const wrapper = await mountSuspended(Sidebar)
 
@@ -45,7 +51,7 @@ describe('Sidebar', () => {
   })
 
   it('show links for a secretary', async () => {
-    useState('current-user-role', () => UserRole.Secretary)
+    mockUser.value = { role: UserRole.Secretary }
 
     const wrapper = await mountSuspended(Sidebar)
 
@@ -67,22 +73,33 @@ describe('Sidebar', () => {
   })
 
   it('show links for an admin', async () => {
-    useState('current-user-role', () => UserRole.Admin)
+    mockUser.value = { role: UserRole.Admin }
 
     const wrapper = await mountSuspended(Sidebar)
 
     expect(wrapper.text()).not.toContain('Recherche de stages')
-    expect(wrapper.text()).toContain('Secrétariats')
+    expect(wrapper.text()).toContain('Départements')
+    expect(wrapper.text()).toContain('Administrateurs')
 
     const navLinks = wrapper.findAll('a')
     const hrefs = navLinks.map(link => link.attributes('href'))
 
-    expect(hrefs).toContain('/secretariats/')
+    expect(hrefs).toContain('/departments/')
+    expect(hrefs).toContain('/admins/')
     expect(hrefs).not.toContain('/student/search/')
   })
 
   it('show no links for an unknown role', async () => {
-    useState('current-user-role', () => 'invalid-role')
+    mockUser.value = { role: 'invalid-role' }
+
+    const wrapper = await mountSuspended(Sidebar)
+
+    expect(wrapper.text()).not.toContain('Recherche de stages')
+    expect(wrapper.text()).not.toContain('Tableau de bord')
+  })
+
+  it('show no links for no role', async () => {
+    mockUser.value = { role: undefined }
 
     const wrapper = await mountSuspended(Sidebar)
 
@@ -91,6 +108,8 @@ describe('Sidebar', () => {
   })
 
   it('init the sidebar as open by default', async () => {
+    mockUser.value = { role: UserRole.Student }
+
     const wrapper = await mountSuspended(Sidebar)
 
     const dashboardSidebar = wrapper.findComponent({ name: 'UDashboardSidebar' })
@@ -100,6 +119,8 @@ describe('Sidebar', () => {
   })
 
   it('check if sidebar can be closed', async () => {
+    mockUser.value = { role: UserRole.Student }
+
     const wrapper = await mountSuspended(Sidebar)
 
     const dashboardSidebar = wrapper.findComponent({ name: 'UDashboardSidebar' })

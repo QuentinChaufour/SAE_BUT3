@@ -5,9 +5,12 @@ import UserRole from '~~/shared/types/role.js'
 
 const open = ref(true)
 
-const role = useState<UserRole>('current-user-role', () => UserRole.Secretary)
+const session = useUserSession()
+const role = session.user.value?.role
 
-function getLinksByRole(role: UserRole): NavigationMenuItem[] {
+function getLinksByRole(role: UserRole | undefined): NavigationMenuItem[] {
+  if (!role) return []
+
   switch (role) {
     case UserRole.Student:
       return [{
@@ -42,11 +45,18 @@ function getLinksByRole(role: UserRole): NavigationMenuItem[] {
         }
       ]
     case UserRole.Admin:
-      return [{
-        label: 'Secrétariats',
-        icon: 'i-lucide-users',
-        to: '/secretariats/'
-      }]
+      return [
+        {
+          label: 'Départements',
+          icon: 'i-lucide-building',
+          to: '/departments/'
+        },
+        {
+          label: 'Administrateurs',
+          icon: 'i-lucide-user',
+          to: '/admins/'
+        }
+      ]
     default:
       return []
   }
