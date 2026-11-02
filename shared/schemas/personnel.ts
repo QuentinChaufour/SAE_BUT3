@@ -1,12 +1,24 @@
 import { z } from 'zod'
-import { Personnel_Role } from '~~/generated/prisma/client'
+
+const PersonnelRole = {
+  admin: 'admin',
+  secretariat: 'secretariat'
+} as const
 
 export const numPersonnelSchema = z.string().regex(/^p\d{1,12}$/m, 'Le numéro de personnel doit commencer par "p" suivi de 1 à 12 chiffres.')
 
+export const personnelNameSchema = z.string().min(2, 'Le nom est requis.').max(50).trim()
+export const personnelFirstNameSchema = z.string().min(2, 'Le prénom est requis.').max(50).trim()
+
 export const personnelBodySchema = z.object({
   numPersonnel: numPersonnelSchema,
-  nom: z.string().min(1, 'Le nom est requis.').max(100).trim(),
-  prenom: z.string().min(1, 'Le prénom est requis.').max(100).trim(),
-  role: z.enum(Personnel_Role, { message: 'Le rôle doit être soit "admin" soit "secretariat".' }),
+  nom: personnelNameSchema,
+  prenom: personnelFirstNameSchema,
+  role: z.enum(PersonnelRole, { message: 'Le rôle doit être soit "admin" soit "secretariat".' }),
   department_ids: z.array(z.number().int().positive()).optional()
+})
+
+export const personnelUpdateBodySchema = z.object({
+  nom: personnelNameSchema.optional(),
+  prenom: personnelFirstNameSchema.optional()
 })
