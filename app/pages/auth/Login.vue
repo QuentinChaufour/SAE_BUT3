@@ -1,7 +1,16 @@
 <script setup lang="ts">
-// import { user } from '#build/ui';
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui'
 import { z } from 'zod'
+
+/**
+ * Login.vue
+ *
+ * Page where the user enter his credential to get authenticated
+ */
+
+definePageMeta({
+  layout: 'empty'
+})
 
 type LoginResponse = { success: true } | { error: false, message: string }
 
@@ -22,36 +31,48 @@ const fields = ref<AuthFormField[]>([
   }
 ])
 
-// __________// Zod checks //__________//
-
 // Define the schema
 const schema = z.object({
   login: z.string().min(1, 'Champs Obligatoire'),
   password: z.string().min(8, 'Minimum 8 caractères')
 })
 
+const toaster = useToast()
+const loading = ref<boolean>(false)
+
 type Schema = z.output<typeof schema>
 
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
+  let response: LoginResponse
+
   try {
-    const response = await $fetch<LoginResponse>(`api/auth/login`, {
+    response = await $fetch<LoginResponse>(`/api/auth/login`, {
       method: 'POST',
       body: { login: payload.data.login, password: payload.data.password }
     })
 
     if ('success' in response && response.success) {
-      console.log('Connexion réussie')
-      // TODO redirect the user to a main page based on his role
-      //    await navigateTo("");
+      toaster.add({
+        color: 'success',
+        title: 'Connexion réussi !'
+      })
     }
-  } catch (error) {
-    console.error('Error during login:', error)
+  } catch {
+    toaster.add({
+      color: 'error',
+      title: 'Connexion échoué !'
+    })
+
+    return
   }
+
+  // TODO redirect the user to a main page based on his role
+  await navigateTo('/example')
 }
 </script>
 
 <template>
-  <div class="grid grid-cols-1 h-full">
+  <div class="flex min-h-screen justify-center items-center">
     <UAuthForm
       title="Connexion"
       description="Veuillez vous connecter pour accéder à votre compte."
@@ -62,7 +83,8 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
         label: 'Connexion',
         variant: 'subtle'
       }"
-      class="max-w-md"
+      :loading="loading"
+      class="w-full max-w-md p-5"
       @submit="onSubmit"
     />
   </div>

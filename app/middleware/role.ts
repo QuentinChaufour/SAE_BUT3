@@ -10,10 +10,13 @@ export default defineNuxtRouteMiddleware((to, _from) => {
     return
   }
 
-  // TODO are we sure the user is logged in when the middleware is called ?
   const hasRole = Array.isArray(role) ? role.includes(session.user.value?.role) : role == session.user.value?.role
 
   if (!hasRole) {
-    return navigateTo('/')
+    throw abortNavigation(createError({
+      status: 403,
+      statusText: 'Forbbiden',
+      fatal: true
+    }))
   }
 })

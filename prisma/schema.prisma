@@ -46,9 +46,9 @@ model Appartenir {
 model Auth {
   login         String      @id @db.VarChar
   password      String      @db.VarChar
-  numPersonnel  String?     @db.VarChar
-  numEnseignant String?     @db.VarChar
-  numEtu        String?     @db.VarChar
+  numPersonnel  String?     @unique @db.VarChar
+  numEnseignant String?     @unique @db.VarChar
+  numEtu        String?     @unique @db.VarChar
   Enseignant    Enseignant? @relation(fields: [numEnseignant], references: [numEnseignant], onDelete: NoAction, onUpdate: NoAction)
   Etudiant      Etudiant?   @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
   Personnel     Personnel?  @relation(fields: [numPersonnel], references: [numPersonnel], onDelete: NoAction, onUpdate: NoAction)
@@ -126,7 +126,7 @@ model Enseignant {
   prenom                String?                 @db.VarChar
   email                 String?                 @db.VarChar
   AnneeEnseignant       AnneeEnseignant[]
-  Auth                  Auth[]
+  Auth                  Auth?
   EnseignantEtuFavori   EnseignantEtuFavori[]
   EnseignantSoutenance  EnseignantSoutenance[]
   PropositionTuteurUniv PropositionTuteurUniv[]
@@ -173,7 +173,7 @@ model Etudiant {
   nom                 String?               @db.VarChar
   prenom              String?               @db.VarChar
   email               String?               @db.VarChar
-  Auth                Auth[]
+  Auth                Auth?
   EnseignantEtuFavori EnseignantEtuFavori[]
   Inscription         Inscription[]
   RechercheStage      RechercheStage[]
@@ -222,7 +222,7 @@ model Personnel {
   email        String?         @db.VarChar
   role         Personnel_Role?
   Appartenir   Appartenir[]
-  Auth         Auth[]
+  Auth         Auth?
 }
 
 model PieceJointe {
