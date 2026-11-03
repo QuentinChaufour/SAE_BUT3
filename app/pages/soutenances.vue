@@ -3,6 +3,21 @@
   import SoutenanceCard from '~/components/soutenance/SoutenanceCard.vue';
   import type { TableColumn } from '@nuxt/ui';
 
+  async function load(departement: number) {
+    try{
+      const data = await $fetch(`/api/prof/profs-list-tuteur`, {
+        query: { idDepartement: departement }
+      });
+      enseignants.value = data;
+      console.log("Fetched data:", data);
+    }
+    catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
+  
+  
   const classes = ref([
     {
       name: "BUT 1",
@@ -50,7 +65,10 @@
       soutenances: 3
     },
   ]);
-
+  
+  let enseignants = ref();
+  await load(1);
+  /*
   const enseignants = ref([
     {
       "Nom": "CHABIN Jacques",
@@ -144,17 +162,20 @@
       "Tuteur alternance BUT 3": "2/1",
     },
   ]);
-
+  */
+ 
   const ratioPattern = /^[0-9]+\/[0-9]+$/;
 
   function setDataColor(value: unknown): string {
+    const defaultColor: string = "text-neutral-600 dark:text-neutral-400";
+
     if (typeof value !== "string") {
-      return "text-neutral-600";
+      return defaultColor;
     }
 
     const match = value.match(ratioPattern);
     if (!match) {
-      return "text-neutral-600";
+      return defaultColor;
     }
 
     const parts = match[0].split("/");
@@ -165,7 +186,7 @@
       return "text-red-500";
     else if(numerator / denominator > 1)
       return "text-yellow-500";
-    return "text-neutral-600";
+    return defaultColor;
   }
 
   function createRatioColumns<T extends Record<string, unknown>>(rows: T[]): TableColumn<T>[] {
