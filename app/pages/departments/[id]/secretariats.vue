@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { UBreadcrumb } from '#components'
+import AddPersonnelModal from '~/components/personnels/AddPersonnelModal.vue'
 import PersonnelsTable from '~/components/personnels/PersonnelsTable.vue'
 import type { Departement } from '~~/generated/prisma/client'
 import UserRole from '~~/shared/types/role'
@@ -25,6 +26,7 @@ if (!data.value) {
   throw createError({ statusCode: 404, statusMessage: 'Unknown department', fatal: true })
 }
 
+const personnelsTable = useTemplateRef('personnelsTable')
 const breadcrumbs = [
   { label: 'Départements', to: '/departments' },
   { label: 'Secrétariats', to: `/departments/${route.params.id}/secretariats` }
@@ -42,13 +44,21 @@ const breadcrumbs = [
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
+
+        <template #right>
+          <AddPersonnelModal
+            :type="'secretariat'"
+            :department="data!"
+            @created="personnelsTable?.refresh()"
+          />
+        </template>
       </UDashboardNavbar>
     </template>
 
     <template #body>
       <!-- TODO: Ajouter tags départment -->
-      <!-- <USeparator /> -->
       <PersonnelsTable
+        ref="personnelsTable"
         :type="'secretariat'"
         :department="data!"
       />
