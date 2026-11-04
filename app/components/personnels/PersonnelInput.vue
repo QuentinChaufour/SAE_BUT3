@@ -5,10 +5,11 @@ export interface PersonnelOption {
   numPersonnel: string
   nom: string
   prenom: string
+  email: string | null
   existing: boolean
 }
 
-type PersonnelApi = Pick<PersonnelOption, 'numPersonnel' | 'nom' | 'prenom'>
+type PersonnelApi = Pick<PersonnelOption, 'numPersonnel' | 'nom' | 'prenom' | 'email'>
 
 const props = defineProps<{ role?: string }>()
 
@@ -56,12 +57,13 @@ function toItem(personnel: PersonnelApi): PersonnelOption {
     numPersonnel: personnel.numPersonnel,
     nom: personnel.nom,
     prenom: personnel.prenom,
+    email: personnel.email,
     existing: true
   }
 }
 
-function toOption({ numPersonnel, nom, prenom, existing }: PersonnelOption): PersonnelOption {
-  return { numPersonnel, nom, prenom, existing }
+function toOption({ numPersonnel, nom, prenom, email, existing }: PersonnelOption): PersonnelOption {
+  return { numPersonnel, nom, prenom, email, existing }
 }
 
 function onCreate(search: string) {
@@ -72,6 +74,7 @@ function onCreate(search: string) {
     numPersonnel: value,
     nom: '',
     prenom: '',
+    email: '',
     existing: false
   }
 

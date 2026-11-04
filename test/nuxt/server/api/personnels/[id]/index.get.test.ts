@@ -29,6 +29,7 @@ const mockPersonnel = {
   numPersonnel: 'p7654321',
   nom: 'Martin',
   prenom: 'Claire',
+  email: 'claire.martin@univ-orleans.fr',
   role: Personnel_Role.secretariat,
   Appartenir: [
     {
@@ -46,6 +47,7 @@ const expectedArgs = {
     numPersonnel: true,
     nom: true,
     prenom: true,
+    email: true,
     role: true,
     Appartenir: {
       select: {

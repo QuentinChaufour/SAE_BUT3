@@ -222,11 +222,12 @@ describe('PersonnelInput', () => {
       await nextTick()
 
       expect(personnel.emitted('update:modelValue')?.at(-1)).toEqual(['p9999'])
-      expect(personnel.emitted('select')?.at(-1)).toEqual([{ numPersonnel: 'p9999', nom: '', prenom: '', existing: false }])
+      expect(personnel.emitted('select')?.at(-1)).toEqual([{ numPersonnel: 'p9999', nom: '', prenom: '', email: '', existing: false }])
       expect(input.props('modelValue')).toEqual({
         numPersonnel: 'p9999',
         nom: '',
         prenom: '',
+        email: '',
         existing: false
       })
     })

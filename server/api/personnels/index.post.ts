@@ -18,6 +18,7 @@ defineRouteMeta({
               numPersonnel: { type: 'string', description: 'Numéro du personnel' },
               nom: { type: 'string', description: 'Nom du personnel' },
               prenom: { type: 'string', description: 'Prénom du personnel' },
+              email: { type: 'string', format: 'email', description: 'Email du personnel' },
               role: { type: 'string', enum: ['admin', 'secretariat'], description: 'Rôle du personnel' },
               department_ids: {
                 type: 'array',
@@ -40,6 +41,7 @@ defineRouteMeta({
                 numPersonnel: { type: 'string' },
                 nom: { type: 'string' },
                 prenom: { type: 'string' },
+                email: { type: 'string', format: 'email' },
                 role: { type: 'string', enum: ['admin', 'secretariat'] }
               }
             }
@@ -72,6 +74,7 @@ export default defineEventHandler(async (event) => {
         numPersonnel: body.numPersonnel,
         nom: body.nom,
         prenom: body.prenom,
+        email: body.email,
         role: body.role
       }
     })

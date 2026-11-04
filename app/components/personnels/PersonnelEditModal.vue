@@ -18,9 +18,9 @@ const emit = defineEmits<{
   saved: [personnel: Personnel]
 }>()
 
-type StateType = Pick<Personnel, 'nom' | 'prenom'>
+type StateType = Pick<Personnel, 'nom' | 'prenom' | 'email'>
 function createDefaultState(): StateType {
-  return { nom: props.editPersonnel.nom, prenom: props.editPersonnel.prenom }
+  return { nom: props.editPersonnel.nom, prenom: props.editPersonnel.prenom, email: props.editPersonnel.email || '' }
 }
 
 let state = reactive<StateType>(createDefaultState())
@@ -45,7 +45,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
   try {
     const response = await $fetch<Personnel>(`/api/personnels/${props.editPersonnel.numPersonnel}`, {
       method: 'PATCH',
-      body: { nom: state.nom, prenom: state.prenom } satisfies Pick<PersonnelUpdateInput, 'nom' | 'prenom'>
+      body: { nom: state.nom, prenom: state.prenom, email: state.email } satisfies Pick<PersonnelUpdateInput, 'nom' | 'prenom' | 'email'>
     })
 
     toast.add({
@@ -108,6 +108,17 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
             :minlength="2"
             :maxlength="50"
             required
+          />
+        </UFormField>
+        <UFormField
+          label="Email"
+          name="email"
+        >
+          <UInput
+            v-model="state.email as string"
+            class="w-full"
+            :maxlength="100"
+            type="email"
           />
         </UFormField>
       </UForm>

@@ -14,11 +14,13 @@ export const personnelBodySchema = z.object({
   numPersonnel: numPersonnelSchema,
   nom: personnelNameSchema,
   prenom: personnelFirstNameSchema,
+  email: z.email('L\'email doit être valide.').max(100).optional(),
   role: z.enum(PersonnelRole, { message: 'Le rôle doit être soit "admin" soit "secretariat".' }),
   department_ids: z.array(z.number().int().positive()).optional()
 })
 
 export const personnelUpdateBodySchema = z.object({
   nom: personnelNameSchema.optional(),
-  prenom: personnelFirstNameSchema.optional()
+  prenom: personnelFirstNameSchema.optional(),
+  email: z.email('L\'email doit être valide.').max(100).optional()
 })

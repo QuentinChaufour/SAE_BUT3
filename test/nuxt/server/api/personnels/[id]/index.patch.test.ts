@@ -62,7 +62,7 @@ describe('PATCH /api/personnels/[id]', () => {
     expect(prisma.personnel.update).toHaveBeenCalledWith({
       where: { numPersonnel: 'p123456789' },
       data: { nom: 'Timothy', prenom: 'Cuisine' },
-      select: { nom: true, prenom: true }
+      select: { nom: true, prenom: true, email: true }
     })
     expect(response).toEqual(mockUpdatedPersonnel)
   })
@@ -87,7 +87,7 @@ describe('PATCH /api/personnels/[id]', () => {
     expect(prisma.personnel.update).toHaveBeenCalledWith({
       where: { numPersonnel: 'p123456789' },
       data: { nom: 'Timothy' },
-      select: { nom: true, prenom: true }
+      select: { nom: true, prenom: true, email: true }
     })
     expect(response).toEqual(mockUpdatedDepartement)
   })

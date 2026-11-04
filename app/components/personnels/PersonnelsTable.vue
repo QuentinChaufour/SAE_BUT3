@@ -41,6 +41,7 @@ const toast = useToast()
 const columns: TableColumn<Personnel>[] = [
   { id: 'nom', header: 'Nom', accessorKey: 'nom' },
   { id: 'prenom', header: 'Prénom', accessorKey: 'prenom' },
+  { id: 'email', header: 'Email', accessorKey: 'email', cell: ({ row }) => row.original.email || 'N/A' },
   { id: 'numPersonnel', header: 'Numéro de personnel', accessorKey: 'numPersonnel' },
   { id: 'action' }
 ]

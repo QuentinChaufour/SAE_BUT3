@@ -15,8 +15,8 @@ mockNuxtImport('$fetch', () => mocks.fetch)
 mockNuxtImport('useUserSession', () => mocks.userSession)
 mockNuxtImport('useToast', () => () => mocks.toast)
 
-const editPersonnel = { numPersonnel: 'p1234', prenom: 'Pierre', nom: 'Chabrier', role: UserRole.Admin }
-const updatedPersonnel = { numPersonnel: 'p1234', prenom: 'Pierre', nom: 'Dupont', role: UserRole.Admin }
+const editPersonnel = { numPersonnel: 'p1234', prenom: 'Pierre', nom: 'Chabrier', email: 'pierre.chabrier@mail.com', role: UserRole.Admin }
+const updatedPersonnel = { numPersonnel: 'p1234', prenom: 'Pierre', nom: 'Dupont', email: '', role: UserRole.Admin }
 
 async function mountAndOpenEdit(personnel = editPersonnel) {
   const wrapper = await mountWithUApp(PersonnelEditModal, {
@@ -27,7 +27,7 @@ async function mountAndOpenEdit(personnel = editPersonnel) {
 
   await vi.waitFor(() => {
     expect(modal.props('open')).toBe(true)
-    expect(wrapper.findAllComponents(UFormField).length).toBe(2)
+    expect(wrapper.findAllComponents(UFormField).length).toBe(3)
   })
 
   return { wrapper, modal }
@@ -52,6 +52,7 @@ describe('PersonnelEditModal', () => {
     const inputs = wrapper.findAllComponents(UInput)
     expect(inputs[0]!.find('input').element.value).toBe('Chabrier')
     expect(inputs[1]!.find('input').element.value).toBe('Pierre')
+    expect(inputs[2]!.find('input').element.value).toBe('pierre.chabrier@mail.com')
 
     const saveButton = modal.findAllComponents(UButton).find(b => b.text() === 'Modifier')
     expect(saveButton).toBeDefined()
@@ -64,6 +65,7 @@ describe('PersonnelEditModal', () => {
     const inputs = wrapper.findAllComponents(UInput)
     await inputs[0]!.find('input').setValue('Dupont')
     await inputs[1]!.find('input').setValue('Jacques')
+    await inputs[2]!.find('input').setValue('jacques.dupont@mail.com')
     await nextTick()
 
     wrapper.findComponent(UForm).vm.$emit('submit')
@@ -71,7 +73,7 @@ describe('PersonnelEditModal', () => {
     await vi.waitFor(() => {
       expect(mocks.fetch).toHaveBeenCalledWith('/api/personnels/p1234', {
         method: 'PATCH',
-        body: { nom: 'Dupont', prenom: 'Jacques' }
+        body: { nom: 'Dupont', prenom: 'Jacques', email: 'jacques.dupont@mail.com' }
       })
     })
   })

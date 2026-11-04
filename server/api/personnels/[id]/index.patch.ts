@@ -18,7 +18,8 @@ defineRouteMeta({
             type: 'object',
             properties: {
               nom: { type: 'string', description: 'Nom du personnel' },
-              prenom: { type: 'string', description: 'Prénom du personnel' }
+              prenom: { type: 'string', description: 'Prénom du personnel' },
+              email: { type: 'string', format: 'email', description: 'Email du personnel' }
             }
           }
         }
@@ -59,7 +60,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const personnel = await prisma.personnel.update({
-    select: { nom: true, prenom: true },
+    select: { nom: true, prenom: true, email: true },
     where: { numPersonnel: params.id },
     data: body
   })

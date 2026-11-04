@@ -30,6 +30,7 @@ const baseArgs = {
     numPersonnel: true,
     nom: true,
     prenom: true,
+    email: true,
     role: true
   },
   orderBy: { numPersonnel: 'asc' }

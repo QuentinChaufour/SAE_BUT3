@@ -33,7 +33,7 @@ async function mountAndOpen(type: 'admin' | 'secretariat', department = mockDepa
 
   await vi.waitFor(() => {
     expect(modal.props('open')).toBe(true)
-    expect(wrapper.findAllComponents(UFormField).length).toBe(3)
+    expect(wrapper.findAllComponents(UFormField).length).toBe(4)
   })
 
   return { wrapper, modal }
@@ -67,18 +67,20 @@ describe('AddPersonnelModal', () => {
     expect(modal.props('title')).toBe('Ajout d\'un administrateur')
 
     const formFields = wrapper.findAllComponents(UFormField)
-    expect(formFields).toHaveLength(3)
+    expect(formFields).toHaveLength(4)
     expect(formFields[0]!.props('label')).toBe('Numéro du personnel')
     expect(formFields[0]!.props('help')).toBeUndefined()
     expect(formFields[1]!.props('label')).toBe('Nom')
     expect(formFields[2]!.props('label')).toBe('Prénom')
+    expect(formFields[3]!.props('label')).toBe('Email')
 
     expect(wrapper.findComponent(PersonnelInput).exists()).toBe(false)
     const inputs = wrapper.findAllComponents(UInput)
-    expect(inputs).toHaveLength(3)
+    expect(inputs).toHaveLength(4)
     expect(inputs[0]!.find('input').attributes('placeholder')).toBe('Numéro du personnel')
     expect(inputs[1]!.find('input').attributes('placeholder')).toBe('Nom')
     expect(inputs[2]!.find('input').attributes('placeholder')).toBe('Prénom')
+    expect(inputs[3]!.find('input').attributes('placeholder')).toBe('Email')
 
     expect(wrapper.findComponent(UAlert).exists()).toBe(false)
 
@@ -94,7 +96,7 @@ describe('AddPersonnelModal', () => {
     expect(modal.props('title')).toBe('Ajout d\'un personnel du secrétariat')
 
     const formFields = wrapper.findAllComponents(UFormField)
-    expect(formFields).toHaveLength(3)
+    expect(formFields).toHaveLength(4)
     expect(formFields[0]!.props('label')).toBe('Numéro du personnel')
     expect(formFields[0]!.props('help')).toBe('Sélectionnez un personnel existant ou saisissez un nouveau numéro.')
 
@@ -103,9 +105,10 @@ describe('AddPersonnelModal', () => {
     expect(personnelInput.props('role')).toBe('secretariat')
 
     const inputs = wrapper.findAllComponents(UInput)
-    expect(inputs).toHaveLength(2)
+    expect(inputs).toHaveLength(3)
     expect(inputs[0]!.find('input').attributes('placeholder')).toBe('Nom')
     expect(inputs[1]!.find('input').attributes('placeholder')).toBe('Prénom')
+    expect(inputs[2]!.find('input').attributes('placeholder')).toBe('Email')
   })
 
   it('disables submit button and shows tooltip when invalid', async () => {
@@ -120,6 +123,7 @@ describe('AddPersonnelModal', () => {
     await inputs[0]!.find('input').setValue('1234')
     await inputs[1]!.find('input').setValue('Dupont')
     await inputs[2]!.find('input').setValue('Jean')
+    await inputs[3]!.find('input').setValue('jean.dupont@univ-orleans.fr')
     await nextTick()
 
     expect(submitButton.props('disabled')).toBe(true)
@@ -226,7 +230,8 @@ describe('AddPersonnelModal', () => {
       numPersonnel: 'p1234',
       nom: 'Dupont',
       prenom: 'Jean',
-      role: 'admin'
+      role: 'admin',
+      email: 'jean.dupont@univ-orleans.fr'
     })
 
     const { wrapper, modal } = await mountAndOpen('admin')
@@ -234,6 +239,7 @@ describe('AddPersonnelModal', () => {
     await inputs[0]!.find('input').setValue('p1234')
     await inputs[1]!.find('input').setValue('Dupont')
     await inputs[2]!.find('input').setValue('Jean')
+    await inputs[3]!.find('input').setValue('jean.dupont@univ-orleans.fr')
     await nextTick()
 
     wrapper.findComponent(UForm).vm.$emit('submit')
@@ -246,6 +252,7 @@ describe('AddPersonnelModal', () => {
           nom: 'Dupont',
           prenom: 'Jean',
           role: 'admin',
+          email: 'jean.dupont@univ-orleans.fr',
           department_ids: undefined
         }
       })
@@ -264,7 +271,8 @@ describe('AddPersonnelModal', () => {
     expect(emitted![0]).toEqual([{
       numPersonnel: 'p1234',
       nom: 'Dupont',
-      prenom: 'Jean'
+      prenom: 'Jean',
+      email: 'jean.dupont@univ-orleans.fr'
     }])
 
     await vi.waitFor(() => {
@@ -277,6 +285,7 @@ describe('AddPersonnelModal', () => {
       numPersonnel: 'p4321',
       nom: 'Durand',
       prenom: 'Claire',
+      email: 'claire.durand@univ-orleans.fr',
       role: 'secretariat'
     })
 
@@ -287,12 +296,14 @@ describe('AddPersonnelModal', () => {
       numPersonnel: 'p4321',
       nom: 'Durand',
       prenom: 'Claire',
+      email: 'claire.durand@univ-orleans.fr',
       existing: false
     })
 
     const inputs = wrapper.findAllComponents(UInput)
     await inputs[0]!.find('input').setValue('Durand')
     await inputs[1]!.find('input').setValue('Claire')
+    await inputs[2]!.find('input').setValue('claire.durand@univ-orleans.fr')
     await nextTick()
 
     wrapper.findComponent(UForm).vm.$emit('submit')
@@ -304,6 +315,7 @@ describe('AddPersonnelModal', () => {
           numPersonnel: 'p4321',
           nom: 'Durand',
           prenom: 'Claire',
+          email: 'claire.durand@univ-orleans.fr',
           role: 'secretariat',
           department_ids: [1]
         }
@@ -323,7 +335,72 @@ describe('AddPersonnelModal', () => {
     expect(emitted![0]).toEqual([{
       numPersonnel: 'p4321',
       nom: 'Durand',
-      prenom: 'Claire'
+      prenom: 'Claire',
+      email: 'claire.durand@univ-orleans.fr'
+    }])
+
+    await vi.waitFor(() => {
+      expect(modal.props('open')).toBe(false)
+    })
+  })
+
+  it('submits new personnel to /api/personnels with no email', async () => {
+    mocks.fetch.mockResolvedValueOnce({
+      numPersonnel: 'p4321',
+      nom: 'Durand',
+      prenom: 'Claire',
+      email: '',
+      role: 'secretariat'
+    })
+
+    const { wrapper, modal } = await mountAndOpen('secretariat')
+    const personnelInput = wrapper.findComponent(PersonnelInput)
+    personnelInput.vm.$emit('update:modelValue', 'p4321')
+    personnelInput.vm.$emit('select', {
+      numPersonnel: 'p4321',
+      nom: 'Durand',
+      prenom: 'Claire',
+      email: '',
+      existing: false
+    })
+
+    const inputs = wrapper.findAllComponents(UInput)
+    await inputs[0]!.find('input').setValue('Durand')
+    await inputs[1]!.find('input').setValue('Claire')
+    await inputs[2]!.find('input').setValue('')
+    await nextTick()
+
+    wrapper.findComponent(UForm).vm.$emit('submit')
+
+    await vi.waitFor(() => {
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/personnels', {
+        method: 'POST',
+        body: {
+          numPersonnel: 'p4321',
+          nom: 'Durand',
+          prenom: 'Claire',
+          email: null,
+          role: 'secretariat',
+          department_ids: [1]
+        }
+      })
+    })
+
+    await vi.waitFor(() => {
+      expect(mocks.toast.add).toHaveBeenCalledWith({
+        title: 'Personnel ajouté',
+        description: 'Claire Durand a été ajouté au département Informatique.',
+        color: 'success'
+      })
+    })
+
+    const emitted = wrapper.findComponent(AddPersonnelModal).emitted('created')
+    expect(emitted).toHaveLength(1)
+    expect(emitted![0]).toEqual([{
+      numPersonnel: 'p4321',
+      nom: 'Durand',
+      prenom: 'Claire',
+      email: ''
     }])
 
     await vi.waitFor(() => {
@@ -341,6 +418,7 @@ describe('AddPersonnelModal', () => {
       numPersonnel: 'p5678',
       nom: 'Martin',
       prenom: 'Alice',
+      email: 'alice.martin@univ-orleans.fr',
       existing: true
     })
     await nextTick()
@@ -367,7 +445,8 @@ describe('AddPersonnelModal', () => {
     expect(emitted![0]).toEqual([{
       numPersonnel: 'p5678',
       nom: 'Martin',
-      prenom: 'Alice'
+      prenom: 'Alice',
+      email: 'alice.martin@univ-orleans.fr'
     }])
 
     await vi.waitFor(() => expect(modal.props('open')).toBe(false))
@@ -381,6 +460,7 @@ describe('AddPersonnelModal', () => {
     await inputs[0]!.find('input').setValue('p1234')
     await inputs[1]!.find('input').setValue('Dupont')
     await inputs[2]!.find('input').setValue('Jean')
+    await inputs[3]!.find('input').setValue('jean.dupont@univ-orleans.fr')
     await nextTick()
 
     wrapper.findComponent(UForm).vm.$emit('submit')
@@ -411,6 +491,7 @@ describe('AddPersonnelModal', () => {
     await inputs[0]!.find('input').setValue('p1234')
     await inputs[1]!.find('input').setValue('Dupont')
     await inputs[2]!.find('input').setValue('Jean')
+    await inputs[3]!.find('input').setValue('jean.dupont@univ-orleans.fr')
     await nextTick()
 
     wrapper.findComponent(UForm).vm.$emit('submit')

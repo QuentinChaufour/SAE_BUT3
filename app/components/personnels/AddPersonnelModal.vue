@@ -9,7 +9,8 @@ import { FetchError } from 'ofetch'
 const personnelFormSchema = personnelBodySchema.pick({
   numPersonnel: true,
   nom: true,
-  prenom: true
+  prenom: true,
+  email: true
 })
 
 type Schema = z.output<typeof personnelFormSchema>
@@ -20,7 +21,7 @@ const props = defineProps<
 >()
 
 const emit = defineEmits<{
-  created: [personnel: Pick<Personnel, 'numPersonnel' | 'nom' | 'prenom'>]
+  created: [personnel: Pick<Personnel, 'numPersonnel' | 'nom' | 'prenom' | 'email'>]
 }>()
 
 const isOpen = defineModel<boolean>('open', { default: false })
@@ -35,7 +36,8 @@ function createDefaultState(): Schema {
   return {
     numPersonnel: '',
     nom: '',
-    prenom: ''
+    prenom: '',
+    email: ''
   }
 }
 
@@ -58,6 +60,7 @@ function onPersonnelSelected(personnel: PersonnelOption | null) {
 
   state.nom = personnel?.nom ?? ''
   state.prenom = personnel?.prenom ?? ''
+  state.email = personnel?.email ?? ''
 
   formRef.value?.validate({ name: 'numPersonnel' }).catch(() => null)
 }
@@ -78,6 +81,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
           numPersonnel: state.numPersonnel,
           nom: state.nom,
           prenom: state.prenom,
+          email: state.email || null,
           role: props.type,
           department_ids: props.type === 'secretariat' ? [props.department.idDepartement] : undefined
         }
@@ -92,7 +96,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
       color: 'success'
     })
 
-    emit('created', { numPersonnel: state.numPersonnel, nom: state.nom, prenom: state.prenom })
+    emit('created', { numPersonnel: state.numPersonnel, nom: state.nom, prenom: state.prenom, email: state.email || '' })
 
     isOpen.value = false
   } catch (error) {
@@ -182,6 +186,20 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
             :disabled="isExistingPersonnel"
             :maxlength="100"
             required
+          />
+        </UFormField>
+
+        <UFormField
+          label="Email"
+          name="email"
+        >
+          <UInput
+            v-model="state.email"
+            placeholder="Email"
+            class="w-full"
+            :disabled="isExistingPersonnel"
+            :maxlength="100"
+            type="email"
           />
         </UFormField>
       </UForm>

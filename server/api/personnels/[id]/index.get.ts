@@ -23,6 +23,7 @@ defineRouteMeta({
                 numPersonnel: { type: 'string' },
                 nom: { type: 'string' },
                 prenom: { type: 'string' },
+                email: { type: 'string' },
                 role: { type: 'string', enum: ['admin', 'secretariat'] },
                 Appartenir: {
                   type: 'array',
@@ -64,6 +65,7 @@ export default defineEventHandler(async (event) => {
       numPersonnel: true,
       nom: true,
       prenom: true,
+      email: true,
       role: true,
       Appartenir: {
         select: {
