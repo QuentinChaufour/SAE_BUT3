@@ -124,6 +124,7 @@ model Enseignant {
   numEnseignant         String                  @id @db.VarChar
   nom                   String                  @db.VarChar
   prenom                String                  @db.VarChar
+  email                 String?                 @db.VarChar
   AnneeEnseignant       AnneeEnseignant[]
   Auth                  Auth?
   EnseignantEtuFavori   EnseignantEtuFavori[]
@@ -171,6 +172,7 @@ model Etudiant {
   numEtu              String                @id @db.VarChar
   nom                 String                @db.VarChar
   prenom              String                @db.VarChar
+  email               String?               @db.VarChar
   Auth                Auth?
   EnseignantEtuFavori EnseignantEtuFavori[]
   Inscription         Inscription[]
@@ -217,6 +219,7 @@ model Personnel {
   numPersonnel String          @id @db.VarChar
   nom          String          @db.VarChar
   prenom       String          @db.VarChar
+  email        String?         @db.VarChar
   role         Personnel_Role
   Appartenir   Appartenir[]
   Auth         Auth?
