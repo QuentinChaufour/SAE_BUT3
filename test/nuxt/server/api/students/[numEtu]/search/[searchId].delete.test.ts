@@ -1,0 +1,65 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import type { H3Event } from 'h3'
+
+import { prisma } from '~~/server/utils/prisma'
+import UserRole from '~~/shared/types/role'
+
+vi.mock('~~/server/utils/prisma', () => ({
+  prisma: {
+    $transaction: vi.fn(async (callback) => {
+      return callback({ rechercheStage: { delete: vi.fn() } })
+    }),
+    rechercheStage: { count: vi.fn() }
+  }
+}))
+
+vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
+vi.stubGlobal('defineRouteMeta', () => {})
+vi.stubGlobal(
+  'getValidatedRouterParams',
+  async (
+    event: H3Event,
+    parse: (params: unknown) => unknown
+  ) => parse(event.context.params)
+)
+vi.stubGlobal('sendNoContent', (_event: H3Event) => ({ status: 204 }))
+vi.stubGlobal('requireUserSession', async () => ({
+  user: { role: UserRole.Student, numId: 'o123456789' }
+}))
+
+let handler: typeof import('~~/server/api/students/[numEtu]/search/[searchId].delete')['default']
+
+describe('DELETE /api/students/:numEtu/search/:searchId', () => {
+  beforeEach(async () => {
+    vi.clearAllMocks()
+
+    vi.mocked(prisma.rechercheStage.count).mockResolvedValue(1)
+
+    handler = (await import('~~/server/api/students/[numEtu]/search/[searchId].delete')).default
+  })
+
+  it('delete department and associated data successfully', async () => {
+    const event = { context: { params: { numEtu: 'o123456789', searchId: 1 } } } as unknown as H3Event
+
+    const response = await handler(event)
+
+    expect(prisma.$transaction).toHaveBeenCalledTimes(1)
+    expect(response).toEqual({ status: 204 })
+  })
+
+  it('search not found', async () => {
+    vi.mocked(prisma.rechercheStage.count).mockResolvedValue(0)
+
+    const event = { context: { params: { numEtu: 'o123456789', searchId: 999 } } } as unknown as H3Event
+
+    await expect(handler(event)).rejects.toThrow()
+    expect(prisma.$transaction).not.toHaveBeenCalled()
+  })
+
+  it('reject request if invalid params id', async () => {
+    const event = { context: { params: { numEtu: 'o123456789', searchId: 'INVALID_ID' } } } as unknown as H3Event
+
+    await expect(handler(event)).rejects.toThrow()
+    expect(prisma.$transaction).not.toHaveBeenCalled()
+  })
+})
