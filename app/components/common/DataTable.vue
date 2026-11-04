@@ -44,13 +44,25 @@ const filteredData = computed(() => {
 })
 
 const tableColumns = computed<TableColumn<T>[]>(() => {
-  if (!props.sortable) return props.columns
-
   return props.columns.map((col) => {
-    if (typeof col.header !== 'string' || col.enableSorting === false) return col
+    let updatedColumn: TableColumn<T> = { ...col }
 
-    const label = col.header
-    return { ...col, header: ({ column }: { column: Column<T> }) => getSortableHeader(column, label) } as TableColumn<T>
+    if (col.id === 'action') {
+      updatedColumn = {
+        ...updatedColumn,
+        meta: {
+          ...updatedColumn.meta,
+          class: { td: 'text-right' }
+        }
+      }
+    }
+
+    if (props.sortable && typeof updatedColumn.header === 'string' && updatedColumn.enableSorting !== false) {
+      const label = updatedColumn.header
+      updatedColumn.header = ({ column }: { column: Column<T> }) => getSortableHeader(column, label)
+    }
+
+    return updatedColumn
   })
 })
 
