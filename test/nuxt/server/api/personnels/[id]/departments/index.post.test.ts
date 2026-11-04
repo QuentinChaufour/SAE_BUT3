@@ -108,10 +108,6 @@ describe('POST /api/personnels/:id/departments', () => {
       message: 'Personnel non trouvé.'
     })
 
-    expect(mocks.createError).toHaveBeenCalledWith({
-      statusCode: 404,
-      message: 'Personnel non trouvé.'
-    })
     expect(prisma.appartenir.findFirst).not.toHaveBeenCalled()
     expect(prisma.appartenir.create).not.toHaveBeenCalled()
     expect(mocks.setResponseStatus).not.toHaveBeenCalled()
@@ -125,10 +121,22 @@ describe('POST /api/personnels/:id/departments', () => {
       message: 'Le personnel est déjà rattaché à ce département.'
     })
 
-    expect(mocks.createError).toHaveBeenCalledWith({
+    expect(prisma.appartenir.create).not.toHaveBeenCalled()
+    expect(mocks.setResponseStatus).not.toHaveBeenCalled()
+  })
+
+  it('return error if the personnel is not a secretariat', async () => {
+    vi.mocked(prisma.personnel.findUnique).mockResolvedValueOnce({
+      ...mockPersonnel,
+      role: Personnel_Role.admin
+    } as never)
+
+    await expect(callHandler()).rejects.toMatchObject({
       statusCode: 400,
-      message: 'Le personnel est déjà rattaché à ce département.'
+      message: 'Seul le secrétariat peut être rattaché à un département.'
     })
+
+    expect(prisma.appartenir.findFirst).not.toHaveBeenCalled()
     expect(prisma.appartenir.create).not.toHaveBeenCalled()
     expect(mocks.setResponseStatus).not.toHaveBeenCalled()
   })

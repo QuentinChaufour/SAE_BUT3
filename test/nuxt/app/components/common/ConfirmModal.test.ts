@@ -41,4 +41,14 @@ describe('ConfirmModal.vue', () => {
 
     expect(wrapper.emitted('confirm')).toBeTruthy()
   })
+
+  it('updates isOpen model when UModal emits update:open', async () => {
+    const wrapper = await mountModal()
+
+    const modal = wrapper.findComponent({ name: 'UModal' })
+    modal.vm.$emit('update:open', false)
+    await nextTick()
+
+    expect(wrapper.emitted('update:open')).toEqual([[false]])
+  })
 })

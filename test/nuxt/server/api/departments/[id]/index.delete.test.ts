@@ -14,7 +14,7 @@ vi.mock('~~/server/utils/prisma', () => ({
         appartenir: { deleteMany: vi.fn() },
         departement: { delete: vi.fn() }
       }
-      return await callback(tx)
+      return callback(tx)
     })
   }
 }))
@@ -28,7 +28,7 @@ vi.stubGlobal(
     parse: (params: unknown) => unknown
   ) => parse(event.context.params)
 )
-vi.stubGlobal('sendNoContent', (event: H3Event, code?: number) => ({ status: code || 204 }))
+vi.stubGlobal('sendNoContent', (_event: H3Event) => ({ status: 204 }))
 vi.stubGlobal('requireUserSession', async () => ({
   user: { role: UserRole.Admin, numId: 'p123456789' }
 }))

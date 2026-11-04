@@ -63,6 +63,7 @@ describe('PersonnelEditModal', () => {
 
     const inputs = wrapper.findAllComponents(UInput)
     await inputs[0]!.find('input').setValue('Dupont')
+    await inputs[1]!.find('input').setValue('Jacques')
     await nextTick()
 
     wrapper.findComponent(UForm).vm.$emit('submit')
@@ -70,7 +71,7 @@ describe('PersonnelEditModal', () => {
     await vi.waitFor(() => {
       expect(mocks.fetch).toHaveBeenCalledWith('/api/personnels/p1234', {
         method: 'PATCH',
-        body: { nom: 'Dupont', prenom: 'Pierre' }
+        body: { nom: 'Dupont', prenom: 'Jacques' }
       })
     })
   })
@@ -107,7 +108,7 @@ describe('PersonnelEditModal', () => {
     await vi.waitFor(() => {
       expect(mocks.toast.add).toHaveBeenCalledWith({
         title: 'Personnel mis à jour',
-        description: 'Le personnel Dupont Pierre a été mis à jour avec succès.',
+        description: 'Le personnel Pierre Dupont a été mis à jour avec succès.',
         color: 'success'
       })
     })
@@ -140,5 +141,40 @@ describe('PersonnelEditModal', () => {
 
     const saveButton = modal.findAllComponents(UButton).find(b => b.text() === 'Modifier')!
     expect(saveButton.props('loading')).toBe(false)
+  })
+
+  it('disables save button and displays validation message when form is invalid', async () => {
+    const { wrapper, modal } = await mountAndOpenEdit()
+
+    const inputs = wrapper.findAllComponents(UInput)
+    await inputs[0]!.find('input').setValue('A')
+    await nextTick()
+
+    const saveButton = modal.findAllComponents(UButton).find(b => b.text() === 'Modifier')!
+    expect(saveButton.props('disabled')).toBe(true)
+
+    const tooltip = modal.findComponent({ name: 'UTooltip' })
+    expect(tooltip.props('text')).toBe('Le nom est requis.')
+  })
+
+  it('resets form state when modal open is updated to false', async () => {
+    const { wrapper, modal } = await mountAndOpenEdit()
+
+    const inputs = wrapper.findAllComponents(UInput)
+    await inputs[0]!.find('input').setValue('NouveauNom')
+    await inputs[1]!.find('input').setValue('NouveauPrenom')
+    await nextTick()
+
+    modal.vm.$emit('update:open', true)
+    await nextTick()
+
+    expect(inputs[0]!.find('input').element.value).toBe('NouveauNom')
+    expect(inputs[1]!.find('input').element.value).toBe('NouveauPrenom')
+
+    modal.vm.$emit('update:open', false)
+    await nextTick()
+
+    expect(inputs[0]!.find('input').element.value).toBe(editPersonnel.nom)
+    expect(inputs[1]!.find('input').element.value).toBe(editPersonnel.prenom)
   })
 })

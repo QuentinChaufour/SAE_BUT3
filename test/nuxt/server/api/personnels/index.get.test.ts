@@ -20,8 +20,8 @@ vi.stubGlobal('getValidatedQuery', async (event: { query?: unknown }, validate: 
 )
 
 const mockResults = [
-  { numPersonnel: 'p000000001', nom: 'Dupont', prenom: 'Jean', role: Personnel_Role.admin },
-  { numPersonnel: 'p000000002', nom: 'Martin', prenom: 'Claire', role: Personnel_Role.secretariat }
+  { numPersonnel: 'p1234567', nom: 'Dupont', prenom: 'Jean', role: Personnel_Role.admin },
+  { numPersonnel: 'p7654321', nom: 'Martin', prenom: 'Claire', role: Personnel_Role.secretariat }
 ]
 
 const baseArgs = {

@@ -1,7 +1,8 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import SecretariatsPage from '~/pages/departments/[id]/secretariats.vue'
 import PersonnelsTable from '~/components/personnels/PersonnelsTable.vue'
+import AddPersonnelModal from '~/components/personnels/AddPersonnelModal.vue'
 
 const mockDepartmentData = {
   idDepartement: 1,
@@ -9,7 +10,10 @@ const mockDepartmentData = {
   DepartementTag: [{ idTag: 1, nomTag: 'Info' }]
 }
 
+const getPersonnels = vi.fn(() => [])
+
 registerEndpoint('/api/departments/1', () => mockDepartmentData)
+registerEndpoint('/api/personnels', getPersonnels)
 registerEndpoint('/api/departments/2', () => {
   throw createError({
     statusCode: 404,
@@ -58,5 +62,18 @@ describe('Departments Secretariats Page', () => {
 
     expect(wrapper.findComponent(PersonnelsTable).exists()).toBe(false)
     expect(useError().value).toMatchObject({ statusCode: 404 })
+  })
+
+  it('refreshes table when personnel is created', async () => {
+    const wrapper = await mountSuspended(SecretariatsPage, {
+      route: { params: { id: '1' } }
+    })
+
+    const callsBefore = getPersonnels.mock.calls.length
+    const modal = wrapper.findComponent(AddPersonnelModal)
+    expect(modal.exists()).toBe(true)
+
+    modal.vm.$emit('created', { numPersonnel: 'p1234', nom: 'Newman', prenom: 'Paul' })
+    await vi.waitFor(() => expect(getPersonnels).toHaveBeenCalledTimes(callsBefore + 1))
   })
 })

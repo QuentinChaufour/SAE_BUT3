@@ -1,9 +1,14 @@
 import { describe, it, expect, vi } from 'vitest'
-import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
+import { mountSuspended, registerEndpoint, mockNuxtImport } from '@nuxt/test-utils/runtime'
 
 import DepartmentsPage from '~/pages/departments/index.vue'
 import DepartementsTable from '~/components/departments/DepartmentsTable.vue'
 import DepartmentModal from '~/components/departments/DepartmentModal.vue'
+
+const mocks = vi.hoisted(() => ({
+  navigateToMock: vi.fn()
+}))
+mockNuxtImport('navigateTo', () => mocks.navigateToMock)
 
 const getDepartments = vi.fn(() => [{ idDepartement: 1, nom: 'Informatique' }])
 registerEndpoint('/api/departments', getDepartments)
@@ -43,5 +48,15 @@ describe('Departments List', () => {
     await vi.waitFor(() => {
       expect(getDepartments).toHaveBeenCalledTimes(callsBefore + 1)
     })
+  })
+
+  it('check navigation url to secretariats page', async () => {
+    const wrapper = await mountSuspended(DepartmentsPage)
+
+    const table = wrapper.findComponent(DepartementsTable)
+    expect(table.exists()).toBe(true)
+
+    table.vm.$emit('secretariats', { idDepartement: 1, nom: 'Informatique' })
+    expect(mocks.navigateToMock).toHaveBeenCalledWith('/departments/1/secretariats')
   })
 })

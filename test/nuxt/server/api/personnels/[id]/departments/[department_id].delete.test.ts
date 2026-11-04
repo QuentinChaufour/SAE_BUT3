@@ -34,8 +34,8 @@ vi.stubGlobal('getValidatedRouterParams', async (event: { params?: unknown }, va
 
 const NOW = new Date('2026-11-01T10:00:00.000Z')
 
-const validParams = { id: 'p000000001', departement_id: '3' }
-const mockAppartenance = { idAppartenance: 42, numPersonnel: 'p000000001', idDepartement: 3, dateFin: null }
+const validParams = { id: 'p1234567', departement_id: '3' }
+const mockAppartenance = { idAppartenance: 42, numPersonnel: 'p1234567', idDepartement: 3, dateFin: null }
 
 let handler: typeof import('~~/server/api/personnels/[id]/departments/[department_id].delete')['default']
 
@@ -51,13 +51,13 @@ describe('DELETE /api/personnels/:id/departments/:department_id', () => {
     handler = (await import('~~/server/api/personnels/[id]/departments/[department_id].delete')).default
   })
 
-  it('looks for the active attachment (coercing departement_id)', async () => {
+  it('check active attachment', async () => {
     await handler({ params: validParams } as unknown as H3Event)
 
     expect(prisma.appartenir.findFirst).toHaveBeenCalledTimes(1)
     expect(prisma.appartenir.findFirst).toHaveBeenCalledWith({
       where: {
-        numPersonnel: 'p000000001',
+        numPersonnel: 'p1234567',
         idDepartement: 3,
         dateFin: null
       }

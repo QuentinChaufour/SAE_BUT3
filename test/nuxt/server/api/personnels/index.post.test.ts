@@ -15,7 +15,7 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('~~/server/utils/prisma', () => ({
-  prisma: { $transaction: vi.fn() }
+  prisma: { $transaction: vi.fn(), personnel: { count: vi.fn() } }
 }))
 
 mockNuxtImport('setResponseStatus', () => mocks.setResponseStatus)
@@ -55,6 +55,8 @@ describe('POST /api/personnels', () => {
     vi.useFakeTimers()
 
     vi.mocked(prisma.$transaction).mockImplementation((async (callback: (tx: typeof mocks.tx) => unknown) => callback(mocks.tx)) as never)
+    vi.mocked(prisma.personnel.count).mockResolvedValue(0)
+
     mocks.tx.personnel.create.mockImplementation(async ({ data }: { data: unknown }) => data)
     mocks.tx.appartenir.createMany.mockResolvedValue({ count: 0 })
 
@@ -117,6 +119,16 @@ describe('POST /api/personnels', () => {
 
   it('rejects an invalid role', async () => {
     await expect(callRoute({ ...adminBody, role: 'student' })).rejects.toThrow()
+    expect(prisma.$transaction).not.toHaveBeenCalled()
+  })
+
+  it('return 409 if the personnel number already exists', async () => {
+    vi.mocked(prisma.personnel.count).mockResolvedValue(1)
+
+    await expect(callRoute(adminBody)).rejects.toMatchObject({
+      statusCode: 409,
+      message: 'Ce numéro personnel existe déjà.'
+    })
     expect(prisma.$transaction).not.toHaveBeenCalled()
   })
 })

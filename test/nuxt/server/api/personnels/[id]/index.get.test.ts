@@ -26,7 +26,7 @@ vi.stubGlobal('getValidatedRouterParams', async (event: { params?: unknown }, va
 )
 
 const mockPersonnel = {
-  numPersonnel: 'p000000001',
+  numPersonnel: 'p7654321',
   nom: 'Martin',
   prenom: 'Claire',
   role: Personnel_Role.secretariat,

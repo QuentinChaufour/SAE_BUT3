@@ -84,6 +84,30 @@ describe('DepartementsTable', () => {
     expect(modal.props('editDepartment')).toEqual(departments[0])
   })
 
+  it('check open/close modal', async () => {
+    const wrapper = await mountTable()
+
+    const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
+      const items = menu.props('items') as { label: string, onSelect: () => void }[][]
+      return items[0]?.[0]?.label === 'Modifier le nom'
+    })
+
+    const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
+    actions[0]![0]!.onSelect()
+    await nextTick()
+
+    const modal = wrapper.findComponent(DepartmentModal)
+    expect(modal.exists()).toBe(true)
+
+    modal.vm.$emit('update:open', true)
+    await nextTick()
+    expect(wrapper.findComponent(DepartmentModal).exists()).toBe(true)
+
+    modal.vm.$emit('update:open', false)
+    await nextTick()
+    expect(wrapper.findComponent(DepartmentModal).exists()).toBe(false)
+  })
+
   it('refresh departments on modal saved', async () => {
     const wrapper = await mountTable()
 

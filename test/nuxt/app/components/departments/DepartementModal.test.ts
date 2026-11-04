@@ -8,12 +8,14 @@ import DepartmentModal from '~/components/departments/DepartmentModal.vue'
 const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
   userSession: vi.fn(),
-  toast: { add: vi.fn() }
+  toast: { add: vi.fn() },
+  navigateTo: vi.fn()
 }))
 
 mockNuxtImport('$fetch', () => mocks.fetch)
 mockNuxtImport('useUserSession', () => mocks.userSession)
 mockNuxtImport('useToast', () => () => mocks.toast)
+mockNuxtImport('navigateTo', () => mocks.navigateTo)
 
 const createdSearch = { idDepartement: 1, nom: 'Informatique', anneeActuelle: '2026-2027' }
 
@@ -139,6 +141,10 @@ describe('DepartmentModal', () => {
       })
     })
     expect(mocks.toast.add).toHaveBeenCalledTimes(1)
+
+    const toastCall = mocks.toast.add.mock.calls[0]![0]
+    toastCall.actions[0].onClick()
+    expect(mocks.navigateTo).toHaveBeenCalledWith('/departments/1/secretariats')
 
     const emitted = wrapper.findComponent(DepartmentModal).emitted('saved')
     expect(emitted).toHaveLength(1)
@@ -302,6 +308,19 @@ describe('DepartmentModal', () => {
 
       const saveButton = modal.findAllComponents(UButton).find(b => b.text() === 'Modifier')!
       expect(saveButton.props('loading')).toBe(false)
+    })
+
+    it('check form reset when modal is closed', async () => {
+      const { wrapper, modal } = await mountAndOpen()
+      await fillForm(wrapper)
+
+      modal.vm.$emit('update:open', true)
+      await nextTick()
+      expect(wrapper.findComponent(UInput).find('input').element.value).toBe('Informatique')
+
+      modal.vm.$emit('update:open', false)
+      await nextTick()
+      expect(wrapper.findComponent(UInput).find('input').element.value).toBe('')
     })
   })
 })

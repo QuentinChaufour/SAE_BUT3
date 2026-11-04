@@ -97,6 +97,30 @@ describe('PersonnelsTable', () => {
     expect(modal.props('editPersonnel')).toEqual(personnelsAdmin[0])
   })
 
+  it('closes edit modal when update:open is emitted with false', async () => {
+    const wrapper = await mountTable()
+
+    const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
+      const items = menu.props('items') as { label: string, onSelect: () => void }[][]
+      return items[0]?.[0]?.label === 'Modifier'
+    })
+
+    const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
+    actions[0]![0]!.onSelect()
+    await nextTick()
+
+    const modal = wrapper.findComponent(PersonnelEditModal)
+    expect(modal.exists()).toBe(true)
+
+    modal.vm.$emit('update:open', true)
+    await nextTick()
+    expect(wrapper.findComponent(PersonnelEditModal).exists()).toBe(true)
+
+    modal.vm.$emit('update:open', false)
+    await nextTick()
+    expect(wrapper.findComponent(PersonnelEditModal).exists()).toBe(false)
+  })
+
   it('refresh departments on modal saved', async () => {
     const wrapper = await mountTable()
 
@@ -264,6 +288,39 @@ describe('PersonnelsTable', () => {
 
       await input.setValue('')
       expect(wrapper.findComponent({ name: 'UTable' }).findAll('tbody tr')).toHaveLength(2)
+    })
+
+    it('deletes personnel in secretariat mode ', async () => {
+      mocks.fetch.mockResolvedValueOnce(undefined)
+      mocks.refresh.mockResolvedValueOnce(undefined)
+
+      const wrapper = await mountTable('secretariat')
+
+      const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
+        const items = menu.props('items') as { label: string, onSelect: () => void }[][]
+        return items[0]?.[1]?.label === 'Supprimer'
+      })
+
+      const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
+      actions[0]![1]!.onSelect()
+
+      const modal = wrapper.findComponent(ConfirmModal)
+
+      modal.vm.$emit('confirm')
+
+      expect($fetch).toHaveBeenCalledWith(
+        '/api/personnels/p9012/departements/1',
+        { method: 'DELETE' }
+      )
+
+      await vi.waitFor(() => {
+        expect(mocks.toast.add).toHaveBeenCalledWith({
+          title: 'Personnel supprimée',
+          description: 'Le personnel Dwayne Johnson a été supprimé avec succès.',
+          color: 'success'
+        })
+        expect(mocks.refresh).toHaveBeenCalledTimes(1)
+      })
     })
   })
 })
