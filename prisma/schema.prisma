@@ -72,7 +72,7 @@ model DemarcheEvenement {
   status                   Recherche_Stage_Status
   source                   Demarche_Source
   idRecherche              Int
-  RechercheStage           RechercheStage             @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
+  RechercheStage           RechercheStage             @relation(fields: [idRecherche], references: [idRecherche], onDelete: Cascade, onUpdate: NoAction)
   DemarcheRechercheContact DemarcheRechercheContact[]
   LienPj                   LienPj[]
 }
@@ -82,7 +82,7 @@ model DemarcheRechercheContact {
   idDemarche        Int
   idContact         Int
   DemarcheContact   DemarcheContact   @relation(fields: [idContact], references: [idContact], onDelete: NoAction, onUpdate: NoAction)
-  DemarcheEvenement DemarcheEvenement @relation(fields: [idDemarche], references: [idDemarche], onDelete: NoAction, onUpdate: NoAction)
+  DemarcheEvenement DemarcheEvenement @relation(fields: [idDemarche], references: [idDemarche], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([idDemarche, idContact])
 }
@@ -114,7 +114,7 @@ model DepartementTag {
 model DepartementTagRecherche {
   idRecherche    Int
   idTag          Int
-  RechercheStage RechercheStage @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
+  RechercheStage RechercheStage @relation(fields: [idRecherche], references: [idRecherche], onDelete: Cascade, onUpdate: NoAction)
   DepartementTag DepartementTag @relation(fields: [idTag], references: [idTag], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([idRecherche, idTag])
@@ -209,7 +209,7 @@ model Inscription {
 model LienPj {
   idPieceJointe     Int
   idDemarche        Int
-  DemarcheEvenement DemarcheEvenement @relation(fields: [idDemarche], references: [idDemarche], onDelete: NoAction, onUpdate: NoAction)
+  DemarcheEvenement DemarcheEvenement @relation(fields: [idDemarche], references: [idDemarche], onDelete: Cascade, onUpdate: NoAction)
   PieceJointe       PieceJointe       @relation(fields: [idPieceJointe], references: [idPieceJointe], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([idPieceJointe, idDemarche])
