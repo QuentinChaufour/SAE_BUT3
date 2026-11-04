@@ -217,7 +217,7 @@ model Personnel {
   numPersonnel String          @id @db.VarChar
   nom          String          @db.VarChar
   prenom       String          @db.VarChar
-  role         Personnel_Role?
+  role         Personnel_Role
   Appartenir   Appartenir[]
   Auth         Auth?
 }
