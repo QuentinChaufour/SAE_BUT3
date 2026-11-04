@@ -18,7 +18,7 @@ const departmentsTable = useTemplateRef('departmentsTable')
 <template>
   <UDashboardPanel>
     <template #header>
-      <UDashboardNavbar :title="'Départements'">
+      <UDashboardNavbar title="Départements">
         <template #leading>
           <UDashboardSidebarCollapse />
         </template>
