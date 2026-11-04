@@ -50,7 +50,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
 
     toast.add({
       title: 'Personnel mis à jour',
-      description: `Le personnel ${response.nom} ${response.prenom} a été mis à jour avec succès.`,
+      description: `Le personnel ${response.prenom} ${response.nom} a été mis à jour avec succès.`,
       color: 'success'
     })
 
