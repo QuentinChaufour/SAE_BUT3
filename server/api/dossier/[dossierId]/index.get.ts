@@ -44,7 +44,7 @@ export default defineEventHandler(async (event) => {
           DemarcheRechercheContact: {
             select: {
               DemarcheContact: true
-            }
+            },
           }
         },
         orderBy: {
@@ -68,7 +68,7 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Dossier not found'
     }))
   }
-
+  
   return { 
     statusCode: 200,
     data: dossier

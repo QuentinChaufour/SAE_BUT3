@@ -5,6 +5,7 @@ import { Demarche_Source , Recherche_Stage_Status } from '~~/generated/prisma/en
 import type { DemarcheContact } from '~~/generated/prisma/client'
 import type { EventInfo } from '~~/shared/types/event'
 import type { APIResponse } from '~~/shared/types/apiResponse'
+import StatusBadge from '~/components/dossier/StatusBadge.vue'
 
 type ContactItem = {
   value: number
@@ -252,7 +253,11 @@ onMounted(async () => {
           name="status"
           :items="Object.values(Recherche_Stage_Status).map(status => ({ value: status, label: status }))"
           v-model="state.status"
-        />
+        >
+          <template #item="{ item }">
+            <StatusBadge :status="item.value" />
+          </template>
+        </USelect>
       </UFormField>
 
       <UFormField

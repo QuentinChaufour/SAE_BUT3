@@ -12,6 +12,7 @@ import type {
   RechercheStage,
   Departement
 } from '~~/generated/prisma/client'
+import { Demarche_Source, Recherche_Stage_Status } from '~~/generated/prisma/enums'
 import type { EventInfo } from '~~/shared/types/event'
 import type { APIResponse } from '~~/shared/types/apiResponse'
 import type { contactSchema } from '~~/shared/schemas/contact'
@@ -19,6 +20,7 @@ import EventsManagement from '~/components/dossier/EventsManagement.vue'
 import EventDescription from '~/components/dossier/EventDescription.vue'
 import ContactForm from '~/components/forms/ContactForm.vue'
 import DossierTagSelection from '~/components/dossier/DossierTagSelection.vue'
+import StatusBadge from '~/components/dossier/StatusBadge.vue'
 
 definePageMeta({
   middleware: ['auth', 'role'],
@@ -76,7 +78,8 @@ const dossierTags = ref<string[]>([])
 const contacts = ref<ContactInfoAcccordion[]>([])
 const files = ref<FileUploadItem[]>([])
 const departementId = ref<number | null>(null)
-const openedEventCreation = ref<boolean>(false)
+const openedEventCreation = ref<boolean>(false) 
+const dossierStatus = computed(() => dossier.value?.DemarcheEvenement[0]?.status ?? Recherche_Stage_Status.AttenteEnvoi)
 const state = reactive({
   description: ''
 })
@@ -144,7 +147,13 @@ async function initComponent() {
     }
 
     // TODO computed ?
+    const idSet = new Set<number>()
     for (const contact of dossier.value.DemarcheEvenement.flatMap(e => e.DemarcheRechercheContact.map(c => c.DemarcheContact))) {
+      // ensure distinct contacts
+      if (idSet.has(contact.idContact)) {
+        continue
+      }
+
       contacts.value.push({
         value: String(contact.idContact),
         label: `${contact.nom} ${contact.prenom}`,
@@ -156,6 +165,8 @@ async function initComponent() {
         email: contact.email || '',
         telephone: contact.telephone || ''
       })
+
+      idSet.add(contact.idContact)
     }
 
     // update the state with the dossier description
@@ -325,7 +336,10 @@ onMounted(async () => {
             Retour
           </UButton>
 
-          <!-- TODO dossier status -->
+          <StatusBadge
+            :status="dossierStatus"
+            class="ml-4"
+          />
         </div>
 
         <UPage>

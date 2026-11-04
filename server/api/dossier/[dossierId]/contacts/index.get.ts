@@ -17,12 +17,19 @@ export default defineEventHandler(async (event) => {
       DemarcheRechercheContact: {
         select: {
           DemarcheContact: true
-        }
-      }
-    }
+        },
+      },
+    },
   })
 
-  const formattedContacts = contacts.map(contact => contact.DemarcheRechercheContact.map(c => c.DemarcheContact)).flat()
+  const idSet = new Set<number>()
+  const formattedContacts = contacts.map(contact => contact.DemarcheRechercheContact.map(c => c.DemarcheContact)).flat().filter(contact => {
+    if (!idSet.has(contact.idContact)) {
+      idSet.add(contact.idContact)
+      return true
+    }
+    return false
+  })
 
   if(!contacts) {
     return {
