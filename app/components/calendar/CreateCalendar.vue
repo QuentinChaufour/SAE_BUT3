@@ -36,7 +36,7 @@ function onViewChange(value: string | number) {
 </script>
 
 <template>
-
+  <div class="relative flex flex-1 flex-col min-h-0">
     <header class="absolute top-0 pt-2 inset-x-0 z-10 flex items-center gap-2 sm:gap-4 h-[calc(var(--ui-header-height)+0.5rem)] px-4 border-b border-default glass-material [view-transition-name:header]">
 
       <div class="pointer-events-none absolute inset-0 -z-10 bg-(--glass-bg) bg-linear-to-b from-default from-40% to-transparent" />
@@ -81,8 +81,8 @@ function onViewChange(value: string | number) {
 
     </header>
 
-  <div class="flex-1 flex flex-col min-h-0">
-    <CalendarWeekView />
+    <div class="flex-1 flex flex-col min-h-0">
+      <CalendarWeekView />
+    </div>
   </div>
-
 </template>

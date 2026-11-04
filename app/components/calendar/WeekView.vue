@@ -157,7 +157,7 @@ onMounted(async () => {
     <UScrollArea
       ref="container"
       :style="{ scrollPaddingTop: chromeOffset }"
-      class="flex-1 z-0 snap-y snap-proximity scrollbar-gutter-stable [view-transition-name:calendar] max-lg:[--toolbar-clearance:5rem] scroll-pb-(--toolbar-clearance)"
+      class="flex-1 min-h-0 z-0 snap-y snap-proximity scrollbar-gutter-stable [view-transition-name:calendar] max-lg:[--toolbar-clearance:5rem] scroll-pb-(--toolbar-clearance)"
     >
       <!-- Below `lg` the day runs on past the phone toolbar floating at the
         bottom, so the last hour can scroll clear of it. The clearance is the
