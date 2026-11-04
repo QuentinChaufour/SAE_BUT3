@@ -8,12 +8,6 @@ import type { EntrepriseStateType } from '~~/shared/types/company.js'
 
 type Schema = z.output<typeof companyFields>
 
-const isLoading = ref(false)
-const state = reactive<EntrepriseStateReactive>(createDefaultState())
-
-const isOpen = defineModel<boolean>('open', { default: false })
-const toast = useToast()
-
 const props = defineProps<{
   initialNomEntreprise?: string
 }>()
@@ -21,6 +15,12 @@ const props = defineProps<{
 const emit = defineEmits<{
   created: [entreprise: Entreprise]
 }>()
+
+const isLoading = ref(false)
+const state = reactive<EntrepriseStateReactive>(createDefaultState())
+
+const isOpen = defineModel<boolean>('open', { default: false })
+const toast = useToast()
 
 export type EntrepriseStateReactive = EntrepriseStateType & { etranger: boolean }
 
