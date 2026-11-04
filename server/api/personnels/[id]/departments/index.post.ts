@@ -75,6 +75,13 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  if (personnel.role !== 'secretariat') {
+    throw createError({
+      statusCode: 400,
+      message: 'Seul le secrétariat peut être rattaché à un département.'
+    })
+  }
+
   const existingAppartenance = await prisma.appartenir.findFirst({
     where: {
       numPersonnel: params.id,

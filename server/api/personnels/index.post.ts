@@ -47,7 +47,8 @@ defineRouteMeta({
         }
       },
       400: { description: 'Les données fournies sont invalides.' },
-      403: { description: 'Forbidden' }
+      403: { description: 'Forbidden' },
+      409: { description: 'Ce numéro personnel existe déjà.' }
     }
   }
 })
@@ -56,6 +57,14 @@ export default defineEventHandler(async (event) => {
   await checkAuth(event, [UserRole.Admin])
 
   const body = await readValidatedBody(event, personnelBodySchema.parse)
+
+  const existing = await prisma.personnel.count({ where: { numPersonnel: body.numPersonnel } })
+  if (existing) {
+    throw createError({
+      statusCode: 409,
+      message: 'Ce numéro personnel existe déjà.'
+    })
+  }
 
   const created = await prisma.$transaction(async (tx) => {
     const personnel = await tx.personnel.create({
