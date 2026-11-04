@@ -3,6 +3,7 @@ import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
 import type { Entreprise, RechercheStage, DepartementTag } from '~~/generated/prisma/client'
 import SearchStatusBadge from './SearchStatusBadge.vue'
 import DataTable from '~/components/common/DataTable.vue'
+import ConfirmModal from '~/components/common/ConfirmModal.vue'
 
 type RechercheStageWithEntreprise
   = Pick<RechercheStage, 'idRecherche' | 'titre' | 'dateDerniereModification' | 'alternance' | 'status'> & {
@@ -19,9 +20,10 @@ const emit = defineEmits<{
   delete: [idRecherche: number]
 }>()
 
-const UBadge = resolveComponent('UBadge')
+const isDeleteModalOpen = ref(false)
+const searchToDelete = ref<RechercheStageWithEntreprise | null>(null)
 
-const { data: rechercheStage } = await useFetch<RechercheStageWithEntreprise[]>(`/api/students/${props.etudiantId}/search`)
+const { data: rechercheStage, refresh } = await useFetch<RechercheStageWithEntreprise[]>(`/api/students/${props.etudiantId}/search`)
 
 const searchFields = (stage: RechercheStageWithEntreprise) => [
   stage.titre,
@@ -29,6 +31,8 @@ const searchFields = (stage: RechercheStageWithEntreprise) => [
   stage.Entreprise.ville,
   ...stage.DepartementTagRecherche.map(tag => tag.DepartementTag.nomTag)
 ]
+
+const UBadge = resolveComponent('UBadge')
 
 const columns: TableColumn<RechercheStageWithEntreprise>[] = [
   {
@@ -104,6 +108,38 @@ const columns: TableColumn<RechercheStageWithEntreprise>[] = [
   { id: 'action' }
 ]
 
+const toast = useToast()
+
+function openDeleteModal(search: RechercheStageWithEntreprise) {
+  searchToDelete.value = search
+  isDeleteModalOpen.value = true
+}
+
+async function handleConfirmDelete() {
+  if (!searchToDelete.value) return
+
+  try {
+    await $fetch(`/api/students/${props.etudiantId}/search/${searchToDelete.value.idRecherche}`, { method: 'DELETE' })
+    await refresh()
+
+    toast.add({
+      title: 'Recherche supprimée',
+      description: `La recherche ${searchToDelete.value.titre} a été supprimée avec succès.`,
+      color: 'success'
+    })
+
+    isDeleteModalOpen.value = false
+    searchToDelete.value = null
+  } catch (error) {
+    console.error(error)
+    toast.add({
+      title: 'Erreur',
+      description: `Une erreur est survenue lors de la suppression de la recherche ${searchToDelete.value!.titre}.`,
+      color: 'error'
+    })
+  }
+}
+
 function getDropdownActions(search: RechercheStageWithEntreprise): DropdownMenuItem[][] {
   return [
     [
@@ -116,7 +152,7 @@ function getDropdownActions(search: RechercheStageWithEntreprise): DropdownMenuI
         label: 'Supprimer',
         icon: 'i-lucide-trash',
         color: 'error',
-        onSelect: () => emit('delete', search.idRecherche) // TODO: Remplacer par une modal de confirmation + suppression dans ce composant
+        onSelect: () => openDeleteModal(search)
       }
     ]
   ]
@@ -124,34 +160,44 @@ function getDropdownActions(search: RechercheStageWithEntreprise): DropdownMenuI
 </script>
 
 <template>
-  <DataTable
-    :data="rechercheStage"
-    :columns="columns"
-    :search-fields="searchFields"
-    search-placeholder="Rechercher parmi les recherches..."
-    :page-size="5"
-    sortable
-  >
-    <template #action-cell="{ row }">
-      <UDropdownMenu
-        v-if="!props.readOnly"
-        :items="getDropdownActions(row.original)"
-      >
+  <div>
+    <DataTable
+      :data="rechercheStage"
+      :columns="columns"
+      :search-fields="searchFields"
+      search-placeholder="Rechercher parmi les recherches..."
+      :page-size="5"
+      sortable
+    >
+      <template #action-cell="{ row }">
+        <UDropdownMenu
+          v-if="!props.readOnly"
+          :items="getDropdownActions(row.original)"
+        >
+          <UButton
+            icon="i-lucide-ellipsis-vertical"
+            color="neutral"
+            variant="ghost"
+            aria-label="Actions"
+          />
+        </UDropdownMenu>
         <UButton
-          icon="i-lucide-ellipsis-vertical"
+          v-else
+          icon="i-heroicons-chevron-right"
           color="neutral"
           variant="ghost"
-          aria-label="Actions"
+          aria-label="Voir"
+          @click="emit('edit', row.original)"
         />
-      </UDropdownMenu>
-      <UButton
-        v-else
-        icon="i-heroicons-chevron-right"
-        color="neutral"
-        variant="ghost"
-        aria-label="Voir"
-        @click="emit('edit', row.original)"
-      />
-    </template>
-  </DataTable>
+      </template>
+    </DataTable>
+
+    <ConfirmModal
+      :open="isDeleteModalOpen"
+      title="Supprimer la recherche"
+      :description="`Êtes-vous sûr de vouloir supprimer la recherche ${searchToDelete?.titre} ? L'ensemble des éléments liés (fichiers, contacts, etc.) seront supprimés. Cette action est irréversible.`"
+      @cancel="isDeleteModalOpen = false"
+      @confirm="handleConfirmDelete"
+    />
+  </div>
 </template>
