@@ -2,7 +2,7 @@
 import UserRole from '~~/shared/types/role'
 import type { ContactInfo } from '~~/shared/types/contact'
 import { z } from 'zod/v4'
-import type { FormSubmitEvent, AccordionItem, FileUploadItem, TimelineItem } from '@nuxt/ui'
+import type { FormSubmitEvent, AccordionItem, FileUploadItem } from '@nuxt/ui'
 import type {
   DemarcheContact,
   DemarcheEvenement,
@@ -12,12 +12,13 @@ import type {
   RechercheStage,
   Departement
 } from '~~/generated/prisma/client'
-
-import EventsManagement from '~/components/dossier/EventsManagement.vue'
-import ContactForm from '~/components/forms/ContactForm.vue'
-import TagSelection from '~/components/dossier/TagSelection.vue'
+import type { EventInfo } from '~~/shared/types/event'
+import type { APIResponse } from '~~/shared/types/apiResponse'
 import type { contactSchema } from '~~/shared/schemas/contact'
-import { pl } from 'zod/locales'
+import EventsManagement from '~/components/dossier/EventsManagement.vue'
+import EventDescription from '~/components/dossier/EventDescription.vue'
+import ContactForm from '~/components/forms/ContactForm.vue'
+import DossierTagSelection from '~/components/dossier/DossierTagSelection.vue'
 
 definePageMeta({
   middleware: ['auth', 'role'],
@@ -34,12 +35,12 @@ type DossierFull = Pick<
   >
 
   DemarcheEvenement: Array<
-    Pick<DemarcheEvenement, 'description'> & {
+    Pick<DemarcheEvenement, 'description'| 'titre' | 'status' | 'source' | 'idDemarche'> & {
       // Date values are serialized as strings by the API.
       date: string
 
       LienPj: Array<{
-        PieceJointe: Pick<PieceJointe, 'nom'>
+        PieceJointe: Pick<PieceJointe, 'nom' | 'idPieceJointe'>
       }>
 
       DemarcheRechercheContact: Array<{
@@ -54,14 +55,6 @@ type DossierFull = Pick<
 }
 
 type ContactInfoAcccordion = AccordionItem & ContactInfo
-type responseDossier = {
-  success: boolean
-  data: DossierFull | null
-}
-type responseDepartement = {
-  statusCode: number
-  data: Departement
-}
 
 // idContact is only needed when creating a new contact 
 type contactSchemaType = z.output<typeof contactSchema> & {
@@ -76,25 +69,26 @@ const hasDescriptionChanged = computed(() => schema.safeParse({ description: sta
 
 type Schema = z.output<typeof schema>
 
-const idDossier = useRoute().params.idDossier
+const idDossier = Number(useRoute().params.idDossier) ?? null
 const dossier = ref<DossierFull>()
-const events = ref<TimelineItem[]>([])
+const events = ref<EventInfo[]>([])
 const dossierTags = ref<string[]>([])
 const contacts = ref<ContactInfoAcccordion[]>([])
 const files = ref<FileUploadItem[]>([])
 const departementId = ref<number | null>(null)
+const openedEventCreation = ref<boolean>(false)
 const state = reactive({
   description: ''
 })
 
 async function initComponent() {
   try {
-    const response = await $fetch<responseDossier>(
+    const response = await $fetch<APIResponse<DossierFull>>(
       `/api/dossier/${idDossier}`,
       { method: 'GET' }
     )
 
-    if (!response.success || !response.data) {
+    if (response.statusCode !== 200 || !response.data) {
       return
     }
 
@@ -111,15 +105,21 @@ async function initComponent() {
       const date = new Date(Date.parse(event.date))
       events.value.push({
         date: date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear(),
-        title: dossier.value.titre,
+        title: event.titre || 'Pas de titre',
+        idDemarche: event.idDemarche,
+        titre: event.titre || 'Pas de titre',
         description: event.description || '',
-        icon: 'i-lucide-rocket'
+        icon: 'i-lucide-rocket',
+        status: event.status,
+        source: event.source,
+        contacts: event.DemarcheRechercheContact.map(c => c.DemarcheContact),
+        files: event.LienPj.map(pj => { return { nom: pj.PieceJointe.nom, idPieceJointe: pj.PieceJointe.idPieceJointe }; })
       })
     }
 
+    // TODO replace with computed
     for (const file of dossier.value.DemarcheEvenement.flatMap(e => e.LienPj.map(pj => pj.PieceJointe))) {
       // skip files with no name
-      // TODO should have a name no null possible
       if (!file.nom) {
         continue
       }
@@ -143,6 +143,7 @@ async function initComponent() {
       })
     }
 
+    // TODO computed ?
     for (const contact of dossier.value.DemarcheEvenement.flatMap(e => e.DemarcheRechercheContact.map(c => c.DemarcheContact))) {
       contacts.value.push({
         value: String(contact.idContact),
@@ -168,7 +169,7 @@ async function getDepartementId(): Promise<number | null> {
   const session = useUserSession()
 
   try {
-    const response = await $fetch<responseDepartement>(`/api/student/${session.user.value?.numId}/departement`, {
+    const response = await $fetch<APIResponse<Departement>>(`/api/student/${session.user.value?.numId}/departement`, {
       method: 'GET'
     })
 
@@ -176,7 +177,7 @@ async function getDepartementId(): Promise<number | null> {
       throw new Error('Failed to get departement id')
     }
 
-    return response.data.idDepartement
+    return response.data?.idDepartement ?? null
   }
   catch (e) {
     console.error(e)
@@ -195,7 +196,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   const newDescription = state.description
 
   if (newDescription === dossier.value.description) {
-    console.log('Description has not changed')
     return
   }
 
@@ -224,7 +224,6 @@ function deleteFile(index: number) {
 // keep the contact list up to date when a contact is added or updated
 // without reloading the page & without making another API call
 function contactSubmitted(contact: contactSchemaType , index?: number) {
-  
 
  if (index !== undefined) {
     const existing = contacts.value[index]
@@ -256,12 +255,40 @@ function contactSubmitted(contact: contactSchemaType , index?: number) {
   }
 }
 
+function eventCreated(event: EventInfo) {
+  events.value.push({
+    date: new Date(event.date).toLocaleDateString(),
+    idDemarche: event.idDemarche,
+    title: event.titre || 'Pas de titre',
+    titre: event.titre || 'Pas de titre',
+    description: event.description || '',
+    icon: 'i-lucide-rocket',
+    status: event.status,
+    source: event.source,
+    contacts: event.contacts,
+    files: event.files
+  })
+
+  // sort the events by date, newest first
+  events.value.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+
+  openedEventCreation.value = false
+}
+
+function deleteEvent(event: EventInfo) {
+  const index = events.value.findIndex(e => e.idDemarche === event.idDemarche)
+
+  if (index !== -1) {
+    events.value.splice(index, 1)
+  }
+}
+
 onMounted(async () => {
   await initComponent()
 
   departementId.value = await getDepartementId()
 })
-
+// TODO bug contacts doubles
 </script>
 
 <template>
@@ -305,7 +332,17 @@ onMounted(async () => {
           <div class="flex min-w-0 w-full flex-col gap-8 md:flex-row">
             <!-- TODO class as prop -->
             <div class="min-w-0 flex-1">
-              <EventsManagement :events="events" />
+              <EventsManagement 
+                :events="events" 
+                :dossier-id="dossier.idRecherche"
+                @deleted-event="deleteEvent"
+              >
+                <template #header_action>
+                  <UButton @click="openedEventCreation = true">
+                    Ajouter un événement
+                  </UButton>
+                </template>
+              </EventsManagement>
             </div>
 
             <div class="min-w-0 flex-2 mr-10 ml-10 space-y-5">
@@ -332,7 +369,7 @@ onMounted(async () => {
                   />
                 </UFormField>
               </div>
-              <!-- Form to update the 'dossier' description -->
+
               <UForm
                 :schema="schema"
                 :state="state"
@@ -357,13 +394,14 @@ onMounted(async () => {
                 </UButton>
               </UForm>
 
-              <TagSelection
+              <DossierTagSelection
                 v-model:tags="dossierTags"
                 :id-departement="departementId"
                 :id-dossier="dossier.idRecherche"
               />
 
-              <!-- TODO still need refresh => key ? -->
+              <USeparator />
+
               <UAccordion :items="contacts">
                 <template #content="{ item, index }">
                   <ContactForm
@@ -407,4 +445,18 @@ onMounted(async () => {
       </div>
     </template>
   </UDashboardPanel>
+
+  <USlideover
+    :title="'Ajouter un événement'"
+    :size="'xl'"
+    v-model:open="openedEventCreation"
+  >
+    <template #body>
+      <EventDescription
+        creation
+        :dossier-id="idDossier"
+        @created="eventCreated"
+      />
+    </template>
+  </USlideover>
 </template>

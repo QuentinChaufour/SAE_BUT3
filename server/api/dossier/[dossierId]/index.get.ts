@@ -25,12 +25,17 @@ export default defineEventHandler(async (event) => {
       },
       DemarcheEvenement: {
         select: {
+          idDemarche: true,
           date: true,
           description: true,
+          titre: true,
+          status: true,
+          source: true,
           LienPj: {
             select: {
               PieceJointe: {
                 select: {
+                  idPieceJointe: true,
                   nom: true
                 }
               }
@@ -51,10 +56,9 @@ export default defineEventHandler(async (event) => {
           DepartementTag: true
         }
       }
-
     },
     where: {
-      idRecherche: Number(dossierId)
+      idRecherche: dossierId
     }
   })
 
@@ -65,5 +69,8 @@ export default defineEventHandler(async (event) => {
     }))
   }
 
-  return { success: true, data: dossier }
+  return { 
+    statusCode: 200,
+    data: dossier
+  }
 })

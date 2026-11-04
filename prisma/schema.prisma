@@ -67,6 +67,7 @@ model DemarcheContact {
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
 model DemarcheEvenement {
   idDemarche               Int                        @id @default(autoincrement())
+  titre                    String?
   description              String?
   date                     DateTime                   @db.Date
   status                   Recherche_Stage_Status?
@@ -227,8 +228,8 @@ model Personnel {
 
 model PieceJointe {
   idPieceJointe Int      @id @default(autoincrement())
-  nom           String?  @db.VarChar
-  chemin        String?  @db.VarChar
+  nom           String  @db.VarChar
+  chemin        String  @db.VarChar
   LienPj        LienPj[]
 }
 
@@ -341,6 +342,7 @@ enum Demarche_Source {
   Telephone
   Presentiel
   Visio
+  Autre
 }
 
 enum Personnel_Role {

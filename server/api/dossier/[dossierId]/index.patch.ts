@@ -24,8 +24,6 @@ export default defineEventHandler(async (event) => {
     data: body
   })
 
-  console.log('Dossier updated successfully:', dossier)
-
   if (!dossier) {
     return sendError(event, createError({
       statusCode: 404,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-
+import TagSelection from '~/components/common/TagSelection.vue'
 // TODO bug
 
 const tags = defineModel<string[]>('tags', { required: true })
@@ -92,7 +92,7 @@ async function addTag(newTag: string) {
   }
 }
 
-async function updateDossierTags() {
+async function updateDossierTags(newTags: string[]) {
 
   tags.value.forEach((tag) => {
     if (!dossierTags.value.includes(tag)) {
@@ -112,10 +112,9 @@ async function updateDossierTags() {
 </script>
 
 <template>
-  <UInputMenu
-    v-model="dossierTags"
-    multiple
-    :items="optionTags"
-    @update:model-value="updateDossierTags"
+  <TagSelection
+    v-model:tags="dossierTags"
+    :option-tags="optionTags"
+    @update:tags="updateDossierTags"
   />
 </template>

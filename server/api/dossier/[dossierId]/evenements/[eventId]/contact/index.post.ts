@@ -1,16 +1,16 @@
 import { z } from 'zod/v4'
 import { prisma } from '~~/server/utils/prisma'
 import { contactSchema } from '~~/shared/schemas/contact'
-import { eventIdSchema } from '~~/shared/schemas/dossier'
-// TODO add 'autre' to Demarche source enum
+import { dossierIdSchema, eventIdSchema } from '~~/shared/schemas/dossier'
 
 const schema = z.object({
+  dossierId: dossierIdSchema,
   eventId: eventIdSchema
 })
 
 export default defineEventHandler(async (event) => {
   // Validate the eventId from the route parameters and the request body
-  const { eventId } = await getValidatedRouterParams(event, schema.parse)
+  const { dossierId, eventId } = await getValidatedRouterParams(event, schema.parse)
   // Validate the request body against the contactSchema
   const body = await readValidatedBody(event, contactSchema.parse)
 
@@ -18,7 +18,8 @@ export default defineEventHandler(async (event) => {
   // duplicate contacts for non-existing events
   const existingEvent = await prisma.demarcheEvenement.findUnique({
     where: {
-      idDemarche: eventId
+      idDemarche: eventId,
+      idRecherche: dossierId
     }
   })
 

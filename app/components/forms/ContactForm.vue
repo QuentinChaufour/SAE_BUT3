@@ -17,6 +17,7 @@ type CreateProps = {
 
   // required only in create mode
   eventId: number
+  dossierId: number
 }
 
 type UpdateProps = {
@@ -47,7 +48,6 @@ const state = reactive({
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   if (props.update) {
-    console.log('Updating contact with data:', state)
     await updateContact(event)
   } else {
     await createContact(event)
@@ -94,7 +94,7 @@ async function createContact(event: FormSubmitEvent<Schema>) {
       })
     }
 
-    const response = await $fetch<responseCreateContact>(`/api/dossier/evenement/${props.eventId}/contact`, {
+    const response = await $fetch<responseCreateContact>(`/api/dossier/${props.dossierId}/evenements/${props.eventId}/contact`, {
       method: 'POST',
       body: state
     })
@@ -177,9 +177,6 @@ async function createContact(event: FormSubmitEvent<Schema>) {
       />
     </UFormField>
 
-    <UButton type="submit">
-      <!-- TODO allow modification if creation instead of update -->
-      Modifier
-    </UButton>
+    <UButton type="submit" :label="props.create ? 'Créer' : 'Modifier'"/>
   </UForm>
 </template>

@@ -1,22 +1,30 @@
 <script setup lang="ts">
-import type { TimelineItem } from '@nuxt/ui'
+import EventDescription from './EventDescription.vue';
+import type { EventInfo } from '~~/shared/types/event'
 // TODO documentation
 
-const { events } = defineProps<{
-  events: TimelineItem[]
+const props = defineProps<{
+  events: EventInfo[]
+  dossierId: number
+}>()
+
+const emit = defineEmits<{
+  deletedEvent: [EventInfo]
 }>()
 
 const showEventDetails = ref<boolean>(false)
+const selectedEvent = ref<EventInfo | null>(props.events[0] ?? null)
 
 // events are already sorted by date on API side
 // so we only need to reverse the order and not to sort them
 const displayedEvents = computed(() => {
-  return timelineReversed.value ? [...events].reverse() : events
+  return timelineReversed.value ? [...props.events].reverse() : props.events
 })
 
 const timelineReversed = ref<boolean>(false)
 
-function onTimelineSelect(event: Event, item: TimelineItem) {
+function onTimelineSelect(event: Event, item: EventInfo) {
+  selectedEvent.value = item
   showEventDetails.value = true
 }
 
@@ -35,15 +43,7 @@ function onTimelineSelect(event: Event, item: TimelineItem) {
       </div>
     </UButton>
 
-    <UButton>
-      <div class="flex items-center">
-        <UIcon
-          name="i-lucide-plus"
-          class="w-4 h-4 mr-1"
-        />
-        Ajouter un événement
-      </div>
-    </UButton>
+    <slot name="header_action" />
   </div>
 
   <UTimeline
@@ -53,18 +53,17 @@ function onTimelineSelect(event: Event, item: TimelineItem) {
 
   <USlideover
     :title="'Visualisation d\'un événement'"
-    :size="'md'"
+    :size="'xl'"
     v-model:open="showEventDetails"
   >
-    <placeholder>
-      <div class="flex flex-col items-center justify-center min-h-screen min-w-full">
-        <UButton to="student/search">
-          Retour
-        </UButton>
-        <p class="text-lg font-semibold mt-4">
-          Chargement de l'événement...
-        </p>
-      </div>
-    </placeholder>
+    <template #body>
+      <EventDescription
+        v-if="selectedEvent"
+        :dossier-id="props.dossierId"
+        :model-value="selectedEvent as EventInfo"
+        @deleted="emit('deletedEvent', selectedEvent)"
+        @close="showEventDetails = false"
+      />
+    </template>
   </USlideover>
 </template>

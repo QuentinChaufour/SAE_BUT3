@@ -25,8 +25,6 @@ export default defineEventHandler(async (event) => {
       }
     })
 
-    console.log(tagId)
-
     if (!tagId) {
       throw new Error('Tag not found')
     }
