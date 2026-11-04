@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
 
   // Return the department tags in the response under the "data" key, along with a success status
   return {
-    success: true,
+    statusCode: 200,
     data: departementTags
   }
 })

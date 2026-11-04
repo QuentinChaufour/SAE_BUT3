@@ -1,180 +1,40 @@
 <script setup lang="ts">
 import UserRole from '~~/shared/types/role'
-import type { ContactInfo } from '~~/shared/types/contact'
 import { z } from 'zod/v4'
-import type { FormSubmitEvent, AccordionItem, FileUploadItem } from '@nuxt/ui'
+import type { FormSubmitEvent, FileUploadItem } from '@nuxt/ui'
 import type {
   DemarcheContact,
-  DemarcheEvenement,
-  DepartementTag,
-  Entreprise,
-  PieceJointe,
-  RechercheStage,
   Departement
 } from '~~/generated/prisma/client'
-import { Demarche_Source, Recherche_Stage_Status } from '~~/generated/prisma/enums'
-import type { EventInfo } from '~~/shared/types/event'
 import type { APIResponse } from '~~/shared/types/apiResponse'
-import type { contactSchema } from '~~/shared/schemas/contact'
 import EventsManagement from '~/components/dossier/EventsManagement.vue'
 import EventDescription from '~/components/dossier/EventDescription.vue'
 import ContactForm from '~/components/forms/ContactForm.vue'
 import DossierTagSelection from '~/components/dossier/DossierTagSelection.vue'
 import StatusBadge from '~/components/dossier/StatusBadge.vue'
+import { useDossierStore } from '~/stores/dossierStore'
 
 definePageMeta({
   middleware: ['auth', 'role'],
   role: UserRole.Student
 })
 
-type DossierFull = Pick<
-  RechercheStage,
-  'idRecherche' | 'titre' | 'description' | 'alternance'
-  > & {
-  Entreprise: Pick<
-    Entreprise,
-    'nom' | 'adresse' | 'codePostal' | 'ville'
-  >
-
-  DemarcheEvenement: Array<
-    Pick<DemarcheEvenement, 'description'| 'titre' | 'status' | 'source' | 'idDemarche'> & {
-      // Date values are serialized as strings by the API.
-      date: string
-
-      LienPj: Array<{
-        PieceJointe: Pick<PieceJointe, 'nom' | 'idPieceJointe'>
-      }>
-
-      DemarcheRechercheContact: Array<{
-        DemarcheContact: DemarcheContact
-      }>
-    }
-  >
-
-  DepartementTagRecherche: Array<{
-    DepartementTag: DepartementTag
-  }>
-}
-
-type ContactInfoAcccordion = AccordionItem & ContactInfo
-
-// idContact is only needed when creating a new contact 
-type contactSchemaType = z.output<typeof contactSchema> & {
-  idContact: number
-}
+const dossierStore = useDossierStore()
 
 const schema = z.object({
   description: z.string()
 })
 
-const hasDescriptionChanged = computed(() => schema.safeParse({ description: state.description }).success && state.description !== dossier.value?.description)
+const hasDescriptionChanged = computed(() => schema.safeParse({ description: state.description }).success && state.description !== dossierStore.dossier?.description)
 
 type Schema = z.output<typeof schema>
-
-const idDossier = Number(useRoute().params.idDossier) ?? null
-const dossier = ref<DossierFull>()
-const events = ref<EventInfo[]>([])
-const dossierTags = ref<string[]>([])
-const contacts = ref<ContactInfoAcccordion[]>([])
 const files = ref<FileUploadItem[]>([])
 const departementId = ref<number | null>(null)
 const openedEventCreation = ref<boolean>(false) 
-const dossierStatus = computed(() => dossier.value?.DemarcheEvenement[0]?.status ?? Recherche_Stage_Status.AttenteEnvoi)
+const idDossier = Number(useRoute().params.idDossier) ?? null
 const state = reactive({
   description: ''
 })
-
-async function initComponent() {
-  try {
-    const response = await $fetch<APIResponse<DossierFull>>(
-      `/api/dossier/${idDossier}`,
-      { method: 'GET' }
-    )
-
-    if (response.statusCode !== 200 || !response.data) {
-      return
-    }
-
-    const loadedDossier = response.data
-    dossier.value = loadedDossier
-
-    // populate the dossierTags array with the tags from the dossier
-    for (const tag of dossier.value.DepartementTagRecherche) {
-      dossierTags.value.push(tag.DepartementTag.nomTag)
-    }
-
-    // populate the timeline items with the events from the dossier
-    for (const event of dossier.value.DemarcheEvenement) {
-      const date = new Date(Date.parse(event.date))
-      events.value.push({
-        date: date.getDate() + '/' + (date.getMonth() + 1) + '/' + date.getFullYear(),
-        title: event.titre || 'Pas de titre',
-        idDemarche: event.idDemarche,
-        titre: event.titre || 'Pas de titre',
-        description: event.description || '',
-        icon: 'i-lucide-rocket',
-        status: event.status,
-        source: event.source,
-        contacts: event.DemarcheRechercheContact.map(c => c.DemarcheContact),
-        files: event.LienPj.map(pj => { return { nom: pj.PieceJointe.nom, idPieceJointe: pj.PieceJointe.idPieceJointe }; })
-      })
-    }
-
-    // TODO replace with computed
-    for (const file of dossier.value.DemarcheEvenement.flatMap(e => e.LienPj.map(pj => pj.PieceJointe))) {
-      // skip files with no name
-      if (!file.nom) {
-        continue
-      }
-
-      let fileType = ''
-
-      // Only pdf and image files are supported for now,
-      // so we can use a simple check to determine the file type
-      if (file.nom.endsWith('.pdf')) {
-        fileType = 'application/pdf'
-      } else {
-        fileType = 'image/*'
-      }
-
-      files.value.push({
-        name: file.nom,
-        type: fileType,
-        avatar: {
-          icon: fileType === 'application/pdf' ? 'i-lucide-file-text' : 'i-lucide-image'
-        }
-      })
-    }
-
-    // TODO computed ?
-    const idSet = new Set<number>()
-    for (const contact of dossier.value.DemarcheEvenement.flatMap(e => e.DemarcheRechercheContact.map(c => c.DemarcheContact))) {
-      // ensure distinct contacts
-      if (idSet.has(contact.idContact)) {
-        continue
-      }
-
-      contacts.value.push({
-        value: String(contact.idContact),
-        label: `${contact.nom} ${contact.prenom}`,
-        content: '',
-        idContact: contact.idContact,
-        nom: contact.nom || '',
-        prenom: contact.prenom || '',
-        fonction: contact.fonction || '',
-        email: contact.email || '',
-        telephone: contact.telephone || ''
-      })
-
-      idSet.add(contact.idContact)
-    }
-
-    // update the state with the dossier description
-    state.description = dossier.value.description || ''
-  } catch (e) {
-    console.error(e)
-  }
-}
 
 async function getDepartementId(): Promise<number | null> {
   const session = useUserSession()
@@ -199,28 +59,30 @@ async function getDepartementId(): Promise<number | null> {
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   event.preventDefault()
 
-  if (!dossier.value) {
+  const dossier = dossierStore.dossier
+
+  if (!dossier) {
     console.error('Dossier is not loaded')
     return
   }
 
   const newDescription = state.description
 
-  if (newDescription === dossier.value.description) {
+  if (newDescription === dossier.description) {
     return
   }
 
   try {
-    const response = await $fetch(`/api/dossier/${idDossier}`, {
+    const response = await $fetch<APIResponse<null>>(`/api/dossier/${dossier.idRecherche}`, {
       method: 'PATCH',
       body: { description: newDescription }
     })
 
-    if (!response || (response as any).statusCode !== 200) {
+    if (response.statusCode !== 200) {
       throw new Error('Failed to update description')
     }
 
-    dossier.value.description = newDescription
+    dossier.description = newDescription
   } catch (error) {
     // TODO handle error properly
     console.error('Error updating description:', error)
@@ -234,72 +96,31 @@ function deleteFile(index: number) {
 
 // keep the contact list up to date when a contact is added or updated
 // without reloading the page & without making another API call
-function contactSubmitted(contact: contactSchemaType , index?: number) {
+function contactSubmitted(contact: DemarcheContact , index?: number) {
 
- if (index !== undefined) {
-    const existing = contacts.value[index]
-    if (!existing) {
-      throw new Error(`No contact found at index ${index}`)
-    }
-
-    Object.assign(existing, {
-      label: `${contact.nom} ${contact.prenom}`,
-      nom: contact.nom || '',
-      prenom: contact.prenom || '',
-      fonction: contact.fonction || '',
-      email: contact.email || '',
-      telephone: contact.telephone || ''
-    })
-  }
-  else {
-    contacts.value.push({
-      value: String(contact.idContact),
-      label: contact.nom + ' ' + contact.prenom,
-      content: '',
-      idContact: contact.idContact,
-      fonction: contact.fonction || '',
-      email: contact.email || '',
-      telephone: contact.telephone || '',
-      nom: contact.nom || '',
-      prenom: contact.prenom || ''
-    })
-  }
+  dossierStore.updateContacts(contact, index)
 }
 
 function eventCreated(event: EventInfo) {
-  events.value.push({
-    date: new Date(event.date).toLocaleDateString(),
-    idDemarche: event.idDemarche,
-    title: event.titre || 'Pas de titre',
-    titre: event.titre || 'Pas de titre',
-    description: event.description || '',
-    icon: 'i-lucide-rocket',
-    status: event.status,
-    source: event.source,
-    contacts: event.contacts,
-    files: event.files
-  })
-
-  // sort the events by date, newest first
-  events.value.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  dossierStore.addEvent(event)
+  dossierStore.getContacts
 
   openedEventCreation.value = false
 }
 
-function deleteEvent(event: EventInfo) {
-  const index = events.value.findIndex(e => e.idDemarche === event.idDemarche)
-
-  if (index !== -1) {
-    events.value.splice(index, 1)
-  }
-}
-
 onMounted(async () => {
-  await initComponent()
+  try {
+    await dossierStore.initState(idDossier)
 
-  departementId.value = await getDepartementId()
+    departementId.value = await getDepartementId()
+  } catch (error) {
+    showError({
+      statusCode: 500,
+      statusMessage: 'Failed to load dossier data with id ' + idDossier,
+      data: error
+    })
+  }
 })
-// TODO bug contacts doubles
 </script>
 
 <template>
@@ -314,7 +135,7 @@ onMounted(async () => {
 
     <template #body>
       <!-- Dossier loading -->
-      <div v-if="!dossier">
+      <div v-if="!dossierStore.dossier">
         <div class="flex flex-col items-center justify-center min-h-screen min-w-full">
           <UButton to="student/search">
             Retour
@@ -337,7 +158,7 @@ onMounted(async () => {
           </UButton>
 
           <StatusBadge
-            :status="dossierStatus"
+            :status="dossierStore.getStatus"
             class="ml-4"
           />
         </div>
@@ -347,9 +168,9 @@ onMounted(async () => {
             <!-- TODO class as prop -->
             <div class="min-w-0 flex-1">
               <EventsManagement 
-                :events="events" 
-                :dossier-id="dossier.idRecherche"
-                @deleted-event="deleteEvent"
+                :events="dossierStore.events" 
+                :dossier-id="idDossier"
+                @updated="() => dossierStore.getContacts"
               >
                 <template #header_action>
                   <UButton @click="openedEventCreation = true">
@@ -368,7 +189,7 @@ onMounted(async () => {
                   <UInput
                     disabled
                     class="w-full sm:w-auto"
-                    :model-value="dossier.Entreprise.nom || ''"
+                    :model-value="dossierStore.dossier.Entreprise.nom || ''"
                   />
                 </UFormField>
 
@@ -379,7 +200,7 @@ onMounted(async () => {
                   <UInput
                     disabled
                     class="w-full sm:w-auto"
-                    :model-value="dossier.Entreprise.adresse || ''"
+                    :model-value="dossierStore.dossier.Entreprise.adresse || ''"
                   />
                 </UFormField>
               </div>
@@ -409,14 +230,14 @@ onMounted(async () => {
               </UForm>
 
               <DossierTagSelection
-                v-model:tags="dossierTags"
+                v-model:tags="dossierStore.dossierTags"
                 :id-departement="departementId"
-                :id-dossier="dossier.idRecherche"
+                :id-dossier="idDossier"
               />
 
               <USeparator />
 
-              <UAccordion :items="contacts">
+              <UAccordion :items="dossierStore.getContacts">
                 <template #content="{ item, index }">
                   <ContactForm
                     update
@@ -469,6 +290,9 @@ onMounted(async () => {
       <EventDescription
         creation
         :dossier-id="idDossier"
+        :state="{
+          status: dossierStore.getStatus
+        }"
         @created="eventCreated"
       />
     </template>

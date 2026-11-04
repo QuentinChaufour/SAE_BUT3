@@ -1,15 +1,30 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { z } from 'zod/v4'
+import { dateToString, getCurrentDateString } from '~~/shared/utils/date'
 import { Demarche_Source , Recherche_Stage_Status } from '~~/generated/prisma/enums'
 import type { DemarcheContact } from '~~/generated/prisma/client'
 import type { EventInfo } from '~~/shared/types/event'
 import type { APIResponse } from '~~/shared/types/apiResponse'
 import StatusBadge from '~/components/dossier/StatusBadge.vue'
+import ContactForm from '../forms/ContactForm.vue'
 
 type ContactItem = {
   value: number
   label: string
+}
+
+type CreateProps = {
+  dossierId: number
+  creation?: true
+
+  // prefilled values for the form in create mode
+  state?: Partial<EventInfo>
+}
+
+type baseProps = {
+  dossierId: number
+  creation?: false
 }
 
 const event = defineModel<EventInfo>()
@@ -18,15 +33,11 @@ if (event.value && !event.value.files) {
   event.value.files = []
 }
 
-const props = withDefaults(defineProps<{
-  dossierId: number
-  creation?: boolean
-}>(), {
-  creation: false
-})
+const props = defineProps<CreateProps | baseProps>()
 
 const emit = defineEmits<{
   created: [EventInfo]
+  updated: []
   deleted: []
   close: []
 }>()
@@ -36,7 +47,8 @@ const contactsEvent = ref<DemarcheContact[]>(event.value?.contacts ?? [])
 const loading = ref<boolean>(true)
 const selectedContact = ref<ContactItem>()
 const searchTermContact = ref<string>('')
-const toast = useToast() 
+const isCreatingContact = ref<boolean>(false) 
+const toast = useToast()
 
 const schema = z.object({
   titre: z.string().min(1, 'Le titre est obligatoire'),
@@ -50,12 +62,13 @@ const schema = z.object({
 
 type EventSchema = z.output<typeof schema>
 
+
 const state = reactive({
-  titre: event.value?.titre || '',
-  description: event.value?.description || '',
-  date: event.value?.date ? event.value?.date : new Date().toISOString(),
-  status: event.value?.status || Recherche_Stage_Status.AttenteEnvoi,
-  source: event.value?.source || Demarche_Source.Autre
+  titre: props.creation ? props.state?.titre || '' : event.value?.titre || '',
+  description: props.creation ? props.state?.description || '' : event.value?.description || '',
+  date: props.creation ? props.state?.date || getCurrentDateString() : event.value?.date ? event.value?.date : getCurrentDateString(),
+  status: props.creation ? props.state?.status || Recherche_Stage_Status.AttenteEnvoi : event.value?.status || Recherche_Stage_Status.AttenteEnvoi,
+  source: props.creation ? props.state?.source || Demarche_Source.Autre : event.value?.source || Demarche_Source.Autre
 })
 
 async function onSubmit(e: FormSubmitEvent<EventSchema>) {
@@ -76,10 +89,19 @@ async function onSubmit(e: FormSubmitEvent<EventSchema>) {
     emit('created', response)
   }
   else {
-    event.value = {
-      ...response,
-      contacts: contactsEvent.value
+    if(!event.value) {
+      return
     }
+
+    Object.assign(event.value, {
+      ...event.value,
+      ...response,
+      title: response.titre || 'Pas de titre',
+      date: dateToString(new Date(Date.parse(event.value.date))),
+      contacts: contactsEvent.value
+    })
+
+    emit('updated')
   }
   toast.add({ title: 'Succès', description: 'Événement mis à jour avec succès', color: 'success' })
   emit('close')
@@ -156,13 +178,11 @@ async function deleteEvent(){
       console.error('Error deleting event:', error)
     }
   }
-
-
 }
 
 async function fetchContacts() {
   try {
-    const response = await $fetch<APIResponse<DemarcheContact[] | null>>(`/api/dossier/${props.dossierId}/contacts`, {
+    const response = await $fetch<APIResponse<DemarcheContact[]>>(`/api/dossier/${props.dossierId}/contacts`, {
       method: 'GET',
     })
     contactsOptions.value = response.data ?? []
@@ -172,8 +192,17 @@ async function fetchContacts() {
   }
 }
 
-function createContact(){
-  // TODO
+function createdContact(contact: DemarcheContact) {
+
+  contactsOptions.value.push(contact)
+  contactsEvent.value.push(contact)
+
+
+  // réinitialiser les champs du formulaire de contact
+  selectedContact.value = undefined
+  searchTermContact.value = ''
+
+  isCreatingContact.value = false
 }
 
 function addContact(contactElement: {value: number, label: string}) {
@@ -181,7 +210,6 @@ function addContact(contactElement: {value: number, label: string}) {
   selectedContact.value = undefined
 
   if (!contact) {
-    // TODO toast instead
     toast.add({ title: 'Erreur', description: `Contact ${contactElement.label} ne fait pas parti des contacts du dossier de recherche`, color: 'error' })
     return
   }
@@ -286,7 +314,7 @@ onMounted(async () => {
           class="w-full"
           create-item="always"
           @update:model-value="addContact"
-          @create="createContact"
+          @create="isCreatingContact = true"
         />
       </UFormField>
 
@@ -336,4 +364,19 @@ onMounted(async () => {
       <UButton type="submit" :label="props.creation ? 'Créer' : 'Modifier'"/>
     </UForm>
   </div>
+
+
+  <UModal
+        v-model:open="isCreatingContact"
+      >
+          <template #content>
+            <ContactForm
+            create
+            @created="createdContact"
+            :state="{prenom: searchTermContact}"
+          />
+          
+          <UButton label="annuler" @click="isCreatingContact=false"/>
+        </template>
+      </UModal>
 </template>

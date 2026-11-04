@@ -16,5 +16,8 @@ export default defineEventHandler(async (event) => {
     data: body
   })
 
-  return updatedContact
+  return {
+    statusCode: 200,
+    data: updatedContact
+  }
 })

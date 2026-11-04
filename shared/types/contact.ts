@@ -1,8 +1,4 @@
-export type ContactInfo = {
-  idContact: number
-  nom: string
-  prenom?: string
-  fonction?: string
-  email?: string
-  telephone?: string
-}
+import type { DemarcheContact } from '~~/generated/prisma/client'
+import type { AccordionItem } from '@nuxt/ui'
+
+export type ContactInfo = AccordionItem & DemarcheContact

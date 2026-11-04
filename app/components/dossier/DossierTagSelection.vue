@@ -22,28 +22,18 @@ watch(
 const dossierTags = ref<string[]>(tags.value)
 const optionTags = ref<string[]>([])
 
-type responseDepartementTags = {
-  success: boolean
-  data: { nomTag: string }[]
-}
-
-type responseDossierTags = {
-  statusCode: number
-  message: string
-}
-
 async function getDepartementTags(idDepartement: number | null) {
 
   if (!idDepartement) {
     throw new Error('idDepartement is null or undefined')
   }
 
-  const response = await $fetch<responseDepartementTags>(
+  const response = await $fetch<APIResponse<{ nomTag: string }[]>>(
     `/api/departement/${idDepartement}/tags`,
     { method: 'GET' },
   )
 
-  if (!response.success || !response.data) {
+  if (response.statusCode !== 200 || !response.data) {
     throw new Error('Failed to fetch departement tags')
   }
 
@@ -64,7 +54,7 @@ async function deleteTag(tagToDelete: string) {
   const index = tags.value.indexOf(tagToDelete)
   if (index !== -1) {
     dossierTags.value.splice(index, 1)
-    const response = await $fetch<responseDossierTags>(`/api/dossier/${idDossier}/tags`, {
+    const response = await $fetch<APIResponse<null>>(`/api/dossier/${idDossier}/tags`, {
       method: 'DELETE',
       body: { tag: tagToDelete }
     })
@@ -82,7 +72,7 @@ async function addTag(newTag: string) {
   }
 
   // TODO manage errors
-  const response = await $fetch<responseDossierTags>(`/api/dossier/${idDossier}/tags`, {
+  const response = await $fetch<APIResponse<null>>(`/api/dossier/${idDossier}/tags`, {
       method: 'POST',
       body: { tag: newTag }
     })

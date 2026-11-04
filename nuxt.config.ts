@@ -3,7 +3,8 @@ export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
     '@nuxt/ui',
-    'nuxt-auth-utils'
+    'nuxt-auth-utils',
+    '@pinia/nuxt'
   ],
 
   devtools: {
@@ -27,7 +28,7 @@ export default defineNuxtConfig({
     },
     optimizeDeps: {
       include: [
-        'zod/v4'
+        'zod/v4',
       ]
     }
   },

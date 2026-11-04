@@ -31,6 +31,8 @@ export default defineEventHandler(async (event) => {
     }))
   }
 
-  // TODO statusCode 200 instead of success
-  return { success: true, data: dossier }
+  return { 
+    statusCode: 200,
+    data: dossier 
+  }
 })
