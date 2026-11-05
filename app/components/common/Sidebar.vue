@@ -2,6 +2,8 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 import UserMenu from './UserMenu.vue'
 import UserRole from '~~/shared/types/role.js'
+import StudentFormationSwitcher from './sidebar/StudentFormationSwitcher.vue'
+import PersonnelDepartmentSwitcher from './sidebar/PersonnelDepartmentSwitcher.vue'
 
 const open = ref(true)
 
@@ -87,6 +89,21 @@ function getLinksByRole(role: UserRole | undefined): NavigationMenuItem[] {
           orientation="vertical"
           tooltip
           popover
+        />
+
+        <StudentFormationSwitcher
+          v-if="role === UserRole.Student"
+          :collapsed="collapsed"
+          orientation="vertical"
+          tooltip
+          class="mt-auto"
+        />
+        <PersonnelDepartmentSwitcher
+          v-else-if="[UserRole.Teacher, UserRole.Secretary].includes(role!)"
+          :collapsed="collapsed"
+          orientation="vertical"
+          tooltip
+          class="mt-auto"
         />
       </template>
 
