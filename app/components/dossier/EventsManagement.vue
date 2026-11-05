@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import EventDescription from './EventDescription.vue';
+import EventDescription from '~/components/dossier/EventDescription.vue';
+import StatusBadge from '~/components/dossier/StatusBadge.vue';
 import type { EventInfo } from '~~/shared/types/event'
 // TODO documentation
 
@@ -28,8 +29,6 @@ function onTimelineSelect(event: Event, item: EventInfo) {
   selectedEvent.value = item
   showEventDetails.value = true
 }
-
-// TODO slot for event creation
 </script>
 
 <template>
@@ -50,7 +49,19 @@ function onTimelineSelect(event: Event, item: EventInfo) {
   <UTimeline
     :items="displayedEvents"
     @select="onTimelineSelect"
-  />
+  >
+    <template #title="{ item }">
+      <div class="flex flex-row gap-2 items-center justify-between">
+        <p>
+          {{ (item as EventInfo).title }}
+        </p>
+        <StatusBadge
+          :status="(item as EventInfo).status ?? 'AttenteEnvoi'"
+          class="text-xs"
+        />
+      </div>
+    </template>
+  </UTimeline>
 
   <USlideover
     :title="'Visualisation d\'un événement'"

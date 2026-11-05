@@ -83,8 +83,8 @@ async function onSubmit(e: FormSubmitEvent<EventSchema>) {
     }
 
     const response = updateEvent()
+    
     if(!response) {
-      toast.add({ title: 'Erreur', description: 'Erreur lors de la soumission de l\'événement', color: 'error' })
       return
     }
 
@@ -111,6 +111,10 @@ function createEvent() {
 
 function updateEvent(){
   if(props.creation) return
+
+  if(!confirm("Etes vous sûr de vouloir mettre à jour cet événement ?")) {
+    return
+  }
 
   return {
     ...props.event,
@@ -196,7 +200,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="min-w-0 flex-2 mr-10 ml-10 space-y-5">
+  <div class="min-w-0 mr-5 ml-5">
     <div class="flex justify-end">
       <UTooltip text="Supprimer l'événement" placement="bottom">
         <UButton
@@ -250,11 +254,16 @@ onMounted(async () => {
             label="Status"
             name="status"
             class="w-full"
+            :ui="{ value: 'w-full p-0.5' }"
             :items="Object.values(Recherche_Stage_Status).map(status => ({ value: status, label: status }))"
             v-model="state.status"
           >
+            <template #default>
+              <StatusBadge :status="state.status" class="w-full" :size="'lg'" />
+            </template>
+
             <template #item="{ item }">
-              <StatusBadge :status="item.value" />
+              <StatusBadge :status="item.value" class="w-full" :size="'lg'" />
             </template>
           </USelect>
         </UFormField>
@@ -388,6 +397,7 @@ onMounted(async () => {
 
         <ContactForm
           create
+          :dossier-id="props.dossierId"
           @created="createdContact"
           :state="{prenom: searchTermContact}"
         />

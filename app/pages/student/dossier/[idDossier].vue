@@ -183,7 +183,7 @@ onMounted(async () => {
         v-else
         class="flex flex-col w-full p-5 gap-4"
       >
-        <div class="mb-5">
+        <div class="flex justify-between">
           <UButton
             to="student/search"
           >
@@ -193,12 +193,12 @@ onMounted(async () => {
           <StatusBadge
             :status="dossierStore.getStatus"
             class="ml-4"
+            :size="'xl'"
           />
         </div>
 
         <UPage>
           <div class="flex min-w-0 w-full flex-col gap-8 md:flex-row">
-            <!-- TODO class as prop -->
             <div class="min-w-0 flex-1">
               <EventsManagement 
                 :events="dossierStore.events" 

@@ -3,6 +3,7 @@ import { Recherche_Stage_Status } from '~~/generated/prisma/enums'
 
 const props = defineProps<{
   status: Recherche_Stage_Status
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }>()
 
 const detailStatus = {
@@ -21,6 +22,8 @@ const statusDetail = computed(() => detailStatus[props.status])
   <UBadge
     variant="subtle"
     :color="statusDetail.color"
+    class="inline-flex items-center justify-center px-3 py-1"
+    :size="props.size ?? 'md'"
   >
     {{ statusDetail.label }}
   </UBadge>

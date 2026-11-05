@@ -23,7 +23,9 @@ export const contactSchema = z.object({
 
   fonction: z.string()
     .trim()
-    .optional()
+    .optional(),
+
+  idRecherche: z.number().nonoptional('L\'idRecherche est requis')
 })
 
 export const contactIdSchema = z.string()

@@ -61,6 +61,8 @@ model DemarcheContact {
   fonction                 String?                    @db.VarChar
   email                    String?                    @db.VarChar
   telephone                String?                    @db.VarChar
+  idRecherche              Int?
+  RechercheStage         RechercheStage?            @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
   DemarcheRechercheContact DemarcheRechercheContact[]
 }
 
@@ -267,6 +269,7 @@ model RechercheStage {
   idEntreprise            Int
   numEtu                  String                    @db.VarChar
   annee                   String                    @db.VarChar
+  DemarcheContact         DemarcheContact[]
   DemarcheEvenement       DemarcheEvenement[]
   DepartementTagRecherche DepartementTagRecherche[]
   AnneeUniversitaire      AnneeUniversitaire        @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)

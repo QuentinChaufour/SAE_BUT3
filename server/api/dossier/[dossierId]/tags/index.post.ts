@@ -1,12 +1,10 @@
 import { z } from 'zod/v4'
 import { dossierIdSchema } from '~~/shared/schemas/dossier'
 
-// TODO SAME 
 const paramsSchema = z.object({
   dossierId: dossierIdSchema
 })
 
-// TODO extern => shared
 const addTagSchema = z.object({
   tag: z.string().nonoptional()
 })

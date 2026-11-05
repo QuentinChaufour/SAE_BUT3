@@ -100,7 +100,7 @@ export const useDossierStore = defineStore('dossier', {
             idDemarche: event.idDemarche,
             titre: event.titre || 'Pas de titre',
             description: event.description || '',
-            icon: 'i-lucide-rocket',
+            icon: '',
             status: event.status,
             source: event.source,
             contacts: event.DemarcheRechercheContact.map(c => c.DemarcheContact),
@@ -123,7 +123,8 @@ export const useDossierStore = defineStore('dossier', {
             prenom: contact.prenom || '',
             fonction: contact.fonction || '',
             email: contact.email || '',
-            telephone: contact.telephone || ''
+            telephone: contact.telephone || '',
+            idRecherche: this.dossier.idRecherche
           })
           idSet.add(contact.idContact)
         }
@@ -272,7 +273,8 @@ export const useDossierStore = defineStore('dossier', {
           prenom: contact.prenom || '',
           fonction: contact.fonction || '',
           email: contact.email || '',
-          telephone: contact.telephone || ''
+          telephone: contact.telephone || '',
+          idRecherche: contact.idRecherche
         })
       },
       deleteContact(contact: ContactInfo){

@@ -9,26 +9,10 @@ const schema = z.object({
 export default defineEventHandler(async (event) => {
   const { dossierId } = await getValidatedRouterParams(event, schema.parse)
 
-  const contacts = await prisma.demarcheEvenement.findMany({
+  const contacts = await prisma.demarcheContact.findMany({
     where: {
       idRecherche: dossierId,
     },
-    select: {
-      DemarcheRechercheContact: {
-        select: {
-          DemarcheContact: true
-        },
-      },
-    },
-  })
-
-  const idSet = new Set<number>()
-  const formattedContacts = contacts.map(contact => contact.DemarcheRechercheContact.map(c => c.DemarcheContact)).flat().filter(contact => {
-    if (!idSet.has(contact.idContact)) {
-      idSet.add(contact.idContact)
-      return true
-    }
-    return false
   })
 
   if(!contacts) {
@@ -40,6 +24,6 @@ export default defineEventHandler(async (event) => {
 
   return {
     statusCode: 200,
-    data: formattedContacts
+    data: contacts
   }
 })

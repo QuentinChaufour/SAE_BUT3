@@ -13,7 +13,8 @@ export default defineEventHandler(async (event) => {
       prenom: body.prenom,
       email: body.email,
       telephone: body.telephone,
-      fonction: body.fonction
+      fonction: body.fonction,
+      idRecherche: body.idRecherche
     }
   })
 

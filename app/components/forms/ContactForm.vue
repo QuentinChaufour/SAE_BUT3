@@ -12,6 +12,7 @@ type CreateProps = {
   update?: false
 
   // prefilled values for the form in create mode
+  dossierId: number
   state?: Partial<DemarcheContact>
 }
 
@@ -40,7 +41,8 @@ const state = reactive({
   prenom: isUpdateMode ? props.contact.prenom || '' : props.state?.prenom || '',
   email: isUpdateMode ? props.contact.email || '' : props.state?.email || '',
   telephone: isUpdateMode ? props.contact.telephone || '' : props.state?.telephone || '',
-  fonction: isUpdateMode ? props.contact.fonction || '' : props.state?.fonction || ''
+  fonction: isUpdateMode ? props.contact.fonction || '' : props.state?.fonction || '',
+  idRecherche: isUpdateMode ? props.contact.idRecherche : props.dossierId
 })
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
