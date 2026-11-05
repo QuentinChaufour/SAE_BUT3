@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+@layer components {
+  .slidingModal {
+    @apply min-w-[40%]
+  }
+}
+
 @theme static {
   --font-sans: 'Public Sans', sans-serif;
 

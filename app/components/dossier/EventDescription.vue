@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { z } from 'zod/v4'
-import { dateToString, getCurrentDateString } from '~~/shared/utils/date'
+import { getCurrentDateString } from '~~/shared/utils/date'
 import { Demarche_Source , Recherche_Stage_Status } from '~~/generated/prisma/enums'
 import type { DemarcheContact } from '~~/generated/prisma/client'
 import type { EventInfo } from '~~/shared/types/event'
@@ -22,28 +22,23 @@ type CreateProps = {
   state?: Partial<EventInfo>
 }
 
-type baseProps = {
+type UpdateProps = {
   dossierId: number
   creation?: false
+  event: EventInfo
 }
 
-const event = defineModel<EventInfo>()
+const props = defineProps<CreateProps | UpdateProps>()
 
-if (event.value && !event.value.files) {
-  event.value.files = []
-}
-
-const props = defineProps<CreateProps | baseProps>()
-
-const emit = defineEmits<{
+const emits = defineEmits<{
   created: [EventInfo]
-  updated: []
+  updated: [EventInfo]
   deleted: []
   close: []
 }>()
 
 const contactsOptions = ref<DemarcheContact[]>([])
-const contactsEvent = ref<DemarcheContact[]>(event.value?.contacts ?? [])
+const contactsEvent = ref<DemarcheContact[]>(props.creation ? [] : props.event?.contacts || [])
 const loading = ref<boolean>(true)
 const selectedContact = ref<ContactItem>()
 const searchTermContact = ref<string>('')
@@ -64,119 +59,80 @@ type EventSchema = z.output<typeof schema>
 
 
 const state = reactive({
-  titre: props.creation ? props.state?.titre || '' : event.value?.titre || '',
-  description: props.creation ? props.state?.description || '' : event.value?.description || '',
-  date: props.creation ? props.state?.date || getCurrentDateString() : event.value?.date ? event.value?.date : getCurrentDateString(),
-  status: props.creation ? props.state?.status || Recherche_Stage_Status.AttenteEnvoi : event.value?.status || Recherche_Stage_Status.AttenteEnvoi,
-  source: props.creation ? props.state?.source || Demarche_Source.Autre : event.value?.source || Demarche_Source.Autre
+  titre: props.creation ? props.state?.titre || '' : props.event?.titre || '',
+  description: props.creation ? props.state?.description || '' : props.event?.description || '',
+  date: props.creation ? props.state?.date || getCurrentDateString() : props.event?.date ? props.event?.date : getCurrentDateString(),
+  status: props.creation ? props.state?.status || Recherche_Stage_Status.AttenteEnvoi : props.event?.status || Recherche_Stage_Status.AttenteEnvoi,
+  source: props.creation ? props.state?.source || Demarche_Source.Autre : props.event?.source || Demarche_Source.Autre
 })
 
 async function onSubmit(e: FormSubmitEvent<EventSchema>) {
-  
-  if(contactsEvent.value.length === 0) {
-    // TODO error under the input
-    throw new Error('Veuillez sélectionner au moins un contact pour l\'événement')
-  }
-
-  const response = props.creation ? await createEvent() : await updateEvent()
-
-  if(!response) {
-    toast.add({ title: 'Erreur', description: 'Erreur lors de la soumission de l\'événement', color: 'error' })
-    return
-  }
-
   if(props.creation){
-    emit('created', response)
-  }
-  else {
-    if(!event.value) {
+    const response = createEvent()
+    
+    if(!response) {
+      toast.add({ title: 'Erreur', description: 'Erreur lors de la soumission de l\'événement', color: 'error' })
       return
     }
 
-    Object.assign(event.value, {
-      ...event.value,
-      ...response,
-      title: response.titre || 'Pas de titre',
-      date: dateToString(new Date(Date.parse(event.value.date))),
-      contacts: contactsEvent.value
-    })
+    emits('created', response)
+  }
+  else {
+    if(!props.event) {
+      return
+    }
 
-    emit('updated')
+    const response = updateEvent()
+    if(!response) {
+      toast.add({ title: 'Erreur', description: 'Erreur lors de la soumission de l\'événement', color: 'error' })
+      return
+    }
+
+    emits('updated', response)
   }
   toast.add({ title: 'Succès', description: 'Événement mis à jour avec succès', color: 'success' })
-  emit('close')
+  emits('close')
 }
 
-async function updateEvent() {
+function createEvent() {
+  if(!props.creation) return
 
-  try{
-    const response = await $fetch<APIResponse<EventInfo>>(`/api/dossier/${props.dossierId}/evenements/${event.value?.idDemarche}`, {
-      method: 'PUT',
-      body: {
-        ...state,
-        contacts: contactsEvent.value.map(contact => contact.idContact)
-      }
-    })
-
-    if(!response.data || response.statusCode !== 200) {
-      throw new Error('Erreur lors de la mise à jour de l\'événement')
-    }
-
-    return response.data
-  }
-  catch(error){
-    toast.add({ title: 'Erreur', description: 'Erreur lors de la mise à jour de l\'événement', color: 'error' })
-    console.error('Error updating event:', error)
-  }
+  return {
+    ...state,
+    idDemarche: 0,
+    contacts: contactsEvent.value.map(contact => ({
+      ...contact,
+      label: `${contact.nom} ${contact.prenom}`.trim() || 'Pas de nom',
+      value: String(contact.idContact),
+      content: ''
+    }))
+  }  
 }
 
-async function createEvent() {
-  try{
-    const response = await $fetch<APIResponse<EventInfo>>(`/api/dossier/${props.dossierId}/evenements`, {
-      method: 'POST',
-      body: {
-        ...state,
-        contacts: contactsEvent.value.map(contact => contact.idContact)
-      }
-    })
+function updateEvent(){
+  if(props.creation) return
 
-    if(!response.data || response.statusCode !== 201) {
-      throw new Error('Erreur lors de la création de l\'événement')
-    }
-
-    return response.data
-  }
-  catch(error){
-    toast.add({ title: 'Erreur', description: 'Erreur lors de la création de l\'événement', color: 'error' })
-    console.error('Error creating event:', error)
+  return {
+    ...props.event,
+    ...state,
+    contacts: contactsEvent.value.map(contact => ({
+      ...contact,
+      label: `${contact.nom} ${contact.prenom}`.trim() || 'Pas de nom',
+      value: String(contact.idContact),
+      content: ''
+    }))
   }
 }
 
 async function deleteEvent(){
 
-  if(!event.value){
+  if(!props.creation && !props.event){
     toast.add({ title: 'Erreur', description: 'Aucun événement sélectionné pour la suppression', color: 'error' })
     return
   }
 
   if(confirm("Etes vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.")) {
-    try{
-      const response = await $fetch<APIResponse<EventInfo>>(`/api/dossier/${props.dossierId}/evenements/${event.value.idDemarche}`, {
-        method: 'DELETE'
-      })
-
-      if(response.statusCode !== 204) {
-        throw new Error('Erreur lors de la suppression de l\'événement')
-      }
-
-      toast.add({ title: 'Succès', description: 'Événement supprimé avec succès', color: 'success' })
-      emit('deleted')
-      emit('close')
-    }
-    catch(error){
-      toast.add({ title: 'Erreur', description: 'Erreur lors de la suppression de l\'événement', color: 'error' })
-      console.error('Error deleting event:', error)
-    }
+    emits('deleted')
   }
 }
 
@@ -194,8 +150,15 @@ async function fetchContacts() {
 
 function createdContact(contact: DemarcheContact) {
 
-  contactsOptions.value.push(contact)
-  contactsEvent.value.push(contact)
+  const newContact = {
+    ...contact,
+    label: `${contact.nom} ${contact.prenom}`.trim() || 'Pas de nom',
+    value: String(contact.idContact),
+    content: ''
+  }
+
+  contactsOptions.value.push(newContact)
+  contactsEvent.value.push(newContact)
 
 
   // réinitialiser les champs du formulaire de contact
@@ -216,7 +179,6 @@ function addContact(contactElement: {value: number, label: string}) {
 
   // Prevent adding the same contact multiple times
   if(contactsEvent.value.some(c => c.idContact === contact.idContact)) {
-    toast.add({ title: 'Erreur', description: `Contact ${contactElement.label} est déjà sélectionné`, color: 'error' })
     return
   }
 
@@ -235,16 +197,18 @@ onMounted(async () => {
 
 <template>
   <div class="min-w-0 flex-2 mr-10 ml-10 space-y-5">
-
-    <UButton
-      :disabled="props.creation"
-      icon="i-lucide-trash-2"
-      label="Supprimer l'événement"
-      color="error"
-      size="sm"
-      class="mb-4"
-      @click="deleteEvent"
-    />
+    <div class="flex justify-end">
+      <UTooltip text="Supprimer l'événement" placement="bottom">
+        <UButton
+          :disabled="props.creation"
+          icon="i-lucide-trash-2"
+          color="error"
+          size="lg"
+          class="mb-4"
+          @click="deleteEvent"
+        />
+      </UTooltip>
+    </div>
 
     <UForm
       :schema="schema"
@@ -255,6 +219,8 @@ onMounted(async () => {
       <UFormField
         label="Titre"
         name="titre"
+        :size="'xl'"
+        required
       >
         <UInput
           class="w-full sm:w-auto"
@@ -265,52 +231,64 @@ onMounted(async () => {
       <UFormField
         label="Description"
         name="description"
+        class="min-w-[80%]"
       >
         <UTextarea
-          class="w-full sm:w-auto"
+          class="w-full"
           v-model="state.description"
         />
       </UFormField>
 
-      <UFormField
-        label="Status de l'événement"
-        name="status"
-      >
-        <USelect
-          label="Status"
-          name="status"
-          :items="Object.values(Recherche_Stage_Status).map(status => ({ value: status, label: status }))"
-          v-model="state.status"
-        >
-          <template #item="{ item }">
-            <StatusBadge :status="item.value" />
-          </template>
-        </USelect>
-      </UFormField>
 
-      <UFormField
-        label="Source"
-        name="source"
-      >
-        <USelect
+      <div class="flex flex-nowrap justify-around gap-10">
+        <UFormField
+          label="Status de l'événement"
+          name="status"
+          class="flex-1"
+        >
+          <USelect
+            label="Status"
+            name="status"
+            class="w-full"
+            :items="Object.values(Recherche_Stage_Status).map(status => ({ value: status, label: status }))"
+            v-model="state.status"
+          >
+            <template #item="{ item }">
+              <StatusBadge :status="item.value" />
+            </template>
+          </USelect>
+        </UFormField>
+
+        <UFormField
           label="Source de l'événement"
           name="source"
-          :items="Object.values(Demarche_Source).map(source => ({ value: source, label: source }))"
-          v-model="state.source"
-        />
-      </UFormField>
+          class="flex-1"
+        >
+          <USelect
+            label="Source de l'événement"
+            name="source"
+            class="w-full"
+            :items="Object.values(Demarche_Source).map(source => ({ value: source, label: source }))"
+            v-model="state.source"
+          />
+        </UFormField>
+      </div>
+
+      <USeparator/>
 
       <UFormField
         label="Contacts"
         name="contacts"
+        description="Ajoutez les contacts impliqués dans l’événement. Recherchez un contact existant ou saisissez un prénom pour en créer un nouveau."
       >
         <UInputMenu
           v-model="selectedContact" 
           v-model:search-term="searchTermContact"
-          :items="contactsOptions.map(contact => ({ value: contact.idContact, label: `${contact.nom} ${contact.prenom}` }))"
+          :items="contactsOptions.map(contact => ({ value: contact.idContact, label: `${contact.nom} ${contact.prenom}` })).filter(contact => contact.label.toLowerCase().includes(searchTermContact.toLowerCase()))"
+          
           :loading="loading"
           ignore-filter
-          placeholder="Sélectionner un contact"
+          placeholder="Rechercher ou créer un contact"
           class="w-full"
           create-item="always"
           @update:model-value="addContact"
@@ -318,28 +296,53 @@ onMounted(async () => {
         />
       </UFormField>
 
-      <div v-if="contactsEvent.length > 0">
-        <div class="flex flex-col space-y-2">
-          <p class="text-gray-500">Contacts associés à l'événement :</p>
-          <ul class="list-disc list-inside">
-            <li v-for="contact in contactsEvent" :key="contact.idContact">
-              <p>{{ contact.nom }} {{ contact.prenom }}</p>
-              <UButton
-                icon="i-lucide-trash-2"
-                color="error"
-                variant="link"
-                size="xs"
-                aria-label="Supprimer le contact"
-                @click="removeContact(contact)"
-              />
-            </li>
-          </ul>
-        </div>
+      <div v-if="contactsEvent.length > 0" class="mt-4">
+        <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
+          Contacts associés à l’événement
+        </p>
+
+        <ul class="space-y-2">
+          <li
+            v-for="contact in contactsEvent"
+            :key="contact.idContact"
+            class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-0.5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+          >
+            <div class="flex min-w-0 items-center gap-3">
+              <div
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-100 font-semibold text-primary-700 dark:bg-primary-900 dark:text-primary-200"
+              >
+                {{ contact.prenom?.charAt(0) }}{{ contact.nom.charAt(0) }}
+              </div>
+
+              <div class="min-w-0">
+                <p class="truncate font-medium text-gray-900 dark:text-white">
+                  {{ contact.prenom || 'Mr./Mme.' }} {{ contact.nom }}
+                </p>
+                <p class="truncate text-sm text-gray-500 dark:text-gray-400">
+                  {{ contact.fonction || 'Fonction inconnue' }}
+                </p>
+              </div>
+            </div>
+
+            <UButton
+              icon="i-lucide-trash-2"
+              color="error"
+              variant="ghost"
+              size="sm"
+              aria-label="Supprimer le contact"
+              @click="removeContact(contact)"
+            />
+          </li>
+        </ul>
       </div>
 
-      <div v-else>
-        <p class="text-gray-500">Aucun contact sélectionné.</p>
+      <div v-else class="mt-4 rounded-lg border border-dashed border-gray-300 p-4 text-center">
+        <p class="text-sm text-gray-500">
+          Aucun contact sélectionné.
+        </p>
       </div>
+
+      <USeparator />
 
       <!-- TODO -->
       <UFileUpload
@@ -361,22 +364,36 @@ onMounted(async () => {
         </template>
       </UFileUpload>
       
-      <UButton type="submit" :label="props.creation ? 'Créer' : 'Modifier'"/>
+      <div class="mt-6 flex justify-center border-t border-gray-200 pt-4 dark:border-gray-700">
+        <UButton
+          type="submit"
+          :label="props.creation ? 'Créer l’événement' : 'Enregistrer les modifications'"
+          color="primary"
+          size="md"
+          class="w-fit"
+        />
+      </div>
     </UForm>
   </div>
 
 
   <UModal
-        v-model:open="isCreatingContact"
-      >
-          <template #content>
-            <ContactForm
-            create
-            @created="createdContact"
-            :state="{prenom: searchTermContact}"
-          />
-          
-          <UButton label="annuler" @click="isCreatingContact=false"/>
-        </template>
-      </UModal>
+    v-model:open="isCreatingContact"
+  >
+    <template #content>
+      <div class="p-5">
+        <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-gray-100">
+          Créer un nouveau contact
+        </h3>
+
+        <ContactForm
+          create
+          @created="createdContact"
+          :state="{prenom: searchTermContact}"
+        />
+    
+        <UButton label="annuler" @click="isCreatingContact=false"/>
+      </div>
+    </template>
+  </UModal>
 </template>

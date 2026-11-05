@@ -15,7 +15,7 @@ const bodySchema = z.object({
   }),
   source: z.enum(Demarche_Source),
   status: z.enum(Recherche_Stage_Status),
-  contacts: z.array(z.number()).min(1, { message: "Au moins un contact doit être sélectionné" }),
+  contacts: z.array(z.number()).optional().default([]),
 })
 
 export default defineEventHandler(async (event) => {

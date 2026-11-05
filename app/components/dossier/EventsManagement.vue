@@ -9,7 +9,8 @@ const props = defineProps<{
 }>()
 
 const emits = defineEmits<{
-  updated: []
+  updated: [EventInfo]
+  deleted: [EventInfo]
 }>()
 
 const showEventDetails = ref<boolean>(false)
@@ -26,14 +27,6 @@ const timelineReversed = ref<boolean>(false)
 function onTimelineSelect(event: Event, item: EventInfo) {
   selectedEvent.value = item
   showEventDetails.value = true
-}
-
-function deleteEvent(event: EventInfo) {
-  const index = props.events.findIndex(e => e.idDemarche === event.idDemarche)
-
-  if (index !== -1) {
-    props.events.splice(index, 1)
-  }
 }
 
 // TODO slot for event creation
@@ -61,16 +54,16 @@ function deleteEvent(event: EventInfo) {
 
   <USlideover
     :title="'Visualisation d\'un événement'"
-    :size="'xl'"
+    class="slidingModal"
     v-model:open="showEventDetails"
   >
     <template #body>
       <EventDescription
         v-if="selectedEvent"
         :dossier-id="props.dossierId"
-        v-model="selectedEvent as EventInfo"
-        @deleted="deleteEvent(selectedEvent as EventInfo)"
-        @updated="emits('updated')"
+        :event="selectedEvent as EventInfo"
+        @deleted="emits('deleted', selectedEvent)"
+        @updated="emits('updated', $event)"
         @close="showEventDetails = false"
       />
     </template>

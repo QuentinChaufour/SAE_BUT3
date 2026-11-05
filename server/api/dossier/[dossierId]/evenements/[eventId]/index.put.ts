@@ -16,7 +16,7 @@ const bodySchema = z.object({
   }),
   source: z.enum(Demarche_Source),
   status: z.enum(Recherche_Stage_Status),
-  contacts: z.array(z.number()).min(1, { message: "Au moins un contact doit être sélectionné" }),
+  contacts: z.array(z.number()).optional().default([]),
 })
 
 export default defineEventHandler(async (event) => {
@@ -59,32 +59,33 @@ export default defineEventHandler(async (event) => {
   }).then((contacts) => contacts.map((c) => c.DemarcheContact.idContact))
 
   // Add new contacts
-  body.contacts.forEach(async (contactId) => {
-    if(!oldContactsIds.find((c) => c === contactId)){
-      // the contact was added
-      await prisma.demarcheRechercheContact.create({
-        data: {
-          idDemarche: updatedEvent.idDemarche,
-          idContact: contactId,
-        }
-      })
-    }
-  })
-
-  // Remove deleted contacts
-  oldContactsIds.forEach( async(contactId) => {
-    if(!body.contacts.find((c) => c === contactId)){
-      // the contact was removed
-      await prisma.demarcheRechercheContact.delete({
-        where: {
-          idDemarche_idContact: {
-            idContact : contactId,
-            idDemarche : updatedEvent.idDemarche,
+  await Promise.all(
+    body.contacts
+      .filter(contactId => !oldContactsIds.includes(contactId))
+      .map(contactId =>
+        prisma.demarcheRechercheContact.create({
+          data: {
+            idDemarche: updatedEvent.idDemarche,
+            idContact: contactId,
           }
-        }
-      })
-    }
-  })
+        })
+      )
+  )
+  
+  await Promise.all(
+    oldContactsIds
+      .filter(contactId => !body.contacts.includes(contactId))
+      .map(contactId =>
+        prisma.demarcheRechercheContact.delete({
+          where: {
+            idDemarche_idContact: {
+              idContact: contactId,
+              idDemarche: updatedEvent.idDemarche,
+            }
+          }
+        })
+      )
+  )
 
   const newEventContacts = await prisma.demarcheRechercheContact.findMany({
     where: {

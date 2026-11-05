@@ -32,6 +32,7 @@ const files = ref<FileUploadItem[]>([])
 const departementId = ref<number | null>(null)
 const openedEventCreation = ref<boolean>(false) 
 const idDossier = Number(useRoute().params.idDossier) ?? null
+const toast = useToast()
 const state = reactive({
   description: ''
 })
@@ -96,16 +97,48 @@ function deleteFile(index: number) {
 
 // keep the contact list up to date when a contact is added or updated
 // without reloading the page & without making another API call
-function contactSubmitted(contact: DemarcheContact , index?: number) {
+function contactUpdated(contact: DemarcheContact) {
 
-  dossierStore.updateContacts(contact, index)
+  dossierStore.updateContacts({
+    ...contact,
+    label: `${contact.nom} ${contact.prenom}`.trim() || 'Pas de nom',
+    value: String(contact.idContact),
+    content: ''
+  })
 }
 
-function eventCreated(event: EventInfo) {
-  dossierStore.addEvent(event)
-  dossierStore.getContacts
+function contactDeleted(contact: DemarcheContact) {
+  dossierStore.deleteContact(contact)
+}
 
-  openedEventCreation.value = false
+async function createEvent(event: EventInfo) {
+  try{
+    await dossierStore.createEvent(event)
+    openedEventCreation.value = false 
+  }
+  catch{
+    toast.add({ title: 'Erreur', description: 'Erreur lors de la création de l\'événement', color: 'error' })
+  }
+}
+
+async function updateEvent(event: EventInfo){
+  try{
+    await dossierStore.updateEvent(event)
+  }
+  catch{
+    toast.add({ title: 'Erreur', description: 'Erreur lors de la mise à jour de l\'événement', color: 'error' })
+  }
+}
+
+async function deleteEvent(event: EventInfo){
+  try{
+    await dossierStore.deleteEvent(event)
+    toast.add({ title: 'Succès', description: 'Événement supprimé avec succès', color: 'success' })
+    openedEventCreation.value = false
+  }
+  catch{
+    toast.add({ title: 'Erreur', description: 'Erreur lors de la suppression de l\'événement', color: 'error' })
+  }
 }
 
 onMounted(async () => {
@@ -170,7 +203,8 @@ onMounted(async () => {
               <EventsManagement 
                 :events="dossierStore.events" 
                 :dossier-id="idDossier"
-                @updated="() => dossierStore.getContacts"
+                @updated="updateEvent"
+                @deleted="deleteEvent"
               >
                 <template #header_action>
                   <UButton @click="openedEventCreation = true">
@@ -237,12 +271,13 @@ onMounted(async () => {
 
               <USeparator />
 
-              <UAccordion :items="dossierStore.getContacts">
-                <template #content="{ item, index }">
+              <UAccordion :items="dossierStore.contacts">
+                <template #content="{ item }">
                   <ContactForm
                     update
                     :contact="item"
-                    @submitted="contactSubmitted($event, index)"
+                    @deleted="contactDeleted(item)"
+                    @updated="contactUpdated"
                   />
                 </template>
               </UAccordion>
@@ -283,7 +318,7 @@ onMounted(async () => {
 
   <USlideover
     :title="'Ajouter un événement'"
-    :size="'xl'"
+    class="slidingModal"
     v-model:open="openedEventCreation"
   >
     <template #body>
@@ -293,7 +328,7 @@ onMounted(async () => {
         :state="{
           status: dossierStore.getStatus
         }"
-        @created="eventCreated"
+        @created="createEvent"
       />
     </template>
   </USlideover>
