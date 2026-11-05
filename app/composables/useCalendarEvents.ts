@@ -1,7 +1,7 @@
 import { addDays, startOfDay } from 'date-fns'
 import { FetchError } from 'ofetch'
 import type { CalendarEvent, Calendar, DateRange } from '../../shared/types'
-import { toLocalISO } from '../shared/utils/time'
+import { toLocalISO } from '~~/shared/utils/time'
 import { useCalendar } from './useCalendar'
 import { dayKey, rangeFor, type RangeTitle, formatRangeTitle, formatMonth, toDate } from '../utils/dates'
 import { useOnline, useIntervalFn } from '@vueuse/core'
@@ -35,7 +35,7 @@ const _useCalendarEvents = () => {
   const nuxtApp = useNuxtApp()
   const toast = useToast()
 
-  const { data: calendars } = useFetch<Calendar[]>('/api/calendars', {
+  const { data: calendars } = useFetch<Calendar[]>('/api/calendar/calendars', {
     key: 'calendars',
     default: () => [],
     getCachedData: (key, nuxtApp) => nuxtApp.payload.data[key] ?? nuxtApp.static.data[key]
@@ -51,7 +51,7 @@ const _useCalendarEvents = () => {
 
   // One cached fetch per visible range: revisiting a range renders instantly
   // from the payload cache instead of requesting again
-  const { data: fetchedEvents, status } = useFetch<CalendarEvent[]>('/api/events', {
+  const { data: fetchedEvents, status } = useFetch<CalendarEvent[]>('/api/calendar/events', {
     key: () => eventsKey(range.value),
     query: computed(() => eventsQuery(range.value)),
     default: () => [],
@@ -67,7 +67,7 @@ const _useCalendarEvents = () => {
     }
 
     try {
-      nuxtApp.payload.data[key] = await $fetch<CalendarEvent[]>('/api/events', { query: eventsQuery(range) })
+      nuxtApp.payload.data[key] = await $fetch<CalendarEvent[]>('/api/calendar/events', { query: eventsQuery(range) })
     } catch {
       // Warming is best-effort, navigation will fetch normally
     }
@@ -107,7 +107,7 @@ const _useCalendarEvents = () => {
     pendingRanges.value = { ...pendingRanges.value, [key]: range }
 
     try {
-      chunks.value[key] = nuxtApp.payload.data[key] ?? await $fetch<CalendarEvent[]>('/api/events', { query: eventsQuery(range) })
+      chunks.value[key] = nuxtApp.payload.data[key] ?? await $fetch<CalendarEvent[]>('/api/calendar/events', { query: eventsQuery(range) })
     } catch {
       const { [key]: _failed, ...rest } = chunks.value
       chunks.value = rest
@@ -214,7 +214,7 @@ const _useCalendarEvents = () => {
 
   const probe = useIntervalFn(async () => {
     try {
-      await $fetch('/api/calendars')
+      await $fetch('/api/calendar/calendars')
       forcedOffline.value = false
     } catch {
       // Still unreachable, keep probing
@@ -322,7 +322,7 @@ const _useCalendarEvents = () => {
   function addEvent(event: CalendarEvent) {
     mutate(event.id, () => {
       overlay.value.created[event.id] = event
-    }, () => send({ method: 'POST', path: '/api/events', body: event }), 'Failed to create event')
+    }, () => send({ method: 'POST', path: '/api/calendar/events', body: event }), 'Failed to create event')
   }
 
   function updateEvent(event: CalendarEvent) {
@@ -339,7 +339,7 @@ const _useCalendarEvents = () => {
       } else {
         overlay.value.updated[event.id] = event
       }
-    }, () => send({ method: 'PATCH', path: `/api/events/${event.id}`, body: event }), 'Failed to update event')
+    }, () => send({ method: 'PATCH', path: `/api/calendar/events/${event.id}`, body: event }), 'Failed to update event')
   }
 
   function removeEvent(id: string) {
@@ -350,7 +350,7 @@ const _useCalendarEvents = () => {
       const deleted = overlay.value.deleted.includes(id) ? overlay.value.deleted : [...overlay.value.deleted, id]
 
       overlay.value = { created, updated, deleted }
-    }, () => send({ method: 'DELETE', path: `/api/events/${id}` }), 'Failed to delete event')
+    }, () => send({ method: 'DELETE', path: `/api/calendar/events/${id}` }), 'Failed to delete event')
   }
 
   return {

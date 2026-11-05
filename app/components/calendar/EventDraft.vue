@@ -21,6 +21,7 @@ const { formSide } = useCalendar()
 const { draft, open, pendingScroll, updateDraft, discardDraft, commitDraft, registerAnchor } = useEventDraft()
 const { calendars } = useCalendarEvents()
 
+console.log(draft, '\n ^')
 // Every segment counts: the draft is discarded once none of them is left, so
 // navigating or scrolling its day away takes it with it
 registerAnchor()
@@ -91,14 +92,14 @@ watch(pendingScroll, reveal)
     <template #anchor>
       <!-- Dressed as the event it is about to be, with its form open: the
         chip wears the held shade a selected chip does, and only an all-day
-        one the tinted pill, so nothing changes about it when Enter saves it -->
+        one the tinted pill, so nothing changes about it when Enter saves it --> <!-- L'evenement dans le calendrier-->
       <div
         ref="el"
         v-bind="$attrs"
         data-draft
         :data-active="variant === 'chip' || undefined"
         aria-hidden="true"
-        class="select-none transition-colors"
+        class="select-none transition-colors magic_class"
         :class="[
           variant === 'block'
             ? [eventBlockClasses[color], 'absolute z-20 flex flex-col items-start overflow-hidden rounded-xs px-3 py-1 text-xs text-start']

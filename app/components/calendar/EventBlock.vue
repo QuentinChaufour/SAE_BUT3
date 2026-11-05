@@ -3,7 +3,7 @@ import { addMinutes } from 'date-fns'
 import { type PositionedEvent, eventBlockStyle, PX_PER_MINUTE, MIN_EVENT_MINUTES, SNAP_MINUTES } from '../../utils/layout'
 import { useCalendarEvents } from '../../composables/useCalendarEvents'
 import { useEventDrag } from '../../composables/useEventDrag'
-import { toLocalISO } from '../../shared/utils/time'
+import { toLocalISO } from '~~/shared/utils/time'
 import { formatTime } from '../../utils/dates'
 import { eventBlockClasses, calendarDotClasses, eventOutlineClasses } from '../../utils/calendars'
 

@@ -1,7 +1,7 @@
 import { addDays, differenceInCalendarDays } from 'date-fns'
 import { useCalendarEvents } from './useCalendarEvents'
 import type { CalendarEvent } from '../../shared/types'
-import { toLocalISO } from '../shared/utils/time'
+import { toLocalISO } from '~~/shared/utils/time'
 import { dateAtPoint } from '../utils/dates'
 import { DRAG_THRESHOLD } from '../utils/layout'
 import { useEventListener } from '@vueuse/core'

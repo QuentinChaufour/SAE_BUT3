@@ -2,7 +2,7 @@
 import { z } from 'zod'
 import { addDays, subMilliseconds } from 'date-fns'
 import { CalendarDate, Time } from '@internationalized/date'
-import { toLocalISO } from '../../shared/utils/time'
+import { toLocalISO } from '~~/shared/utils/time'
 
 // One request per pause rather than one per keystroke. The popover unmounts
 // the form when it closes, which flushes whatever is still waiting
