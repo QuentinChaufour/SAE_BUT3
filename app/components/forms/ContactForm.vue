@@ -73,8 +73,6 @@ async function updateContact(event: FormSubmitEvent<Schema>) {
         statusCode: 500,
         statusMessage: 'Failed to update contact'
       })
-
-      // TODO update contacts for each event
     }
 
     emits('updated', response.data)

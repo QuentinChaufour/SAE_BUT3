@@ -282,7 +282,23 @@ export const useDossierStore = defineStore('dossier', {
           telephone: contact.telephone || ''
         })
 
-        //TODO update the contact in all events as well
+        // Update the contact information in all events that reference this contact
+        this.events.forEach(event => {
+          if (event.contacts) {
+            const eventContactIndex = event.contacts.findIndex(c => c.idContact === contact.idContact)
+            if (eventContactIndex !== -1 && event.contacts[eventContactIndex]) {
+              Object.assign(event.contacts[eventContactIndex], {
+                label: `${contact.nom} ${contact.prenom}`,
+                idContact: contact.idContact,
+                nom: contact.nom || '',
+                prenom: contact.prenom || '',
+                fonction: contact.fonction || '',
+                email: contact.email || '',
+                telephone: contact.telephone || ''
+              })
+            }
+          }
+        })
       },
       createContact(contact: ContactInfo){
         this.contacts.push({
