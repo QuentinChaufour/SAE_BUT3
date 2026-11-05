@@ -11,12 +11,12 @@ describe('redirect', () => {
 
     it('should return the correct redirect path for Secretary role', () => {
       const result = getRoleRedirectPath(UserRole.Secretary)
-      expect(result).toBe('')
+      expect(result).toBe('/example') // TODO: A remplacer
     })
 
     it('should return the correct redirect path for Teacher role', () => {
       const result = getRoleRedirectPath(UserRole.Teacher)
-      expect(result).toBe('')
+      expect(result).toBe('/example') // TODO: A remplacer
     })
 
     it('should return the correct redirect path for Admin role', () => {

@@ -11,7 +11,7 @@ export function getRoleRedirectPath(role: UserRole): string {
       return '/student/search'
     case UserRole.Secretary:
     case UserRole.Teacher:
-      return ''
+      return '/example' // TODO: A remplacer
     case UserRole.Admin:
       return '/departments'
   }

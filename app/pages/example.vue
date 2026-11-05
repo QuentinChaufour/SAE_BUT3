@@ -1,9 +1,6 @@
 <script setup lang="ts">
-import UserRole from '~~/shared/types/role'
-
 definePageMeta({
-  middleware: ['auth', 'role'],
-  role: UserRole.Student
+  middleware: ['auth', 'role']
 })
 </script>
 
