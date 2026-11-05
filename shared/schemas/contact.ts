@@ -16,7 +16,7 @@ export const contactSchema = z.object({
 
   telephone: emptyToNull(
     z.string()
-      .regex(/^(?:\+\d{1,3})?(?:\s*\d){10}$/, { message: 'Must be a valid international phone number' })
+      .regex(/^(?:\+\d{1,3})?(?:\s*\d){10}$/, { message: 'Doit être un numéro de téléphone valide' })
       .trim()
       .optional()
   ),

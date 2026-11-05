@@ -157,6 +157,27 @@ export const useDossierStore = defineStore('dossier', {
         throw e
       }
     },
+    async updateDossier(state: {description: string; titre: string}) {
+
+      if(!this.dossier) throw new Error('No dossier selected')
+
+      try {
+        const response = await $fetch<APIResponse<null>>(`/api/dossier/${this.getDossierId}`, {
+          method: 'PATCH',
+          body: state
+        })
+
+        if (response.statusCode !== 200) {
+          throw new Error('Failed to update dossier')
+        }
+
+        this.dossier.description = state.description
+        this.dossier.titre = state.titre
+      } catch (error) {
+        console.error('Error updating dossier:', error)
+        throw error
+      }
+    },
     async createEvent(event: EventInfo) {
 
         try{

@@ -21,20 +21,31 @@ definePageMeta({
 
 const dossierStore = useDossierStore()
 
-const schema = z.object({
-  description: z.string()
+const descriptionSchema = z.object({
+  description: z.string().trim(),
 })
 
-const hasDescriptionChanged = computed(() => schema.safeParse({ description: state.description }).success && state.description !== dossierStore.dossier?.description)
+const titleSchema = z.object({
+  titre: z.string().trim().min(1, { message: 'Le titre ne peut pas être vide' })
+})
 
-type Schema = z.output<typeof schema>
+// Define the schema for the form
+const schema = z.object({
+  description: descriptionSchema.shape.description,
+  titre: titleSchema.shape.titre
+})
+
+const hasDescriptionChanged = computed(() => descriptionSchema.safeParse({ description: state.description }).success && state.description !== dossierStore.dossier?.description)
+const hasTitleChanged = computed(() => titleSchema.safeParse({ titre: state.titre }).success && state.titre !== dossierStore.dossier?.titre)
+
 const files = ref<FileUploadItem[]>([])
 const departementId = ref<number | null>(null)
 const openedEventCreation = ref<boolean>(false) 
 const idDossier = Number(useRoute().params.idDossier) ?? null
 const toast = useToast()
 const state = reactive({
-  description: ''
+  description: dossierStore.dossier?.description || '',
+  titre: dossierStore.dossier?.titre || '',
 })
 
 async function getDepartementId(): Promise<number | null> {
@@ -54,39 +65,6 @@ async function getDepartementId(): Promise<number | null> {
   catch (e) {
     console.error(e)
     return null
-  }
-}
-
-async function onSubmit(event: FormSubmitEvent<Schema>) {
-  event.preventDefault()
-
-  const dossier = dossierStore.dossier
-
-  if (!dossier) {
-    console.error('Dossier is not loaded')
-    return
-  }
-
-  const newDescription = state.description
-
-  if (newDescription === dossier.description) {
-    return
-  }
-
-  try {
-    const response = await $fetch<APIResponse<null>>(`/api/dossier/${dossier.idRecherche}`, {
-      method: 'PATCH',
-      body: { description: newDescription }
-    })
-
-    if (response.statusCode !== 200) {
-      throw new Error('Failed to update description')
-    }
-
-    dossier.description = newDescription
-  } catch (error) {
-    // TODO handle error properly
-    console.error('Error updating description:', error)
   }
 }
 
@@ -139,6 +117,36 @@ async function deleteEvent(event: EventInfo){
   catch{
     toast.add({ title: 'Erreur', description: 'Erreur lors de la suppression de l\'événement', color: 'error' })
   }
+}
+
+async function updateDossier() {
+  const dossier = dossierStore.dossier
+
+  if (!dossier) {
+    console.error('Dossier is not loaded')
+    toast.add({ title: 'Erreur', description: 'Dossier non chargé', color: 'error' })
+    return
+  }
+
+  const newDescription = state.description
+  const newTitle = state.titre
+
+  if (!hasDescriptionChanged.value && !hasTitleChanged.value) {
+    return
+  }
+
+  try {
+    await dossierStore.updateDossier({
+        description: newDescription,
+        titre: newTitle
+    })
+
+    toast.add({ title: 'Succès', description: 'Dossier mis à jour avec succès', color: 'success' })
+  }
+  catch (error) {
+    console.error('Error updating dossier:', error)
+  }
+
 }
 
 onMounted(async () => {
@@ -243,8 +251,19 @@ onMounted(async () => {
                 :schema="schema"
                 :state="state"
                 class=" mt-6 mb-5 min-w-0 space-y-4"
-                @submit="onSubmit"
               >
+                <UFormField
+                  label="Titre"
+                  name="titre"
+                >
+                  <UInput
+                    v-model="state.titre"
+                    type="text"
+                    class="w-full"
+                    @blur="updateDossier"
+                  />
+                </UFormField>
+
                 <UFormField
                   label="Description"
                   name="description"
@@ -252,15 +271,9 @@ onMounted(async () => {
                   <UTextarea
                     v-model="state.description"
                     class="w-full"
+                    @blur="updateDossier"
                   />
                 </UFormField>
-
-                <UButton
-                  type="submit"
-                  :disabled="!hasDescriptionChanged"
-                >
-                  Modifier
-                </UButton>
               </UForm>
 
               <DossierTagSelection
