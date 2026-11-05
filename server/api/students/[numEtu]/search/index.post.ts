@@ -2,7 +2,6 @@ import { prisma } from '~~/server/utils/prisma'
 import { z } from 'zod'
 
 import { studentIdSchema } from '~~/shared/schemas/student'
-import { yearSchema } from '~~/shared/schemas/year'
 import { studentSearchFields } from '~~/shared/schemas/student-search'
 import { checkAuthWithOnlySelfStudentData } from '~~/server/utils/middleware'
 import UserRole from '~~/shared/types/role'
@@ -11,7 +10,9 @@ const paramsSchema = z.object({
   numEtu: studentIdSchema
 })
 
-const bodySchema = studentSearchFields.extend({ annee: yearSchema })
+const bodySchema = studentSearchFields.extend({
+  idInscription: z.number('Le numéro d\'inscription est requis.').positive('Le numéro d\'inscription doit être un nombre positif.').nonoptional()
+})
 
 defineRouteMeta({
   openAPI: {
@@ -101,14 +102,24 @@ export default defineEventHandler(async (event) => {
   await checkAuthWithOnlySelfStudentData(event, params.numEtu, [UserRole.Student, UserRole.Secretary, UserRole.Admin])
 
   const body = await readValidatedBody(event, bodySchema.parse)
+
+  const inscription = await prisma.inscription.count({
+    where: { idInscription: body.idInscription, numEtu: params.numEtu }
+  })
+  if (!inscription) {
+    throw createError({
+      statusCode: 400,
+      message: 'Le numéro d\'inscription est invalide pour cet étudiant.'
+    })
+  }
+
   const created = await prisma.rechercheStage.create({
     data: {
       titre: body.titre,
       description: body.description,
       alternance: body.alternance,
-      annee: body.annee,
-      idEntreprise: body.idEntreprise,
-      numEtu: params.numEtu
+      idInscription: body.idInscription,
+      idEntreprise: body.idEntreprise
     }
   })
   return created

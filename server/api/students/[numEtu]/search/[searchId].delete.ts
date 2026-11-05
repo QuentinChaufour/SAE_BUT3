@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
   await checkAuthWithOnlySelfStudentData(event, params.numEtu, [UserRole.Student])
 
   const exist = await prisma.rechercheStage.count({
-    where: { idRecherche: params.searchId, numEtu: params.numEtu }
+    where: { idRecherche: params.searchId, Inscription: { numEtu: params.numEtu } }
   })
   if (!exist) throw createError({ statusCode: 404, message: 'Search not found' })
 
@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
   await prisma.$transaction(async (tx) => {
     // TODO: Supprimer les pièces jointes stockées également
 
-    await tx.rechercheStage.delete({ where: { idRecherche: searchId, numEtu: params.numEtu } })
+    await tx.rechercheStage.delete({ where: { idRecherche: searchId } })
   })
 
   return sendNoContent(event)

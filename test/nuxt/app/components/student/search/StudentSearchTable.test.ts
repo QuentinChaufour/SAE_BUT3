@@ -46,9 +46,9 @@ describe('StudentSearchTable', () => {
   })
 
   it('renders rows and cell values', async () => {
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
 
-    expect(mocks.useFetch).toHaveBeenCalledWith('/api/students/o123456789/search', expect.any(String))
+    expect(mocks.useFetch).toHaveBeenCalledWith('/api/students/o123456789/search?idInscription=1', expect.any(String))
     const rows = wrapper.findComponent({ name: 'UTable' }).findAll('tbody tr')
 
     expect(rows).toHaveLength(2)
@@ -68,7 +68,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('check content', async () => {
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
 
     const searchbar = wrapper.findComponent({ name: 'UInput' })
     expect(searchbar.exists()).toBe(true)
@@ -93,7 +93,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('filters elements', async () => {
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
     const input = wrapper.findComponent({ name: 'UInput' }).find('input')
 
     await input.setValue('  WEB paris  ')
@@ -109,7 +109,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('emits edit action', async () => {
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
     const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
       const items = menu.props('items') as { label: string, onSelect: () => void }[][]
       return items[0]?.[0]?.label === 'Modifier'
@@ -122,7 +122,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('check read-only mode', async () => {
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789', readOnly: true } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1, readOnly: true } })
     const viewButton = wrapper.find('button[aria-label="Voir"]')
 
     expect(viewButton.exists()).toBe(true)
@@ -133,7 +133,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('updates pagination and sorting', async () => {
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
     const table = wrapper.findComponent({ name: 'UTable' })
     const pagination = wrapper.findComponent({ name: 'UPagination' })
 
@@ -165,7 +165,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('opens delete modal with selected search', async () => {
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
 
     const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
       const items = menu.props('items') as { label: string, onSelect: () => void }[][]
@@ -190,7 +190,7 @@ describe('StudentSearchTable', () => {
     mocks.fetch.mockResolvedValueOnce(undefined)
     mocks.refresh.mockResolvedValueOnce(undefined)
 
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
 
     const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
       const items = menu.props('items') as { label: string, onSelect: () => void }[][]
@@ -219,7 +219,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('network error on deletes search on modal confirm', async () => {
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
     mocks.fetch.mockRejectedValueOnce(new Error('Network error'))
 
     const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
@@ -248,7 +248,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('closes delete modal on cancel', async () => {
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
 
     const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
       const items = menu.props('items') as { label: string, onSelect: () => void }[][]
@@ -268,7 +268,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('does not delete a department when none is selected', async () => {
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
 
     const modal = wrapper.findComponent(ConfirmModal)
     modal.vm.$emit('confirm')
