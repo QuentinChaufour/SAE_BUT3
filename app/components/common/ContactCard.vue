@@ -18,7 +18,7 @@ defineProps<{
         {{ contact.prenom || 'Mr./Mme.' }} {{ contact.nom }}
       </p>
       <p class="truncate text-sm text-gray-500 dark:text-gray-400">
-        {{ contact.fonction || 'Fonction inconnue' }}
+        {{ contact.fonction || '' }}
       </p>
     </div>
   </div>

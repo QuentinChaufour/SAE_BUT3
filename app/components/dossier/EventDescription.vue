@@ -7,7 +7,6 @@ import { getCurrentDateString } from '~~/shared/utils/date'
 import { Demarche_Source , Recherche_Stage_Status } from '~~/generated/prisma/enums'
 import type { DemarcheContact } from '~~/generated/prisma/client'
 import type { EventInfo } from '~~/shared/types/event'
-import type { APIResponse } from '~~/shared/types/apiResponse'
 import StatusBadge from '~/components/dossier/StatusBadge.vue'
 import ContactForm from '../forms/ContactForm.vue'
 import ContactCard from '~/components/common/ContactCard.vue'
@@ -40,12 +39,15 @@ const emits = defineEmits<{
   close: []
 }>()
 
+const dossierStore = useDossierStore()
+
 const contactsOptions = ref<DemarcheContact[]>([])
 const contactsEvent = ref<DemarcheContact[]>(props.creation ? [] : props.event?.contacts || [])
 const loading = ref<boolean>(true)
 const selectedContact = ref<ContactItem>()
 const searchTermContact = ref<string>('')
-const isCreatingContact = ref<boolean>(false) 
+const isCreatingContact = ref<boolean>(false)
+const isContactSelectorOpen = ref<boolean>(false)
 const toast = useToast()
 
 const schema = z.object({
@@ -144,18 +146,6 @@ async function deleteEvent(){
   }
 }
 
-async function fetchContacts() {
-  try {
-    const response = await $fetch<APIResponse<DemarcheContact[]>>(`/api/dossier/${props.dossierId}/contacts`, {
-      method: 'GET',
-    })
-    contactsOptions.value = response.data ?? []
-    loading.value = false
-  } catch (error) {
-    toast.add({ title: 'Erreur', description: 'Erreur lors de la récupération des contacts', color: 'error' })
-  }
-}
-
 function createdContact(contact: DemarcheContact) {
 
   contactsOptions.value.push(contact)
@@ -167,6 +157,7 @@ function createdContact(contact: DemarcheContact) {
   searchTermContact.value = ''
 
   isCreatingContact.value = false
+  isContactSelectorOpen.value = false
 }
 
 function addContact(contactElement: {value: number, label: string}) {
@@ -184,6 +175,8 @@ function addContact(contactElement: {value: number, label: string}) {
   }
 
   contactsEvent.value.push(contact)
+  isContactSelectorOpen.value = false
+  searchTermContact.value = ''
 }
 
 function removeContact(contact: DemarcheContact) {
@@ -193,7 +186,14 @@ function removeContact(contact: DemarcheContact) {
 // TODO  add calendar
 
 onMounted(async () => {
-  await fetchContacts()
+  loading.value = true
+  try {
+    contactsOptions.value = await dossierStore.fetchContacts()
+  } catch (error) {
+    console.error('Error fetching contacts:', error)
+    toast.add({ title: 'Erreur', description: 'Erreur lors de la récupération des contacts', color: 'error' })
+  }
+  loading.value = false
 })
 
 </script>
@@ -293,8 +293,8 @@ onMounted(async () => {
         <UInputMenu
           v-model="selectedContact" 
           v-model:search-term="searchTermContact"
+          v-model:open="isContactSelectorOpen"
           :items="options"
-          
           :loading="loading"
           ignore-filter
           placeholder="Rechercher ou créer un contact"
@@ -396,7 +396,11 @@ onMounted(async () => {
           create
           :dossier-id="props.dossierId"
           @created="createdContact"
-          @cancel="isCreatingContact = false"
+          @cancel="() => {
+            isCreatingContact = false 
+            isContactSelectorOpen = false
+            searchTermContact = ''
+          }"
           :state="{prenom: searchTermContact}"
         />
       </div>

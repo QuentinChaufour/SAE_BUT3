@@ -245,7 +245,7 @@ async function deleteContact() {
     </div>
 
     <div class="flex gap-4 justify-between pt-3">
-      <UButton v-if="props.create" :color="'error'" label="Annuler" @click="emits('cancel')"/>
+      <UButton v-if="props.create" :color="'neutral'" label="Annuler" @click="emits('cancel')"/>
       <UButton v-else :color="'error'" label="Supprimer" @click="deleteContact"/>
       <UButton type="submit" :label="props.create ? 'Créer' : 'Modifier'"/>
     </div>

@@ -105,16 +105,8 @@ export const useDossierStore = defineStore('dossier', {
             files: event.LienPj.map(pj => { return { nom: pj.PieceJointe.nom, idPieceJointe: pj.PieceJointe.idPieceJointe }; })
           })
         }
-        const idSet = new Set<number>()
-            
-        for (const contact of this.dossier.DemarcheEvenement.flatMap(e => e.DemarcheRechercheContact.map(c => c.DemarcheContact))) {
-          // ensure distinct contacts
-          if (idSet.has(contact.idContact)) {
-            continue
-          }
-          this.contacts.push(contact)
-          idSet.add(contact.idContact)
-        }
+        
+        this.contacts = await this.fetchContacts()
 /*  
           for (const file of this.dossier.DemarcheEvenement.flatMap(e => e.LienPj.map(pj => pj.PieceJointe))) {
             // skip files with no name
@@ -191,7 +183,7 @@ export const useDossierStore = defineStore('dossier', {
             files: response.data.files
           })
         
-          this.refreshContact()
+          this.contacts = await this.fetchContacts()
           this.orderEvents()
         }
         catch(error){
@@ -225,7 +217,7 @@ export const useDossierStore = defineStore('dossier', {
             title: response.data.titre || 'Pas de titre',
           })
           // TODO delete contact if no longer used in any event
-          this.refreshContact()
+          this.contacts = await this.fetchContacts()
         }
         catch(error){
           console.error('Error updating event:', error)
@@ -243,7 +235,7 @@ export const useDossierStore = defineStore('dossier', {
           }
 
           this.events = this.events.filter((e) => e.idDemarche !== event.idDemarche)
-          this.refreshContact()
+          this.contacts = await this.fetchContacts()
         }
         catch(error){
           console.error('Error deleting event:', error)
@@ -295,11 +287,18 @@ export const useDossierStore = defineStore('dossier', {
           }
         })
       },
-      refreshContact(){
-        const idSet = new Set<number>()
-        this.contacts = this.events.flatMap(e => e.contacts ?? []).filter(contact => !idSet.has(contact.idContact) && idSet.add(contact.idContact))
+
+      async fetchContacts() {
+        try {
+          const response = await $fetch<APIResponse<DemarcheContact[]>>(`/api/dossier/${this.getDossierId}/contacts`, {
+            method: 'GET',
+          })
+          return response.data ?? []
+          
+        } catch (error) {
+          throw error
+        }
       },
-      
       /**
         * Sort the events array by date in descending order (most recent first).
         * @param state the store State

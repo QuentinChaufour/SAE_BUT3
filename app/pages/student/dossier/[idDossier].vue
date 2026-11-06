@@ -304,9 +304,19 @@ onMounted(async () => {
               <UFormField
                 label="Étiquettes de la recherche"
                 name="tags"
-                description="Étiquettes décrivant la recherche. Ajoutez ou supprimer en pour caratériser votre recherche. 
-                  Pour tout ajout de tag non-disponible, veuillez faire la demande à votre secrétariat de département."
+                description="Étiquettes décrivant la recherche. Ajoutez ou supprimer en pour caratériser votre recherche."
               >
+                <template #label>
+                  <div class="flex items-center gap-2">
+                    <p>Étiquettes de la recherche</p>
+                    <UTooltip
+                      text="Pour créer une éttiquette, demandez a votre secrétariat de département."
+                    >
+                      <UIcon name="i-lucide-info"/>
+                    </UTooltip>
+                  </div>
+                </template>
+
                 <DossierTagSelection
                   v-model:tags="dossierStore.dossierTags"
                   :id-departement="departementId"
@@ -315,9 +325,6 @@ onMounted(async () => {
               </UFormField>
 
               <USeparator label="Contacts de la Recherche" size="sm"/>
-              <p class="text-sm text-gray-500">
-                Cliquez sur un contact pour le modifier ou le supprimer.
-              </p>
 
               <UAccordion 
                 v-if="dossierStore.contacts.length > 0" 
@@ -325,7 +332,7 @@ onMounted(async () => {
                 class="w-full space-y-2"
                 :ui="{
                   item: 'overflow-hidden rounded-lg border border-default bg-default last:border-b',
-                  trigger: 'rounded-lg px-4 py-3 hover:bg-elevated/50 data-[state=open]:rounded-b-none data-[state=open]:bg-elevated',
+                  trigger: 'cursor-pointer rounded-lg px-4 py-3 hover:bg-elevated/50 data-[state=open]:rounded-b-none data-[state=open]:bg-elevated',
                   content: 'border-t border-default px-4',
                   body: 'pb-4'
                 }"
