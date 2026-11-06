@@ -7,6 +7,56 @@ const loginSchema = z.object({
   password: z.string().trim().min(8, 'Le mot de passe doit faire au minimum 8 caratère')
 })
 
+defineRouteMeta({
+  openAPI: {
+    tags: ['auth'],
+    description: 'Authentifier un utilisateur et ouvrir sa session.',
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            required: ['login', 'password'],
+            properties: {
+              login: {
+                type: 'string',
+                description: 'Identifiant de connexion.'
+              },
+              password: {
+                type: 'string',
+                format: 'password',
+                description: 'Mot de passe de l\'utilisateur.'
+              }
+            }
+          }
+        }
+      }
+    },
+    responses: {
+      200: {
+        description: 'Connexion réussie.',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                success: { type: 'boolean', example: true }
+              }
+            }
+          }
+        }
+      },
+      400: {
+        description: 'Les identifiants fournis sont invalides.'
+      },
+      401: {
+        description: 'Identifiant ou mot de passe incorrect.'
+      }
+    }
+  }
+})
+
 export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, loginSchema.parse)
 
@@ -38,7 +88,7 @@ export default defineEventHandler(async (event) => {
 
   const userSession = {
     numId: user.login,
-    role: '',
+    role: UserRole.Student,
     nom: '',
     prenom: ''
   }
