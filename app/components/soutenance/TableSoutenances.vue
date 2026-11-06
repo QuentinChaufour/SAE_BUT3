@@ -1,24 +1,46 @@
 <script setup lang="ts">
-import type { DropdownMenuItem, TableColumn } from '@nuxt/ui'
-import type { Entreprise, RechercheStage, DepartementTag } from '~~/generated/prisma/client'
-import DataTable from '~/components/common/DataTable.vue'
+import type { TableColumn } from '@nuxt/ui'
+import SoutenanceDataTable from '~/components/soutenance/SoutenanceDataTable.vue'
 
-type RechercheStageWithEntreprise
-  = Pick<RechercheStage, 'idRecherche' | 'titre'  | 'alternance'> & {
-    Entreprise: Pick<Entreprise, 'nom' | 'ville'>
-  } & { DepartementTagRecherche: { DepartementTag: Pick<DepartementTag, 'nomTag'> }[] }
- 
+type QuotaRow = Record<string, string>
+
 const props = defineProps<{
   departementId: string
   readOnly?: boolean
 }>()
 
-const emit = defineEmits<{
-  edit: [recherche: RechercheStageWithEntreprise]
-  delete: [idRecherche: number]
-}>()
+const { data: quotas } = await useFetch<QuotaRow[]>('/api/teachers/list-quotas', {
+  query: { idDepartement: props.departementId }
+})
 
-const { data: rechercheStage } = await useFetch<RechercheStageWithEntreprise[]>(`/api/students/`, {query: { departementId: props.departementId }})
+const ratioPattern = /^[0-9]+\/[0-9]+$/
+
+function setDataColor(value: unknown): string {
+  const defaultColor = 'text-neutral-600 dark:text-neutral-400'
+
+  if (typeof value !== 'string') {
+    return defaultColor
+  }
+
+  const match = value.match(ratioPattern)
+  if (!match) {
+    return defaultColor
+  }
+
+  const [numeratorValue, denominatorValue] = match[0].split('/')
+  const numerator = Number(numeratorValue)
+  const denominator = Number(denominatorValue)
+
+  if (numerator / denominator < 1) {
+    return 'text-red-500'
+  }
+
+  if (numerator / denominator > 1) {
+    return 'text-yellow-500'
+  }
+
+  return defaultColor
+}
 
 function flattenValue(value: unknown): string[] {
   if (value === null || value === undefined) return []
@@ -32,6 +54,28 @@ function formatHeader(key: string): string {
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/[_-]+/g, ' ')
     .replace(/^./, character => character.toUpperCase())
+}
+
+function sumColumnRatios(rows: QuotaRow[], key: string): string | undefined {
+  const totals = rows.reduce(
+    (sum, row) => {
+      const [numeratorValue, denominatorValue] = String(row[key] ?? '').split('/')
+      const numerator = Number(numeratorValue)
+      const denominator = Number(denominatorValue)
+
+      if (Number.isFinite(numerator) && Number.isFinite(denominator)) {
+        sum.numerator += numerator
+        sum.denominator += denominator
+      }
+
+      return sum
+    },
+    { numerator: 0, denominator: 0 }
+  )
+
+  return totals.numerator || totals.denominator
+    ? `${totals.numerator}/${totals.denominator}`
+    : undefined
 }
 
 function formatCellValue(value: unknown, key: string): string {
@@ -51,72 +95,41 @@ function formatCellValue(value: unknown, key: string): string {
   return result
 }
 
-const searchFields = (stage: RechercheStageWithEntreprise) =>
-  Object.values(stage).flatMap(flattenValue)
+const searchFields = (row: QuotaRow) => Object.values(row)
 
-const columns = computed<TableColumn<RechercheStageWithEntreprise>[]>(() => {
+const columns = computed<TableColumn<QuotaRow>[]>(() => {
   const keys = new Set(
-    (rechercheStage.value ?? []).flatMap(stage => Object.keys(stage))
+    (quotas.value ?? []).flatMap(row => Object.keys(row))
   )
 
-  const dynamicColumns: TableColumn<RechercheStageWithEntreprise>[] = Array.from(keys, key => ({
-      accessorKey: key,
-      header: formatHeader(key),
-      cell: ({ row }) =>
-        formatCellValue(row.getValue(key), key)
-    }))
+  const dynamicColumns: TableColumn<QuotaRow>[] = Array.from(keys, key => ({
+    accessorKey: key,
+    header: formatHeader(key),
+    meta: {
+      headerTotal: sumColumnRatios(quotas.value ?? [], key)
+    },
+    cell: ({ row }) => {
+      const value = row.getValue(key)
 
-  return [...dynamicColumns, { id: 'action' }]
+      return h(
+        'span',
+        { class: setDataColor(value) },
+        formatCellValue(value, key)
+      )
+    }
+  }) as TableColumn<QuotaRow>)
+
+  return dynamicColumns
 })
-
-function getDropdownActions(search: RechercheStageWithEntreprise): DropdownMenuItem[][] {
-  return [
-    [
-      {
-        label: 'Modifier',
-        icon: 'i-lucide-edit',
-        onSelect: () => emit('edit', search)
-      },
-      {
-        label: 'Supprimer',
-        icon: 'i-lucide-trash',
-        color: 'error',
-        onSelect: () => emit('delete', search.idRecherche) // TODO: Remplacer par une modal de confirmation + suppression dans ce composant
-      }
-    ]
-  ]
-}
 </script>
 
 <template>
-  <DataTable
-    :data="rechercheStage"
+  <SoutenanceDataTable
+    :data="quotas"
     :columns="columns"
     :search-fields="searchFields"
-    search-placeholder="Rechercher parmi les recherches..."
+    search-placeholder="Rechercher un enseignant"
     :page-size="5"
     sortable
-  >
-    <template #action-cell="{ row }">
-      <UDropdownMenu
-        v-if="!props.readOnly"
-        :items="getDropdownActions(row.original)"
-      >
-        <UButton
-          icon="i-lucide-ellipsis-vertical"
-          color="neutral"
-          variant="ghost"
-          aria-label="Actions"
-        />
-      </UDropdownMenu>
-      <UButton
-        v-else
-        icon="i-heroicons-chevron-right"
-        color="neutral"
-        variant="ghost"
-        aria-label="Voir"
-        @click="emit('edit', row.original)"
-      />
-    </template>
-  </DataTable>
+  />
 </template>
