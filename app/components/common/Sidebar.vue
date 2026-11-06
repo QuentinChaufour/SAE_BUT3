@@ -13,7 +13,7 @@ function getLinksByRole(role: UserRole): NavigationMenuItem[] {
       return [{
         label: 'Recherche de stages',
         icon: 'i-lucide-search',
-        to: '/'
+        to: '/student/search/'
       }]
     case UserRole.Secretary:
       return [
@@ -21,7 +21,7 @@ function getLinksByRole(role: UserRole): NavigationMenuItem[] {
         {
           label: 'Enseignants',
           icon: 'i-lucide-users',
-          to: '/'
+          to: '/teachers/'
         }
       ]
     case UserRole.Teacher:
@@ -33,29 +33,24 @@ function getLinksByRole(role: UserRole): NavigationMenuItem[] {
         }, {
           label: 'Étudiants',
           icon: 'i-lucide-users',
-          to: '/'
+          to: '/students/'
         },
         {
           label: 'Soutenances',
           icon: 'i-lucide-calendar',
-          to: '/'
+          to: '/soutenances/'
         }
       ]
     case UserRole.Admin:
       return [{
         label: 'Secrétariats',
         icon: 'i-lucide-users',
-        to: '/'
+        to: '/secretariats/'
       }]
     default:
       return []
   }
 }
-
-const sublinks: NavigationMenuItem[] = [{
-  label: 'Crédits',
-  icon: 'i-lucide-info'
-}]
 </script>
 
 <template>
@@ -82,14 +77,6 @@ const sublinks: NavigationMenuItem[] = [{
           orientation="vertical"
           tooltip
           popover
-        />
-
-        <UNavigationMenu
-          :collapsed="collapsed"
-          :items="sublinks"
-          orientation="vertical"
-          tooltip
-          class="mt-auto"
         />
       </template>
 

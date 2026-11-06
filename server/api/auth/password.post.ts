@@ -7,6 +7,61 @@ const loginSchema = z.object({
   newPassword: z.string().trim().min(1, 'Le mot de passe doit faire au minimum 8 caratère')
 })
 
+defineRouteMeta({
+  openAPI: {
+    tags: ['auth'],
+    description: 'Modifier le mot de passe d\'un utilisateur.',
+    requestBody: {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            required: ['login', 'oldPassword', 'newPassword'],
+            properties: {
+              login: {
+                type: 'string',
+                description: 'Identifiant de connexion.'
+              },
+              oldPassword: {
+                type: 'string',
+                format: 'password',
+                description: 'Mot de passe actuel.'
+              },
+              newPassword: {
+                type: 'string',
+                format: 'password',
+                description: 'Nouveau mot de passe.'
+              }
+            }
+          }
+        }
+      }
+    },
+    responses: {
+      200: {
+        description: 'Mot de passe modifié avec succès.',
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                success: { type: 'boolean', example: true }
+              }
+            }
+          }
+        }
+      },
+      400: {
+        description: 'Les données fournies sont invalides.'
+      },
+      401: {
+        description: 'Identifiant ou ancien mot de passe incorrect.'
+      }
+    }
+  }
+})
+
 export default defineEventHandler(async (event) => {
   const body = await readValidatedBody(event, loginSchema.parse)
   const hashedPassword = await hashPassword(body.newPassword)

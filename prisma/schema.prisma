@@ -71,11 +71,11 @@ model DemarcheEvenement {
   idDemarche               Int                        @id @default(autoincrement())
   titre                    String?
   description              String?
-  date                     DateTime                   @db.Date
-  status                   Recherche_Stage_Status?
+  date                     DateTime                   @default(now()) @db.Date
+  status                   Recherche_Stage_Status
   source                   Demarche_Source
   idRecherche              Int
-  RechercheStage           RechercheStage             @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
+  RechercheStage           RechercheStage             @relation(fields: [idRecherche], references: [idRecherche], onDelete: Cascade, onUpdate: NoAction)
   DemarcheRechercheContact DemarcheRechercheContact[]
   LienPj                   LienPj[]
 }
@@ -85,7 +85,7 @@ model DemarcheRechercheContact {
   idDemarche        Int
   idContact         Int
   DemarcheContact   DemarcheContact   @relation(fields: [idContact], references: [idContact], onDelete: NoAction, onUpdate: NoAction)
-  DemarcheEvenement DemarcheEvenement @relation(fields: [idDemarche], references: [idDemarche], onDelete: NoAction, onUpdate: NoAction)
+  DemarcheEvenement DemarcheEvenement @relation(fields: [idDemarche], references: [idDemarche], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([idDemarche, idContact])
 }
@@ -117,7 +117,7 @@ model DepartementTag {
 model DepartementTagRecherche {
   idRecherche    Int
   idTag          Int
-  RechercheStage RechercheStage @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
+  RechercheStage RechercheStage @relation(fields: [idRecherche], references: [idRecherche], onDelete: Cascade, onUpdate: NoAction)
   DepartementTag DepartementTag @relation(fields: [idTag], references: [idTag], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([idRecherche, idTag])
@@ -161,12 +161,12 @@ model EnseignantSoutenance {
 model Entreprise {
   idEntreprise     Int                @id @default(autoincrement())
   nom              String             @db.VarChar
-  adresse          String?            @db.VarChar
+  nomEtab          String?            @db.VarChar
+  adresse          String             @db.VarChar
   codePostal       String?            @db.VarChar
-  ville            String?            @db.VarChar
-  email            String?            @db.VarChar
-  telephone        String?            @db.VarChar
+  ville            String             @db.VarChar
   siret            String?            @db.VarChar
+  pays             String?            @db.VarChar
   RechercheStage   RechercheStage[]
   TuteurEntreprise TuteurEntreprise[]
 }
@@ -212,7 +212,7 @@ model Inscription {
 model LienPj {
   idPieceJointe     Int
   idDemarche        Int
-  DemarcheEvenement DemarcheEvenement @relation(fields: [idDemarche], references: [idDemarche], onDelete: NoAction, onUpdate: NoAction)
+  DemarcheEvenement DemarcheEvenement @relation(fields: [idDemarche], references: [idDemarche], onDelete: Cascade, onUpdate: NoAction)
   PieceJointe       PieceJointe       @relation(fields: [idPieceJointe], references: [idPieceJointe], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([idPieceJointe, idDemarche])
@@ -269,6 +269,8 @@ model RechercheStage {
   idEntreprise            Int
   numEtu                  String                    @db.VarChar
   annee                   String                    @db.VarChar
+  dateCreation             DateTime                  @default(now()) @db.Date
+  dateDerniereModification DateTime                  @updatedAt
   DemarcheContact         DemarcheContact[]
   DemarcheEvenement       DemarcheEvenement[]
   DepartementTagRecherche DepartementTagRecherche[]
@@ -314,7 +316,7 @@ model Stage {
   dateFin               DateTime?               @db.Date
   titre                 String?                 @db.VarChar
   description           String?
-  type                  Stage_Type?
+  type                  Boolean                 @default(false)
   confidentielle        Boolean                 @default(false)
   numEtu                String                  @db.VarChar
   idTuteurEntreprise    Int
@@ -366,9 +368,4 @@ enum Recherche_Stage_Status {
   Entretien
   AttenteReponse
   AttenteEnvoi
-}
-
-enum Stage_Type {
-  stage
-  alternance
 }
