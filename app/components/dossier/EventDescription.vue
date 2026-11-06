@@ -355,7 +355,7 @@ onMounted(async () => {
 
       <!-- TODO -->
       <UFileUpload
-        label="Insérez vos fichier"
+        label="Insérez vos fichiers"
         description="Accepté : .pdf, .jpg, .png ..."
         layout="list"
         multiple
