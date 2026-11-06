@@ -63,7 +63,7 @@ async function getDepartementId(): Promise<number | null> {
   const session = useUserSession()
 
   try {
-    const response = await $fetch<APIResponse<Departement>>(`/api/student/${session.user.value?.numId}/departement`, {
+    const response = await $fetch<APIResponse<Departement>>(`/api/students/${session.user.value?.numId}/departement`, {
       method: 'GET'
     })
 
