@@ -2,7 +2,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import PasswordUpdate from '~/components/common/PasswordUpdate.vue'
+import PasswordUpdate from '~/components/forms/PasswordUpdate.vue'
 import { resetNuxtMocks } from '../../../utils/utils'
 
 const mocks = vi.hoisted(() => ({

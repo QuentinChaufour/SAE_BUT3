@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 /**
  * Component allowing a authentificated user
@@ -42,6 +42,7 @@ const fields = ref<AuthFormField[]>([
 ])
 
 // Define the schema
+// TODO centraliser
 const schema = z
   .object({
     login: z.string().min(1, 'Champs Obligatoire'),

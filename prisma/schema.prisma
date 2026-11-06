@@ -61,12 +61,15 @@ model DemarcheContact {
   fonction                 String?                    @db.VarChar
   email                    String?                    @db.VarChar
   telephone                String?                    @db.VarChar
+  idRecherche              Int?
+  RechercheStage         RechercheStage?            @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
   DemarcheRechercheContact DemarcheRechercheContact[]
 }
 
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
 model DemarcheEvenement {
   idDemarche               Int                        @id @default(autoincrement())
+  titre                    String?
   description              String?
   date                     DateTime                   @default(now()) @db.Date
   status                   Recherche_Stage_Status
@@ -227,8 +230,8 @@ model Personnel {
 
 model PieceJointe {
   idPieceJointe Int      @id @default(autoincrement())
-  nom           String?  @db.VarChar
-  chemin        String?  @db.VarChar
+  nom           String  @db.VarChar
+  chemin        String  @db.VarChar
   LienPj        LienPj[]
 }
 
@@ -259,21 +262,21 @@ model QuotaEnseignant {
 
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
 model RechercheStage {
-  idRecherche              Int                       @id @default(autoincrement())
-  titre                    String                    @db.VarChar
-  description              String?
-  alternance               Boolean
-  idEntreprise             Int
-  numEtu                   String                    @db.VarChar
-  annee                    String                    @db.VarChar
+  idRecherche             Int                       @id
+  titre                   String                    @db.VarChar
+  description             String?
+  alternance              Boolean
+  idEntreprise            Int
+  numEtu                  String                    @db.VarChar
+  annee                   String                    @db.VarChar
   dateCreation             DateTime                  @default(now()) @db.Date
   dateDerniereModification DateTime                  @updatedAt
-  status                   Recherche_Stage_Status    @default(AttenteEnvoi)
-  DemarcheEvenement        DemarcheEvenement[]
-  DepartementTagRecherche  DepartementTagRecherche[]
-  AnneeUniversitaire       AnneeUniversitaire        @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
-  Entreprise               Entreprise                @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: NoAction, onUpdate: NoAction)
-  Etudiant                 Etudiant                  @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
+  DemarcheContact         DemarcheContact[]
+  DemarcheEvenement       DemarcheEvenement[]
+  DepartementTagRecherche DepartementTagRecherche[]
+  AnneeUniversitaire      AnneeUniversitaire        @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
+  Entreprise              Entreprise                @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: NoAction, onUpdate: NoAction)
+  Etudiant                Etudiant                  @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Salle {
@@ -344,6 +347,7 @@ enum Demarche_Source {
   Telephone
   Presentiel
   Visio
+  Autre
 }
 
 enum Personnel_Role {

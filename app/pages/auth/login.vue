@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 /**
  * Login.vue
