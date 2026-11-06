@@ -226,6 +226,7 @@ async function deleteContact() {
     <div class="flex gap-4 justify-between pt-3">
       <UButton type="submit" :label="props.create ? 'Créer' : 'Modifier'"/>
       <UButton v-if="props.create" :color="'error'" label="Annuler" @click="emits('cancel')"/>
+      <UButton v-else :color="'error'" label="Supprimer" @click="deleteContact"/>
     </div>
   </UForm>
 </template>

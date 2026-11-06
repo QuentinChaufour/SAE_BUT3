@@ -86,8 +86,8 @@ function contactUpdated(contact: DemarcheContact) {
   })
 }
 
-function contactDeleted(contact: DemarcheContact) {
-  dossierStore.deleteContact(contact)
+function contactDeleted(idContact: number) {
+  dossierStore.deleteContact(idContact)
 }
 
 async function createEvent(event: EventInfo) {
@@ -309,7 +309,11 @@ onMounted(async () => {
                 Cliquez sur un contact pour le modifier ou le supprimer.
               </p>
 
-              <UAccordion v-if="dossierStore.contacts.length > 0" :items="dossierStore.contacts">
+              <UAccordion 
+                v-if="dossierStore.contacts.length > 0" 
+                :items="dossierStore.contacts.map(contact => ({...contact, title: contact.prenom + ' ' + contact.nom, value: String(contact.idContact), content: '' }))" 
+                class="w-full"
+              >
                 <template #default>
 
                 </template>
@@ -318,7 +322,7 @@ onMounted(async () => {
                   <ContactForm
                     update
                     :contact="item"
-                    @deleted="contactDeleted(item)"
+                    @deleted="contactDeleted(Number(item.value))"
                     @updated="contactUpdated"
                   />
                 </template>

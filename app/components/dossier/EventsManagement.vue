@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import EventDescription from '~/components/dossier/EventDescription.vue';
 import StatusBadge from '~/components/dossier/StatusBadge.vue';
+import type { TimelineItem } from '@nuxt/ui'
 import type { EventInfo } from '~~/shared/types/event'
 // TODO documentation
 
@@ -61,7 +62,12 @@ function deleteEvent() {
 
   <UTimeline
     v-if="displayedEvents.length > 0"
-    :items="displayedEvents"
+    :items="displayedEvents.map(event => ({
+      ...event,
+      title: event.titre || 'Pas de titre',
+      description: event.description || '',
+      icon: '',
+    } satisfies TimelineItem & EventInfo))"
     @select="onTimelineSelect"
     :ui="{
       item: 'cursor-pointer'
@@ -70,7 +76,7 @@ function deleteEvent() {
     <template #title="{ item }">
       <div class="flex flex-row gap-2 items-center justify-between">
         <p>
-          {{ (item as EventInfo).title }}
+          {{ item.title }}
         </p>
         <div class="flex items-center gap-2">
           <StatusBadge

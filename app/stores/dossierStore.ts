@@ -44,7 +44,7 @@ type DossierFull = Pick<
 interface StoreState {
     dossier: DossierFull | null,
     events: EventInfo[],
-    contacts: ContactInfo[],
+    contacts: DemarcheContact[],
     dossierTags: string[],
 }
 
@@ -96,11 +96,9 @@ export const useDossierStore = defineStore('dossier', {
         for (const event of this.dossier?.DemarcheEvenement ?? []) {
           this.events.push({
             date: dateToString(new Date(event.date)),
-            title: event.titre || 'Pas de titre',
             idDemarche: event.idDemarche,
             titre: event.titre || 'Pas de titre',
             description: event.description || '',
-            icon: '',
             status: event.status,
             source: event.source,
             contacts: event.DemarcheRechercheContact.map(c => c.DemarcheContact),
@@ -114,18 +112,7 @@ export const useDossierStore = defineStore('dossier', {
           if (idSet.has(contact.idContact)) {
             continue
           }
-          this.contacts.push({
-            value: String(contact.idContact),
-            label: `${contact.prenom} ${contact.nom}`,
-            content: '',
-            idContact: contact.idContact,
-            nom: contact.nom || '',
-            prenom: contact.prenom || '',
-            fonction: contact.fonction || '',
-            email: contact.email || '',
-            telephone: contact.telephone || '',
-            idRecherche: this.dossier.idRecherche
-          })
+          this.contacts.push(contact)
           idSet.add(contact.idContact)
         }
 /*  
@@ -196,10 +183,8 @@ export const useDossierStore = defineStore('dossier', {
           this.events.push({
             date: dateToString(new Date(response.data.date)),
             idDemarche: response.data.idDemarche,
-            title: response.data.titre || 'Pas de titre',
             titre: response.data.titre || 'Pas de titre',
             description: response.data.description || '',
-            icon: 'i-lucide-rocket',
             status: response.data.status,
             source: response.data.source,
             contacts: response.data.contacts,
@@ -299,33 +284,20 @@ export const useDossierStore = defineStore('dossier', {
           }
         })
       },
-      createContact(contact: ContactInfo){
-        this.contacts.push({
-          value: String(contact.idContact),
-          label: `${contact.nom} ${contact.prenom}`,
-          content: '',
-          idContact: contact.idContact,
-          nom: contact.nom || '',
-          prenom: contact.prenom || '',
-          fonction: contact.fonction || '',
-          email: contact.email || '',
-          telephone: contact.telephone || '',
-          idRecherche: contact.idRecherche
-        })
+      createContact(contact: DemarcheContact){
+        this.contacts.push(contact)
       },
-      deleteContact(contact: ContactInfo){
-        // TODO
+      deleteContact(idContact: number){
+        this.contacts = this.contacts.filter(c => c.idContact !== idContact)
+        this.events.forEach(event => {
+          if (event.contacts) {
+            event.contacts = event.contacts.filter(c => c.idContact !== idContact)
+          }
+        })
       },
       refreshContact(){
         const idSet = new Set<number>()
-        this.contacts = this.events.flatMap(e => e.contacts ?? []).filter(contact => !idSet.has(contact.idContact) && idSet.add(contact.idContact)).map(
-          contact => ({
-            ...contact,
-            label: `${contact.nom} ${contact.prenom}`.trim() || 'Pas de nom',
-            value: String(contact.idContact),
-            content: ''
-          })
-        )
+        this.contacts = this.events.flatMap(e => e.contacts ?? []).filter(contact => !idSet.has(contact.idContact) && idSet.add(contact.idContact))
       },
       
       /**
@@ -338,7 +310,3 @@ export const useDossierStore = defineStore('dossier', {
       },
   }
 })
-
-function getDateString(arg0: Date): string {
-  throw new Error('Function not implemented.')
-}

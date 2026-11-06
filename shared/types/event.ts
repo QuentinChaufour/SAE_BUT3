@@ -1,7 +1,6 @@
 import type { DemarcheEvenement, DemarcheContact, PieceJointe } from '~~/generated/prisma/client'
-import type { TimelineItem } from '@nuxt/ui'
 
-export type EventInfo = TimelineItem & Pick<DemarcheEvenement, 'description' | 'titre' | 'status' | 'source' | 'idDemarche'> & {
+export type EventInfo = Pick<DemarcheEvenement, 'description' | 'titre' | 'status' | 'source' | 'idDemarche'> & {
   date: string
 } & {
   contacts?: DemarcheContact[],
