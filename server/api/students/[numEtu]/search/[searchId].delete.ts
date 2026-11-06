@@ -6,7 +6,7 @@ import { checkAuthWithOnlySelfStudentData } from '~~/server/utils/middleware'
 
 const paramsSchema = z.object({
   numEtu: studentIdSchema,
-  searchId: z.number().int().positive('L\'identifiant de la recherche doit être un entier positif.')
+  searchId: z.coerce.number().int().positive('L\'identifiant de la recherche doit être un entier positif.')
 })
 
 defineRouteMeta({
