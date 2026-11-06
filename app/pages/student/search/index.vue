@@ -4,6 +4,7 @@ import StudentSearchTable from '~/components/student/search/StudentSearchTable.v
 import UserRole from '~~/shared/types/role'
 
 const session = useUserSession()
+const store = useConnectedStudentStore()
 
 definePageMeta({
   middleware: ['auth', 'role'],
@@ -27,7 +28,9 @@ definePageMeta({
 
     <template #body>
       <StudentSearchTable
-        :etudiant-id="session.user.value!.numId"
+        :num-etu="session.user.value!.numId"
+        :id-inscription="store.getSelectedPromotion!.idInscription"
+        :read-only="store.isReadOnlyYear"
       />
     </template>
   </UDashboardPanel>

@@ -26,9 +26,7 @@ model AnneeUniversitaire {
   Departement         Departement[]
   EnseignantEtuFavori EnseignantEtuFavori[]
   Inscription         Inscription[]
-  RechercheStage      RechercheStage[]
   Soutenance          Soutenance[]
-  Stage               Stage[]
 }
 
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
@@ -176,14 +174,12 @@ model Etudiant {
   Auth                Auth?
   EnseignantEtuFavori EnseignantEtuFavori[]
   Inscription         Inscription[]
-  RechercheStage      RechercheStage[]
-  Stage               Stage[]
 }
 
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
 model Formation {
   idFormation     Int               @id @default(autoincrement())
-  nomFormation    String?           @db.VarChar
+  nomFormation    String            @db.VarChar
   alternance      Boolean
   idDepartement   Int
   Departement     Departement       @relation(fields: [idDepartement], references: [idDepartement], onDelete: NoAction, onUpdate: NoAction)
@@ -193,6 +189,7 @@ model Formation {
 
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
 model Inscription {
+  idInscription      Int                @id @default(autoincrement())
   numEtu             String             @db.VarChar
   idFormation        Int
   annee              String             @db.VarChar
@@ -201,8 +198,10 @@ model Inscription {
   AnneeUniversitaire AnneeUniversitaire @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
   Formation          Formation          @relation(fields: [idFormation], references: [idFormation], onDelete: NoAction, onUpdate: NoAction)
   Etudiant           Etudiant           @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
+  RechercheStage     RechercheStage[]
+  Stage              Stage[]
 
-  @@id([numEtu, idFormation, annee])
+  @@unique([numEtu, idFormation, annee])
 }
 
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
@@ -264,16 +263,14 @@ model RechercheStage {
   description              String?
   alternance               Boolean
   idEntreprise             Int
-  numEtu                   String                    @db.VarChar
-  annee                    String                    @db.VarChar
   dateCreation             DateTime                  @default(now()) @db.Date
   dateDerniereModification DateTime                  @updatedAt
+  idInscription            Int
   status                   Recherche_Stage_Status    @default(AttenteEnvoi)
   DemarcheEvenement        DemarcheEvenement[]
   DepartementTagRecherche  DepartementTagRecherche[]
-  AnneeUniversitaire       AnneeUniversitaire        @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
   Entreprise               Entreprise                @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: NoAction, onUpdate: NoAction)
-  Etudiant                 Etudiant                  @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
+  Inscription              Inscription               @relation(fields: [idInscription], references: [idInscription], onDelete: NoAction, onUpdate: NoAction)
 }
 
 model Salle {
@@ -315,16 +312,14 @@ model Stage {
   description           String?
   type                  Boolean                 @default(false)
   confidentielle        Boolean                 @default(false)
-  numEtu                String                  @db.VarChar
   idTuteurEntreprise    Int
-  annee                 String                  @db.VarChar
   numEnseignant         String?                 @db.VarChar
+  idInscription         Int
   PropositionTuteurUniv PropositionTuteurUniv[]
   SoutenanceStage       SoutenanceStage[]
-  AnneeUniversitaire    AnneeUniversitaire      @relation(fields: [annee], references: [annee], onDelete: NoAction, onUpdate: NoAction)
   TuteurEntreprise      TuteurEntreprise        @relation(fields: [idTuteurEntreprise], references: [idTuteurEntreprise], onDelete: NoAction, onUpdate: NoAction)
   Enseignant            Enseignant?             @relation(fields: [numEnseignant], references: [numEnseignant], onDelete: NoAction, onUpdate: NoAction)
-  Etudiant              Etudiant                @relation(fields: [numEtu], references: [numEtu], onDelete: NoAction, onUpdate: NoAction)
+  Inscription           Inscription             @relation(fields: [idInscription], references: [idInscription], onDelete: NoAction, onUpdate: NoAction)
 }
 
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.

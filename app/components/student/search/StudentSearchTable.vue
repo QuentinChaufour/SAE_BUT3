@@ -11,7 +11,8 @@ type RechercheStageWithEntreprise
   } & { DepartementTagRecherche: { DepartementTag: Pick<DepartementTag, 'nomTag'> }[] }
 
 const props = defineProps<{
-  etudiantId: string
+  numEtu: string
+  idInscription: number
   readOnly?: boolean
 }>()
 
@@ -23,7 +24,7 @@ const emit = defineEmits<{
 const isDeleteModalOpen = ref(false)
 const searchToDelete = ref<RechercheStageWithEntreprise | null>(null)
 
-const { data: rechercheStage, refresh } = await useFetch<RechercheStageWithEntreprise[]>(`/api/students/${props.etudiantId}/search`)
+const { data: rechercheStage, refresh } = await useFetch<RechercheStageWithEntreprise[]>(`/api/students/${props.numEtu}/search?idInscription=${props.idInscription}`)
 
 const searchFields = (stage: RechercheStageWithEntreprise) => [
   stage.titre,
@@ -119,7 +120,7 @@ async function handleConfirmDelete() {
   if (!searchToDelete.value) return
 
   try {
-    await $fetch(`/api/students/${props.etudiantId}/search/${searchToDelete.value.idRecherche}`, { method: 'DELETE' })
+    await $fetch(`/api/students/${props.numEtu}/search/${searchToDelete.value.idRecherche}`, { method: 'DELETE' })
     await refresh()
 
     toast.add({

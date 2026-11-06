@@ -3,6 +3,7 @@ import { prisma } from '~~/server/utils/prisma'
 import {
   type Enseignant,
   type Etudiant,
+  type Inscription,
   type Personnel,
   type Entreprise,
   type TuteurEntreprise,
@@ -44,18 +45,18 @@ export default defineEventHandler(async (event) => {
   await createAppartenances(departement.idDepartement, personnels)
   await createAnneeEnseignants(departement.idDepartement, enseignants)
   await createQuotas(departement.idDepartement, formation.idFormation, enseignants)
-  await createInscriptions(formation.idFormation, etudiants)
+  const inscriptions = await createInscriptions(formation.idFormation, etudiants)
   await createFavoris(enseignants, etudiants)
 
   const tags = await createTags(departement.idDepartement)
   const entreprises = await createEntreprises()
   const tuteurs = await createTuteurs(entreprises)
-  const recherches = await createRecherches(entreprises, etudiants)
+  const recherches = await createRecherches(entreprises, inscriptions)
 
   await createDepartementTagRecherches(recherches, tags)
   await createDemarches(recherches)
 
-  const stages = await createStages(tuteurs, enseignants, etudiants)
+  const stages = await createStages(tuteurs, enseignants, inscriptions)
   await createSoutenances(stages, enseignants)
 
   return sendNoContent(event)
@@ -209,17 +210,19 @@ async function createQuotas(
 }
 
 async function createInscriptions(idFormation: number, etudiants: Etudiant[]) {
+  const result: Inscription[] = []
   for (const [index, etudiant] of etudiants.entries()) {
     const data = { numEtu: etudiant.numEtu, idFormation, annee: ANNEE }
-    await prisma.inscription.upsert({
+    result.push(await prisma.inscription.upsert({
       where: { numEtu_idFormation_annee: data },
       create: {
         ...data,
         dateInscription: new Date(`2026-09-0${index + 1}T00:00:00.000Z`)
       },
       update: {}
-    })
+    }))
   }
+  return result
 }
 
 async function createFavoris(enseignants: Enseignant[], etudiants: Etudiant[]) {
@@ -317,15 +320,14 @@ async function createTuteurs(entreprises: Entreprise[]) {
   return result
 }
 
-async function createRecherches(entreprises: Entreprise[], etudiants: Etudiant[]) {
+async function createRecherches(entreprises: Entreprise[], inscriptions: Inscription[]) {
   const data = [
     {
       titre: 'Développeur back-end',
       description: 'Développement d\'une API REST en TypeScript',
       alternance: false,
       idEntreprise: entreprises[0]!.idEntreprise,
-      numEtu: etudiants[0]!.numEtu,
-      annee: ANNEE,
+      idInscription: inscriptions[0]!.idInscription,
       status: Recherche_Stage_Status.Entretien
     },
     {
@@ -333,8 +335,7 @@ async function createRecherches(entreprises: Entreprise[], etudiants: Etudiant[]
       description: 'Développement d\'une application web en Vue.js',
       alternance: false,
       idEntreprise: entreprises[1]!.idEntreprise,
-      numEtu: etudiants[1]!.numEtu,
-      annee: ANNEE,
+      idInscription: inscriptions[1]!.idInscription,
       status: Recherche_Stage_Status.AttenteReponse
     },
     {
@@ -342,8 +343,7 @@ async function createRecherches(entreprises: Entreprise[], etudiants: Etudiant[]
       description: 'Conception et sécurisation d\'une base de données.',
       alternance: true,
       idEntreprise: entreprises[0]!.idEntreprise,
-      numEtu: etudiants[2]!.numEtu,
-      annee: ANNEE,
+      idInscription: inscriptions[2]!.idInscription,
       status: Recherche_Stage_Status.AttenteEnvoi
     }
   ]
@@ -351,7 +351,7 @@ async function createRecherches(entreprises: Entreprise[], etudiants: Etudiant[]
   const result: RechercheStage[] = []
   for (const item of data) {
     result.push(await ensure(
-      () => prisma.rechercheStage.findFirst({ where: { titre: item.titre, numEtu: item.numEtu, annee: ANNEE } }),
+      () => prisma.rechercheStage.findFirst({ where: { titre: item.titre, idInscription: item.idInscription } }),
       () => prisma.rechercheStage.create({ data: item })
     ))
   }
@@ -407,7 +407,7 @@ async function createDemarches(recherches: RechercheStage[]) {
   }
 }
 
-async function createStages(tuteurs: TuteurEntreprise[], enseignants: Enseignant[], etudiants: Etudiant[]) {
+async function createStages(tuteurs: TuteurEntreprise[], enseignants: Enseignant[], inscriptions: Inscription[]) {
   const data = [
     {
       titre: 'Application de gestion de stages',
@@ -416,9 +416,8 @@ async function createStages(tuteurs: TuteurEntreprise[], enseignants: Enseignant
       dateFin: new Date('2027-06-25T00:00:00.000Z'),
       type: false,
       confidentielle: false,
-      numEtu: etudiants[0]!.numEtu,
+      idInscription: inscriptions[0]!.idInscription,
       idTuteurEntreprise: tuteurs[0]!.idTuteurEntreprise,
-      annee: ANNEE,
       numEnseignant: enseignants[0]!.numEnseignant
     },
     {
@@ -428,9 +427,8 @@ async function createStages(tuteurs: TuteurEntreprise[], enseignants: Enseignant
       dateFin: new Date('2027-06-25T00:00:00.000Z'),
       type: false,
       confidentielle: false,
-      numEtu: etudiants[1]!.numEtu,
+      idInscription: inscriptions[1]!.idInscription,
       idTuteurEntreprise: tuteurs[1]!.idTuteurEntreprise,
-      annee: ANNEE,
       numEnseignant: enseignants[1]!.numEnseignant
     }
   ]
@@ -438,7 +436,7 @@ async function createStages(tuteurs: TuteurEntreprise[], enseignants: Enseignant
   const result: Stage[] = []
   for (const item of data) {
     const stage = await ensure(
-      () => prisma.stage.findFirst({ where: { titre: item.titre, numEtu: item.numEtu, annee: ANNEE } }),
+      () => prisma.stage.findFirst({ where: { titre: item.titre, idInscription: item.idInscription } }),
       () => prisma.stage.create({ data: item })
     )
     result.push(stage)

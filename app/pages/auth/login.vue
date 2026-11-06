@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui'
 import { z } from 'zod'
+import { getRoleRedirectPath } from '~~/shared/const/redirect'
+import type UserRole from '~~/shared/types/role'
 
 /**
  * Login.vue
@@ -42,6 +44,19 @@ const loading = ref<boolean>(false)
 
 type Schema = z.output<typeof schema>
 
+const paramsSchema = z.object({
+  redirect: z.string().optional()
+})
+
+const session = useUserSession()
+
+function getRedirectPath(role: UserRole) {
+  const result = paramsSchema.safeParse(useRoute().query)
+  if (result.success && result.data.redirect) return result.data.redirect
+
+  return getRoleRedirectPath(role)
+}
+
 async function onSubmit(payload: FormSubmitEvent<Schema>) {
   let response: LoginResponse
 
@@ -55,11 +70,16 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       throw new Error('Login failed')
     }
 
+    await session.fetch()
+
     toaster.add({
       color: 'success',
       title: 'Connexion réussi !'
     })
-  } catch {
+
+    await navigateTo(getRedirectPath(session.user.value!.role!))
+  } catch (error) {
+    console.error('Error during login:', error)
     toaster.add({
       color: 'error',
       title: 'Connexion échoué !'
@@ -67,9 +87,6 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
 
     return
   }
-
-  // TODO redirect the user to a main page based on his role
-  await navigateTo('/example')
 }
 </script>
 
