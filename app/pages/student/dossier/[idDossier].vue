@@ -18,6 +18,7 @@ definePageMeta({
   middleware: ['auth', 'role'],
   role: UserRole.Student
 })
+// TODO read-only on all components
 
 const dossierStore = useDossierStore()
 
@@ -79,7 +80,7 @@ function contactUpdated(contact: DemarcheContact) {
 
   dossierStore.updateContacts({
     ...contact,
-    label: `${contact.nom} ${contact.prenom}`.trim() || 'Pas de nom',
+    label: `${contact.prenom} ${contact.nom}`.trim() || 'Pas de nom',
     value: String(contact.idContact),
     content: ''
   })
@@ -153,6 +154,11 @@ onMounted(async () => {
   try {
     await dossierStore.initState(idDossier)
 
+    if (dossierStore.dossier) {
+      state.titre = dossierStore.dossier.titre
+      state.description = dossierStore.dossier.description || ''
+    }
+
     departementId.value = await getDepartementId()
   } catch (error) {
     showError({
@@ -178,7 +184,7 @@ onMounted(async () => {
       <!-- Dossier loading -->
       <div v-if="!dossierStore.dossier">
         <div class="flex flex-col items-center justify-center min-h-screen min-w-full">
-          <UButton to="student/search">
+          <UButton @click="navigateTo('/student/search')">
             Retour
           </UButton>
           <p class="text-lg font-semibold mt-4">
@@ -193,16 +199,21 @@ onMounted(async () => {
       >
         <div class="flex justify-between">
           <UButton
-            to="student/search"
+            @click="navigateTo('/student/search')"
           >
             Retour
           </UButton>
 
-          <StatusBadge
-            :status="dossierStore.getStatus"
-            class="ml-4"
-            :size="'xl'"
-          />
+          <div class="flex items-center">
+            <p class="text-sm">
+              Status de la recherche : 
+            </p>
+            <StatusBadge
+              :status="dossierStore.getStatus"
+              class="ml-4"
+              :size="'lg'"
+            />
+          </div>
         </div>
 
         <UPage>
@@ -255,10 +266,12 @@ onMounted(async () => {
                 <UFormField
                   label="Titre"
                   name="titre"
+                  required
                 >
                   <UInput
                     v-model="state.titre"
                     type="text"
+                    placeholder="Dépôt de candidature"
                     class="w-full"
                     @blur="updateDossier"
                   />
@@ -270,21 +283,37 @@ onMounted(async () => {
                 >
                   <UTextarea
                     v-model="state.description"
+                    placeholder="envoie de la candidature, relance, entretien, etc..."
                     class="w-full"
                     @blur="updateDossier"
                   />
                 </UFormField>
               </UForm>
 
-              <DossierTagSelection
-                v-model:tags="dossierStore.dossierTags"
-                :id-departement="departementId"
-                :id-dossier="idDossier"
-              />
 
-              <USeparator />
+              <UFormField
+                label="Étiquettes de la recherche"
+                name="tags"
+                description="Étiquettes décrivant la recherche. Ajoutez ou supprimer en pour caratériser votre recherche. 
+                  Pour tout ajout de tag non-disponible, veuillez faire la demande à votre secrétariat de département."
+              >
+                <DossierTagSelection
+                  v-model:tags="dossierStore.dossierTags"
+                  :id-departement="departementId"
+                  :id-dossier="idDossier"
+                />
+              </UFormField>
 
-              <UAccordion :items="dossierStore.contacts">
+              <USeparator label="Contacts de la Recherche" size="sm"/>
+              <p class="text-sm text-gray-500">
+                Cliquez sur un contact pour le modifier ou le supprimer.
+              </p>
+
+              <UAccordion v-if="dossierStore.contacts.length > 0" :items="dossierStore.contacts">
+                <template #default>
+
+                </template>
+                
                 <template #content="{ item }">
                   <ContactForm
                     update
@@ -294,16 +323,16 @@ onMounted(async () => {
                   />
                 </template>
               </UAccordion>
-
-              <div>
-                <!-- TODO replace with separator component -->
-                <h2>Documents</h2>
-                <p class="mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                  Pièces jointes
+              <div v-else class="emptyDataPlaceholder">
+                <p class="text-sm text-gray-500">
+                  Aucun contact au cours de la recherche.
                 </p>
               </div>
 
+              <USeparator label="Pieces jointes de la recherche" size="sm"/>
+
               <UFileUpload
+                v-if="files.length > 0"
                 :model-value="files"
                 :ui="{ base: 'hidden' }"
                 layout="list"
@@ -322,6 +351,12 @@ onMounted(async () => {
                   />
                 </template>
               </UFileUpload>
+
+              <div v-else class="emptyDataPlaceholder">
+                <p class="text-sm text-gray-500">
+                  Aucun fichiers téléversé au cours de la recherche.
+                </p>
+              </div>
             </div>
           </div>
         </UPage>

@@ -105,6 +105,7 @@ async function updateDossierTags(newTags: string[]) {
   <TagSelection
     v-model:tags="dossierTags"
     :option-tags="optionTags"
+    placeholder="Ajouter un tag"
     @update:tags="updateDossierTags"
   />
 </template>

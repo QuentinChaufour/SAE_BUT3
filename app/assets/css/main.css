@@ -5,6 +5,10 @@
   .slidingModal {
     @apply min-w-[40%]
   }
+
+  .emptyDataPlaceholder {
+    @apply mt-4 rounded-lg border border-dashed border-gray-300 p-4 text-center
+  }
 }
 
 @theme static {

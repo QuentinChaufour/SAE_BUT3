@@ -116,7 +116,7 @@ export const useDossierStore = defineStore('dossier', {
           }
           this.contacts.push({
             value: String(contact.idContact),
-            label: `${contact.nom} ${contact.prenom}`,
+            label: `${contact.prenom} ${contact.nom}`,
             content: '',
             idContact: contact.idContact,
             nom: contact.nom || '',
@@ -194,7 +194,7 @@ export const useDossierStore = defineStore('dossier', {
             throw new Error('Erreur lors de la création de l\'événement')
           }
           this.events.push({
-            date: response.data.date,
+            date: dateToString(new Date(response.data.date)),
             idDemarche: response.data.idDemarche,
             title: response.data.titre || 'Pas de titre',
             titre: response.data.titre || 'Pas de titre',
@@ -259,7 +259,6 @@ export const useDossierStore = defineStore('dossier', {
 
           this.events = this.events.filter((e) => e.idDemarche !== event.idDemarche)
           this.refreshContact()
-          // TODO delete contact if no longer used in any event
         }
         catch(error){
           console.error('Error deleting event:', error)
@@ -273,7 +272,7 @@ export const useDossierStore = defineStore('dossier', {
         }
       
         Object.assign(this.contacts[contactIndex], {
-          label: `${contact.nom} ${contact.prenom}`,
+          label: `${contact.prenom} ${contact.nom}`,
           idContact: contact.idContact,
           nom: contact.nom || '',
           prenom: contact.prenom || '',

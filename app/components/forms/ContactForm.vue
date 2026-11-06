@@ -31,9 +31,11 @@ const emits = defineEmits<{
   created: [ DemarcheContact ]
   updated: [ DemarcheContact ]
   deleted: []
+  cancel: []
 }>()
 
 const isUpdateMode = props.update === true
+const toast = useToast()
 
 const state = reactive({
   idContact: isUpdateMode ? props.contact.idContact : props.state?.idContact ?? null,
@@ -77,8 +79,12 @@ async function updateContact(event: FormSubmitEvent<Schema>) {
 
     emits('updated', response.data)
   } catch (error) {
-    // TODO: handle error properly, maybe show a notification to the user
     console.error('Error updating contact:', error)
+    toast.add({
+      color: 'error',
+      title: 'Erreur',
+      description: 'Une erreur est survenue lors de la mise à jour du contact.'
+    })
   }
 }
 
@@ -98,14 +104,16 @@ async function createContact(event: FormSubmitEvent<Schema>) {
 
     emits('created', response.data)
   } catch (error) {
-    // TODO: handle error properly, maybe show a notification to the user
     console.error('Error creating contact:', error)
+    toast.add({
+      color: 'error',
+      title: 'Erreur',
+      description: 'Une erreur est survenue lors de la création du contact.'
+    })
   }
 }
 
 async function deleteContact() {
-  emits('deleted')
-
   try{
     if(!isUpdateMode || !props.contact) {
       throw createError({
@@ -124,8 +132,16 @@ async function deleteContact() {
         statusMessage: 'Failed to delete contact'
       })
     }
+
+    emits('deleted')
   }
   catch(error) {
+    console.error('Error deleting contact:', error)
+    toast.add({
+      color: 'error',
+      title: 'Erreur',
+      description: 'Une erreur est survenue lors de la suppression du contact.'
+    })
   }
 }
 </script>
@@ -134,7 +150,7 @@ async function deleteContact() {
   <UForm
     :schema="contactSchema"
     :state="state"
-    class=" mt-6 mb-5 min-w-0 space-y-2"
+    class=" mt-6 mb-5 min-w-0 space-y-4"
     @submit="onSubmit"
   >
 
@@ -148,6 +164,7 @@ async function deleteContact() {
         <UInput
           v-model="state.nom"
           type="text"
+          placeholder="Nom du contact"
           class="w-full"
         />
       </UFormField>
@@ -159,6 +176,7 @@ async function deleteContact() {
       >
         <UInput
           v-model="state.prenom"
+          placeholder="Prénom du contact"
           type="text"
           class="w-full"
         />
@@ -172,6 +190,7 @@ async function deleteContact() {
       <UInput
         v-model="state.fonction"
         type="text"
+        placeholder="Fonction du contact au sein de l'entreprise"
         class="w-full"
       />
     </UFormField>
@@ -198,11 +217,15 @@ async function deleteContact() {
         <UInput
           v-model="state.email"
           type="email"
+          placeholder="someEmail@example.com"
           class="w-full"
         />
       </UFormField>
     </div>
 
-    <UButton type="submit" :label="props.create ? 'Créer' : 'Modifier'"/>
+    <div class="flex gap-4 justify-between pt-3">
+      <UButton type="submit" :label="props.create ? 'Créer' : 'Modifier'"/>
+      <UButton v-if="props.create" :color="'error'" label="Annuler" @click="emits('cancel')"/>
+    </div>
   </UForm>
 </template>

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
 import { z } from 'zod/v4'
+import { DetailStatus } from '~/utils/RechercheStatusDetails'
+import { DetailsSource } from '~/utils/RechercheSourceDetails'
 import { getCurrentDateString } from '~~/shared/utils/date'
 import { Demarche_Source , Recherche_Stage_Status } from '~~/generated/prisma/enums'
 import type { DemarcheContact } from '~~/generated/prisma/client'
@@ -90,7 +92,7 @@ async function onSubmit(e: FormSubmitEvent<EventSchema>) {
 
     emits('updated', response)
   }
-  toast.add({ title: 'Succès', description: 'Événement mis à jour avec succès', color: 'success' })
+  toast.add({ title: 'Succès', description: props.creation ? 'Événement créé avec succès' : 'Événement mis à jour avec succès', color: 'success' })
   emits('close')
 }
 
@@ -102,7 +104,7 @@ function createEvent() {
     idDemarche: 0,
     contacts: contactsEvent.value.map(contact => ({
       ...contact,
-      label: `${contact.nom} ${contact.prenom}`.trim() || 'Pas de nom',
+      label: `${contact.prenom} ${contact.nom}`.trim() || 'Pas de nom',
       value: String(contact.idContact),
       content: ''
     }))
@@ -121,7 +123,7 @@ function updateEvent(){
     ...state,
     contacts: contactsEvent.value.map(contact => ({
       ...contact,
-      label: `${contact.nom} ${contact.prenom}`.trim() || 'Pas de nom',
+      label: `${contact.prenom} ${contact.nom}`.trim() || 'Pas de nom',
       value: String(contact.idContact),
       content: ''
     }))
@@ -154,15 +156,8 @@ async function fetchContacts() {
 
 function createdContact(contact: DemarcheContact) {
 
-  const newContact = {
-    ...contact,
-    label: `${contact.nom} ${contact.prenom}`.trim() || 'Pas de nom',
-    value: String(contact.idContact),
-    content: ''
-  }
-
-  contactsOptions.value.push(newContact)
-  contactsEvent.value.push(newContact)
+  contactsOptions.value.push(contact)
+  contactsEvent.value.push(contact)
 
 
   // réinitialiser les champs du formulaire de contact
@@ -193,6 +188,8 @@ function removeContact(contact: DemarcheContact) {
   contactsEvent.value = contactsEvent.value.filter(c => c.idContact !== contact.idContact)
 }
 
+// TODO  add calendar
+
 onMounted(async () => {
   await fetchContacts()
 })
@@ -208,7 +205,6 @@ onMounted(async () => {
           icon="i-lucide-trash-2"
           color="error"
           size="lg"
-          class="mb-4"
           @click="deleteEvent"
         />
       </UTooltip>
@@ -217,18 +213,19 @@ onMounted(async () => {
     <UForm
       :schema="schema"
       :state="state"
-      class=" flex flex-col mt-6 mb-5 min-w-0 space-y-4"
+      class=" flex flex-col mb-5 min-w-0 space-y-4"
       @submit="onSubmit"
     >
       <UFormField
         label="Titre"
         name="titre"
-        :size="'xl'"
+        class="min-w-[80%]"
         required
       >
         <UInput
-          class="w-full sm:w-auto"
+          class="w-full"
           required
+          placeholder="Dépôt de candidature"
           v-model="state.titre"
         />
       </UFormField>
@@ -239,6 +236,7 @@ onMounted(async () => {
       >
         <UTextarea
           class="w-full"
+          placeholder="envoie de la candidature, relance, entretien, etc..."
           v-model="state.description"
         />
       </UFormField>
@@ -254,12 +252,12 @@ onMounted(async () => {
             label="Status"
             name="status"
             class="w-full"
-            :ui="{ value: 'w-full p-0.5' }"
+            :ui="{ value: 'w-full' }"
             :items="Object.values(Recherche_Stage_Status).map(status => ({ value: status, label: status }))"
             v-model="state.status"
           >
             <template #default>
-              <StatusBadge :status="state.status" class="w-full" :size="'lg'" />
+              <p class="justify-self-start">{{ DetailStatus[state.status]?.label }}</p>
             </template>
 
             <template #item="{ item }">
@@ -277,7 +275,7 @@ onMounted(async () => {
             label="Source de l'événement"
             name="source"
             class="w-full"
-            :items="Object.values(Demarche_Source).map(source => ({ value: source, label: source }))"
+            :items="Object.values(Demarche_Source).map(source => ({ value: source, label: DetailsSource[source]?.label || source }))"
             v-model="state.source"
           />
         </UFormField>
@@ -302,7 +300,14 @@ onMounted(async () => {
           create-item="always"
           @update:model-value="addContact"
           @create="isCreatingContact = true"
-        />
+        >
+          <template #create-item-label>
+            <div class="flex items-center gap-2">
+              <UIcon name="i-lucide-plus" class="size-4 text-primary-600" />
+              <span>Créer un contact : {{ searchTermContact }}</span>
+            </div>
+          </template>
+        </UInputMenu>
       </UFormField>
 
       <div v-if="contactsEvent.length > 0" class="mt-4">
@@ -310,7 +315,7 @@ onMounted(async () => {
           Contacts associés à l’événement
         </p>
 
-        <ul class="space-y-2">
+        <ul class="space-y-3">
           <li
             v-for="contact in contactsEvent"
             :key="contact.idContact"
@@ -318,13 +323,13 @@ onMounted(async () => {
           >
             <div class="flex min-w-0 items-center gap-3">
               <div
-                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-100 font-semibold text-primary-700 dark:bg-primary-900 dark:text-primary-200"
+                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-100 font-semibold text-sm text-primary-700 dark:bg-primary-900 dark:text-primary-200"
               >
                 {{ contact.prenom?.charAt(0) }}{{ contact.nom.charAt(0) }}
               </div>
 
               <div class="min-w-0">
-                <p class="truncate font-medium text-gray-900 dark:text-white">
+                <p class="truncate text-md font-medium text-gray-900 dark:text-white">
                   {{ contact.prenom || 'Mr./Mme.' }} {{ contact.nom }}
                 </p>
                 <p class="truncate text-sm text-gray-500 dark:text-gray-400">
@@ -334,10 +339,10 @@ onMounted(async () => {
             </div>
 
             <UButton
-              icon="i-lucide-trash-2"
+              icon="i-lucide-x"
               color="error"
               variant="ghost"
-              size="sm"
+              size="lg"
               aria-label="Supprimer le contact"
               @click="removeContact(contact)"
             />
@@ -345,7 +350,7 @@ onMounted(async () => {
         </ul>
       </div>
 
-      <div v-else class="mt-4 rounded-lg border border-dashed border-gray-300 p-4 text-center">
+      <div v-else class="emptyDataPlaceholder">
         <p class="text-sm text-gray-500">
           Aucun contact sélectionné.
         </p>
@@ -354,24 +359,29 @@ onMounted(async () => {
       <USeparator />
 
       <!-- TODO -->
-      <UFileUpload
-        label="Insérez vos fichiers"
-        description="Accepté : .pdf, .jpg, .png ..."
-        layout="list"
-        multiple
-        class="w-fit"
+      <UFormField
+        label="Fichiers"
+        name="files"
+        description="Ajoutez des fichiers liés à l’événement (e.g. Votre CV, un capture d'écran). Vous pouvez télécharger plusieurs fichiers à la fois."
       >
-        <template #file-trailing="{ index }">
-          <!-- TODO add download functionality -->
-          <UButton
-            icon="i-lucide-trash-2"
-            color="error"
-            variant="link"
-            size="xs"
-            aria-label="Delete file"
-          />
-        </template>
-      </UFileUpload>
+        <UFileUpload  
+          label="Insérez vos fichier"
+          description="Accepté : .pdf, .jpg, .png ..."
+          layout="list"
+          multiple
+        >
+          <template #file-trailing="{ index }">
+            <!-- TODO add download functionality -->
+            <UButton
+              icon="i-lucide-trash-2"
+              color="error"
+              variant="link"
+              size="xs"
+              aria-label="Delete file"
+            />
+          </template>
+        </UFileUpload>
+      </UFormField>
       
       <div class="mt-6 flex justify-center border-t border-gray-200 pt-4 dark:border-gray-700">
         <UButton
@@ -399,10 +409,9 @@ onMounted(async () => {
           create
           :dossier-id="props.dossierId"
           @created="createdContact"
+          @cancel="isCreatingContact = false"
           :state="{prenom: searchTermContact}"
         />
-    
-        <UButton label="annuler" @click="isCreatingContact=false"/>
       </div>
     </template>
   </UModal>

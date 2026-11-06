@@ -2,6 +2,7 @@ import { z } from 'zod/v4'
 import { dossierIdSchema } from '~~/shared/schemas/dossier'
 import { prisma } from '~~/server/utils/prisma'
 import { Demarche_Source , Recherche_Stage_Status } from '~~/generated/prisma/enums'
+import { stringToDate } from '~~/shared/utils/date'
 
 const routeSchema = z.object({
   dossierId : dossierIdSchema,
@@ -28,7 +29,7 @@ export default defineEventHandler(async (event) => {
       idRecherche: dossierId,
       titre: body.titre,
       description: body.description,
-      date: new Date(body.date),
+      date: stringToDate(body.date),
       source: body.source,
       status: body.status,
       DemarcheRechercheContact: {

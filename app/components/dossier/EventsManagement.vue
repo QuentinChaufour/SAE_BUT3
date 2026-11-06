@@ -14,6 +14,8 @@ const emits = defineEmits<{
   deleted: [EventInfo]
 }>()
 
+const emitDeleted = emits as unknown as (event: 'deleted', payload: EventInfo) => void
+
 const showEventDetails = ref<boolean>(false)
 const selectedEvent = ref<EventInfo | null>(props.events[0] ?? null)
 
@@ -25,10 +27,21 @@ const displayedEvents = computed(() => {
 
 const timelineReversed = ref<boolean>(false)
 
-function onTimelineSelect(event: Event, item: EventInfo) {
+function onTimelineSelect(_: Event, item: EventInfo) {
   selectedEvent.value = item
   showEventDetails.value = true
 }
+
+function deleteEvent() {
+
+  if(!selectedEvent.value) {
+    return
+  }
+
+  emits('deleted', selectedEvent.value as EventInfo)
+  showEventDetails.value = false
+}
+
 </script>
 
 <template>
@@ -47,21 +60,37 @@ function onTimelineSelect(event: Event, item: EventInfo) {
   </div>
 
   <UTimeline
+    v-if="displayedEvents.length > 0"
     :items="displayedEvents"
     @select="onTimelineSelect"
+    :ui="{
+      item: 'cursor-pointer'
+    }"
   >
     <template #title="{ item }">
       <div class="flex flex-row gap-2 items-center justify-between">
         <p>
           {{ (item as EventInfo).title }}
         </p>
-        <StatusBadge
-          :status="(item as EventInfo).status ?? 'AttenteEnvoi'"
-          class="text-xs"
-        />
+        <div class="flex items-center gap-2">
+          <StatusBadge
+            :status="(item as EventInfo).status ?? 'AttenteEnvoi'"
+            class="text-xs"
+          />
+          <UIcon
+            name="i-lucide-chevron-right"
+            class="size-5 text-muted"
+            aria-hidden="true"
+          />
+        </div>
       </div>
     </template>
   </UTimeline>
+  <div v-else class="emptyDataPlaceholder">
+    <p class="text-sm text-gray-500">
+      Aucun événement à afficher.
+    </p>
+  </div>
 
   <USlideover
     :title="'Visualisation d\'un événement'"
@@ -73,7 +102,7 @@ function onTimelineSelect(event: Event, item: EventInfo) {
         v-if="selectedEvent"
         :dossier-id="props.dossierId"
         :event="selectedEvent as EventInfo"
-        @deleted="emits('deleted', selectedEvent)"
+        @deleted="deleteEvent"
         @updated="emits('updated', $event)"
         @close="showEventDetails = false"
       />

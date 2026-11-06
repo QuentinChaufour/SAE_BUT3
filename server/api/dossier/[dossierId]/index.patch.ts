@@ -16,6 +16,13 @@ export default defineEventHandler(async (event) => {
 
   const body = await readValidatedBody(event, bodySchema.parse)
 
+  if(Object.keys(body).length === 0) {
+    return sendError(event, createError({
+      statusCode: 400,
+      statusMessage: 'No data provided for update'
+    }))
+  }
+
   // récupérer le dossier de recherche
   const dossier = await prisma.rechercheStage.update({
     where: {
