@@ -1,5 +1,8 @@
 <script setup lang="ts">
-const emit = defineEmits(['confirm', 'cancel'])
+const emit = defineEmits<{
+  confirm: []
+  cancel: []
+}>()
 
 defineProps<{
   title: string

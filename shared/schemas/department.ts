@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+export const idDepartementSchema = z.coerce.number().int().positive().optional()
+
 export const nomDepartementSchema = z
   .string()
   .min(3, 'Le nom du département doit contenir au moins 3 caractères.')
