@@ -16,6 +16,11 @@ export interface EventDraft {
   title: string
   calendarId: string
   description: string
+  salle: string
+  etu: string
+  tuteur: string
+  candideUn: string
+  candideDeux: string
 }
 
 // Where a gesture started, and what it should draw there. The month grid has
@@ -51,6 +56,7 @@ const _useEventDraft = () => {
   const gridView = computed(() => view.value === 'year' ? 'month' : view.value)
 
   const draft = shallowRef<EventDraft | null>(null)
+  console.log(draft)
   // The pointer is still down: the ghost is being drawn and the popover waits
   // for it to settle
   const drawing = ref(false)
@@ -73,6 +79,11 @@ const _useEventDraft = () => {
   const draftEvent = computed<CalendarEvent | null>(() => draft.value && {
     id: DRAFT_EVENT_ID,
     calendarId: draft.value.calendarId,
+    salle: draft.value.salle,
+    etu: draft.value.etu,
+    tuteur: draft.value.tuteur,
+    candideUn: draft.value.candideUn,
+    candideDeux: draft.value.candideDeux,
     title: draft.value.title,
     start: toLocalISO(draft.value.start),
     end: toLocalISO(draft.value.end),
@@ -86,14 +97,19 @@ const _useEventDraft = () => {
     return visible?.id ?? calendars.value[0]?.id ?? 'work'
   }
 
-  function createDraft(input: { start: Date, end: Date, allDay?: boolean, title?: string, scroll?: boolean }) {
+  function createDraft(input: { start: Date, end: Date, allDay?: boolean, title?: string, scroll?: boolean, salle?: string, etu?: string, tuteur?: string, candideUn?: string, candideDeux?: string }) {
     draft.value = {
       start: input.start,
       end: input.end,
       allDay: input.allDay ?? false,
       title: input.title ?? '',
       calendarId: defaultCalendarId(),
-      description: ''
+      description: '',
+      salle: input.salle ?? '',
+      etu: input.etu ?? '',
+      tuteur: input.tuteur ?? '',
+      candideUn: input.candideUn ?? '',
+      candideDeux: input.candideDeux ?? '',
     }
 
     everAnchored = false
@@ -144,7 +160,12 @@ const _useEventDraft = () => {
       description: draft.value.description || undefined,
       start: toLocalISO(draft.value.start),
       end: toLocalISO(draft.value.end),
-      allDay: draft.value.allDay || undefined
+      allDay: draft.value.allDay || undefined,
+      salle: draft.value.salle,
+      etu: draft.value.etu,
+      tuteur: draft.value.tuteur,
+      candideUn: draft.value.candideUn || undefined,
+      candideDeux: draft.value.candideDeux || undefined,
     })
 
     discardDraft(refocus)
@@ -161,8 +182,13 @@ const _useEventDraft = () => {
     // `getHours() + 1` alone rolls a draft started at 23:xx into the next day
     const hour = Math.min(23, new Date().getHours() + 1)
     const start = addMinutes(startOfDay(toDate(date.value)), hour * 60)
+    const salle = '' // Changer avec les vrai valeurs
+    const etu = ''
+    const tuteur = ''
+    const candideUn = ''
+    const candideDeux = ''
 
-    createDraft({ start, end: addMinutes(start, 60), title, scroll: true })
+    createDraft({ start, end: addMinutes(start, 60), title, scroll: true, salle, etu, tuteur, candideUn, candideDeux })
   }
 
   // The quick event input. What the phrase says is drawn as a draft rather

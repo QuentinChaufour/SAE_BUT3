@@ -64,7 +64,12 @@ const formSchema = z.object({
   endDate: z.instanceof(CalendarDate, { error: 'End date is required' }),
   endTime: z.instanceof(Time, { error: 'End time is required' }),
   allDay: z.boolean(),
-  description: z.string().max(1000).optional()
+  description: z.string().max(1000).optional(),
+  salle: z.string(),
+  etu: z.string(),
+  tuteur: z.string(),
+  candideUn: z.string().optional(),
+  candideDeux: z.string().optional(),
 }).refine(data => !data.startDate || !data.endDate || (data.allDay
   ? data.endDate.compare(data.startDate) >= 0
   : toDateTime(data.endDate, data.endTime) > toDateTime(data.startDate, data.startTime)), {
@@ -98,7 +103,13 @@ function initialState(): FormState {
     startTime: allDay ? new Time(9) : toTime(start),
     endTime: allDay ? new Time(10) : toTime(end),
     allDay,
-    description: source?.description ?? ''
+    description: source?.description ?? '',
+    // Model perso  -->  ici mettre les valeur prédéfinie
+    salle: source?.salle ?? '',
+    etu: source?.etu ?? '',
+    tuteur: source?.tuteur ?? '',
+    candideUn: source?.candideUn ?? '',
+    candideDeux: source?.candideDeux ?? '',
   }
 }
 
@@ -353,12 +364,66 @@ watch(
     </div>
 
     <div class="px-3 py-2 rounded-md bg-(--control-bg)">
-      <UFormField name="description">
-        <UTextarea
-          v-model="state.description"
-          placeholder="Add Notes"
+      <UFormField name="salle">
+        <UInput
+          v-model="state.salle"
+          placeholder="Salle"
           variant="none"
-          :maxlength="1000"
+          :rows="2"
+          autoresize
+          :maxrows="6"
+          class="w-full"
+          :ui="{ base: 'p-0 resize-none rounded-none' }"
+        />
+      </UFormField>
+    </div>
+
+
+    <div class="px-3 py-2 rounded-md bg-(--control-bg)">
+      <UFormField name="etudiant" class="mb-1">
+        <UInput
+          v-model="state.etu"
+          placeholder="Etudiant"
+          variant="none"
+          :rows="2"
+          autoresize
+          :maxrows="6"
+          class="w-full"
+          :ui="{ base: 'p-0 resize-none rounded-none' }"
+        />
+      </UFormField>
+
+      <UFormField name="tuteur" class="mb-1">
+        <UInput
+          v-model="state.tuteur"
+          placeholder="Tuteur de stage"
+          variant="none"
+          :rows="2"
+          autoresize
+          :maxrows="6"
+          class="w-full"
+          :ui="{ base: 'p-0 resize-none rounded-none' }"
+        />
+      </UFormField>
+
+      <UFormField name="candideUn" class="mb-1">
+        <UInput
+          v-model="state.candideUn"
+          placeholder="Candide Un"
+          variant="none"
+          :rows="2"
+          autoresize
+          :maxrows="6"
+          class="w-full"
+          :ui="{ base: 'p-0 resize-none rounded-none' }"
+        />
+      </UFormField>
+
+      <UFormField name="candideDeux">
+        <UInput
+          v-model="state.candideDeux"
+          placeholder="Candide Deux"
+          variant="none"
           :rows="2"
           autoresize
           :maxrows="6"

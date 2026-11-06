@@ -6,6 +6,9 @@ export interface QuickEvent {
   start: Date
   end: Date
   allDay: boolean
+  salle: string
+  etu: string
+  tuteur: string
 }
 
 // Words a title spends leading into its time, "Movie at 7pm", and would be
@@ -67,11 +70,15 @@ export async function parseQuickEvent(text: string): Promise<QuickEvent | null> 
       ? new Date(occurrence.end)
       : occurrence.allDay ? addDays(start, 1) : addMinutes(start, 60)
 
+
     return {
       title: titleWithout(phrase, result.spans),
       start,
       end,
-      allDay: occurrence.allDay
+      allDay: occurrence.allDay,
+      salle: '',
+      etu: '',
+      tuteur: '',
     }
   } catch {
     // The model could not load or run here, the phrase still makes an event

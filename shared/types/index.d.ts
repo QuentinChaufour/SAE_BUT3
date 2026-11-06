@@ -32,6 +32,16 @@ export interface Calendar {
   color: 'info' | 'success' | 'warning' | 'error' | 'primary' | 'secondary'
 }
 
+// export interface CalendarEvent {
+//   id: string
+//   calendarId: string
+//   title: string
+//   description?: string
+//   start: string
+//   end: string
+//   allDay?: boolean
+// }
+
 export interface CalendarEvent {
   id: string
   calendarId: string
@@ -40,5 +50,10 @@ export interface CalendarEvent {
   start: string
   end: string
   allDay?: boolean
+  salle: string
+  etu: string
+  tuteur: string
+  candideUn?: string
+  candideDeux?: string
 }
 
