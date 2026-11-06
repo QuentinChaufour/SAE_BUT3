@@ -12,6 +12,7 @@ import EventDescription from '~/components/dossier/EventDescription.vue'
 import ContactForm from '~/components/forms/ContactForm.vue'
 import DossierTagSelection from '~/components/dossier/DossierTagSelection.vue'
 import StatusBadge from '~/components/dossier/StatusBadge.vue'
+import ContactCard from '~/components/common/ContactCard.vue'
 import { useDossierStore } from '~/stores/dossierStore'
 
 definePageMeta({
@@ -48,6 +49,15 @@ const state = reactive({
   description: dossierStore.dossier?.description || '',
   titre: dossierStore.dossier?.titre || '',
 })
+
+const contactItems = computed(() =>
+  dossierStore.contacts.map(contact => ({
+    ...contact,
+    label: `${contact.prenom} ${contact.nom}`.trim() || 'Contact sans nom',
+    value: String(contact.idContact),
+    content: ''
+  }))
+)
 
 async function getDepartementId(): Promise<number | null> {
   const session = useUserSession()
@@ -311,13 +321,19 @@ onMounted(async () => {
 
               <UAccordion 
                 v-if="dossierStore.contacts.length > 0" 
-                :items="dossierStore.contacts.map(contact => ({...contact, title: contact.prenom + ' ' + contact.nom, value: String(contact.idContact), content: '' }))" 
-                class="w-full"
-              >
-                <template #default>
-
+                :items="contactItems" 
+                class="w-full space-y-2"
+                :ui="{
+                  item: 'overflow-hidden rounded-lg border border-default bg-default last:border-b',
+                  trigger: 'rounded-lg px-4 py-3 hover:bg-elevated/50 data-[state=open]:rounded-b-none data-[state=open]:bg-elevated',
+                  content: 'border-t border-default px-4',
+                  body: 'pb-4'
+                }"
+              > 
+                <template #default="{ item }">
+                  <ContactCard :contact="item" />
                 </template>
-                
+
                 <template #content="{ item }">
                   <ContactForm
                     update

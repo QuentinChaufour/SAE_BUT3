@@ -77,6 +77,12 @@ async function updateContact(event: FormSubmitEvent<Schema>) {
       })
     }
 
+    toast.add({
+      color: 'success',
+      title: 'Succès',
+      description: 'Le contact a été mis à jour avec succès.'
+    })
+
     emits('updated', response.data)
   } catch (error) {
     console.error('Error updating contact:', error)
@@ -102,6 +108,12 @@ async function createContact(event: FormSubmitEvent<Schema>) {
       })
     }
 
+    toast.add({
+      color: 'success',
+      title: 'Succès',
+      description: 'Le contact a été créé avec succès.'
+    })
+
     emits('created', response.data)
   } catch (error) {
     console.error('Error creating contact:', error)
@@ -114,6 +126,10 @@ async function createContact(event: FormSubmitEvent<Schema>) {
 }
 
 async function deleteContact() {
+  if(!confirm('Êtes-vous sûr de vouloir supprimer ce contact ? Cette action est irréversible.')) {
+    return
+  }
+  
   try{
     if(!isUpdateMode || !props.contact) {
       throw createError({
@@ -126,12 +142,17 @@ async function deleteContact() {
       method: 'DELETE'
     })
 
-    if(response.statusCode !== 200) {
+    if(response.statusCode !== 204) {
       throw createError({
         statusCode: 500,
         statusMessage: 'Failed to delete contact'
       })
     }
+    toast.add({
+      color: 'success',
+      title: 'Succès',
+      description: 'Le contact a été supprimé avec succès.'
+    })
 
     emits('deleted')
   }
@@ -224,9 +245,9 @@ async function deleteContact() {
     </div>
 
     <div class="flex gap-4 justify-between pt-3">
-      <UButton type="submit" :label="props.create ? 'Créer' : 'Modifier'"/>
       <UButton v-if="props.create" :color="'error'" label="Annuler" @click="emits('cancel')"/>
       <UButton v-else :color="'error'" label="Supprimer" @click="deleteContact"/>
+      <UButton type="submit" :label="props.create ? 'Créer' : 'Modifier'"/>
     </div>
   </UForm>
 </template>

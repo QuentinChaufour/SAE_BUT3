@@ -10,6 +10,7 @@ import type { EventInfo } from '~~/shared/types/event'
 import type { APIResponse } from '~~/shared/types/apiResponse'
 import StatusBadge from '~/components/dossier/StatusBadge.vue'
 import ContactForm from '../forms/ContactForm.vue'
+import ContactCard from '~/components/common/ContactCard.vue'
 
 type ContactItem = {
   value: number
@@ -59,7 +60,6 @@ const schema = z.object({
 
 type EventSchema = z.output<typeof schema>
 
-
 const state = reactive({
   titre: props.creation ? props.state?.titre || '' : props.event?.titre || '',
   description: props.creation ? props.state?.description || '' : props.event?.description || '',
@@ -67,6 +67,8 @@ const state = reactive({
   status: props.creation ? props.state?.status || Recherche_Stage_Status.AttenteEnvoi : props.event?.status || Recherche_Stage_Status.AttenteEnvoi,
   source: props.creation ? props.state?.source || Demarche_Source.Autre : props.event?.source || Demarche_Source.Autre
 })
+
+const options = computed(() => contactsOptions.value.map(contact => ({ value: contact.idContact, label: `${contact.nom} ${contact.prenom}` })).filter(contact => contact.label.toLowerCase().includes(searchTermContact.value.toLowerCase())))
 
 async function onSubmit(e: FormSubmitEvent<EventSchema>) {
   if(props.creation){
@@ -291,7 +293,7 @@ onMounted(async () => {
         <UInputMenu
           v-model="selectedContact" 
           v-model:search-term="searchTermContact"
-          :items="contactsOptions.map(contact => ({ value: contact.idContact, label: `${contact.nom} ${contact.prenom}` })).filter(contact => contact.label.toLowerCase().includes(searchTermContact.toLowerCase()))"
+          :items="options"
           
           :loading="loading"
           ignore-filter
@@ -321,22 +323,7 @@ onMounted(async () => {
             :key="contact.idContact"
             class="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-3 py-0.5 shadow-sm dark:border-gray-700 dark:bg-gray-800"
           >
-            <div class="flex min-w-0 items-center gap-3">
-              <div
-                class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary-100 font-semibold text-sm text-primary-700 dark:bg-primary-900 dark:text-primary-200"
-              >
-                {{ contact.prenom?.charAt(0) }}{{ contact.nom.charAt(0) }}
-              </div>
-
-              <div class="min-w-0">
-                <p class="truncate text-md font-medium text-gray-900 dark:text-white">
-                  {{ contact.prenom || 'Mr./Mme.' }} {{ contact.nom }}
-                </p>
-                <p class="truncate text-sm text-gray-500 dark:text-gray-400">
-                  {{ contact.fonction || 'Fonction inconnue' }}
-                </p>
-              </div>
-            </div>
+            <ContactCard :contact="contact" />
 
             <UButton
               icon="i-lucide-x"
