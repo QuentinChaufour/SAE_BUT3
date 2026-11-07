@@ -5,7 +5,7 @@
         stages: number,
         soutenances: number
     }>();
-    let progress: number = +props.soutenances / +props.stages;
+    const progress = ref(+props.soutenances / +props.stages);
 </script>
 
 <template>

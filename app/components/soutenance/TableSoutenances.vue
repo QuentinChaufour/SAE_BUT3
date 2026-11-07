@@ -102,22 +102,24 @@ const columns = computed<TableColumn<QuotaRow>[]>(() => {
     (quotas.value ?? []).flatMap(row => Object.keys(row))
   )
 
-  const dynamicColumns: TableColumn<QuotaRow>[] = Array.from(keys, key => ({
-    accessorKey: key,
-    header: formatHeader(key),
-    meta: {
-      headerTotal: sumColumnRatios(quotas.value ?? [], key)
-    },
-    cell: ({ row }) => {
-      const value = row.getValue(key)
+  const dynamicColumns: TableColumn<QuotaRow>[] = Array.from(keys, (key) => {
+    const headerTotal = sumColumnRatios(quotas.value ?? [], key)
 
-      return h(
-        'span',
-        { class: setDataColor(value) },
-        formatCellValue(value, key)
-      )
-    }
-  }) as TableColumn<QuotaRow>)
+    return {
+      accessorKey: key,
+      header: formatHeader(key),
+      meta: { headerTotal },
+      cell: ({ row }) => {
+        const value = row.getValue(key)
+
+        return h(
+          'span',
+          { class: setDataColor(value) },
+          formatCellValue(value, key)
+        )
+      }
+    } as TableColumn<QuotaRow>
+  })
 
   return dynamicColumns
 })

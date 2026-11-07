@@ -65,7 +65,7 @@
         <p>Étudiants</p>
         <div class="md:flex">
           <ClassCard v-for="item in classes"
-          :class_name=item.name
+          :class_name="item.name ?? 'Formation sans nom'"
           :alternance=item.alternance
           :nb_etudiants=item.etudiants
           :nb_stages=item.stages
@@ -78,7 +78,7 @@
         <p>Soutenances</p>
         <div class="md:flex">
           <SoutenanceCard v-for="item in soutenances"
-          :class_name=item.name
+          :class_name="item.name ?? 'Formation sans nom'"
           :alternance=item.alternance
           :stages=item.stages
           :soutenances=item.soutenances

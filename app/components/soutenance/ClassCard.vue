@@ -5,7 +5,7 @@
         nb_etudiants: number,
         nb_stages: number,
     }>();
-    let progress: number = +props.nb_stages / +props.nb_etudiants;
+    const progress = ref(+props.nb_stages / +props.nb_etudiants);
 </script>
 
 <template>
