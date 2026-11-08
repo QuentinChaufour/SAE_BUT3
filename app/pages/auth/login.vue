@@ -71,6 +71,28 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
   // TODO redirect the user to a main page based on his role
   await navigateTo('/example')
 }
+
+async function populate(){
+  try {
+    const response = await $fetch<APIResponse<null>>(`/api/dbpopulate`, {
+      method: 'POST'
+    })
+
+    if(!response.statusCode || response.statusCode !== 200) {
+      throw new Error('Populate failed')
+    }
+
+    toaster.add({
+      color: 'success',
+      title: 'Base de données peuplée !'
+    })
+  } catch {
+    toaster.add({
+      color: 'error',
+      title: 'Erreur lors du peuplement de la base de données !'
+    })
+  }
+}
 </script>
 
 <template>
@@ -90,4 +112,12 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       @submit="onSubmit"
     />
   </div>
+
+  <UButton
+    label="Peupler la base de données"
+    class="fixed bottom-4 right-4"
+    color="primary"
+    variant="subtle"
+    @click="populate"
+  />
 </template>

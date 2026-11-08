@@ -12,7 +12,6 @@ import {
   Personnel_Role,
   Recherche_Stage_Status,
   Demarche_Source,
-  Stage_Type
 } from '~~/generated/prisma/client'
 
 const ANNEE = '2026-2027'
@@ -278,8 +277,6 @@ async function createEntreprises() {
       codePostal: '45100',
       ville: 'Orléans',
       siret: null,
-      email: null,
-      telephone: null
     },
     {
       nom: 'TechPrise',
@@ -287,8 +284,6 @@ async function createEntreprises() {
       codePostal: '80000',
       ville: 'Amiens',
       siret: '1'.repeat(14),
-      email: null,
-      telephone: null
     }
   ]
 
@@ -374,9 +369,9 @@ async function createDemarches(recherches: RechercheStage[]) {
   )
 
   const evenements = [
-    { idRecherche: recherches[0]!.idRecherche, description: 'Envoi candidature par mail', status: Recherche_Stage_Status.AttenteReponse, source: Demarche_Source.Email },
-    { idRecherche: recherches[0]!.idRecherche, description: 'Entretien Teams', status: Recherche_Stage_Status.Entretien, source: Demarche_Source.Telephone },
-    { idRecherche: recherches[1]!.idRecherche, description: 'Dépôt candidature en main propre', status: Recherche_Stage_Status.AttenteReponse, source: Demarche_Source.Presentiel }
+    { idRecherche: recherches[0]!.idRecherche,titre: "Envoi candidature par mail" ,description: 'Envoi candidature par mail', status: Recherche_Stage_Status.AttenteReponse, source: Demarche_Source.Email },
+    { idRecherche: recherches[0]!.idRecherche,titre: "Entretien Teams" ,description: 'Entretien Teams', status: Recherche_Stage_Status.Entretien, source: Demarche_Source.Telephone },
+    { idRecherche: recherches[1]!.idRecherche, titre: "Dépôt candidature en main propre", description: 'Dépôt candidature en main propre', status: Recherche_Stage_Status.AttenteReponse, source: Demarche_Source.Presentiel }
   ]
 
   for (const [index, item] of evenements.entries()) {
@@ -415,7 +410,7 @@ async function createStages(tuteurs: TuteurEntreprise[], enseignants: Enseignant
       description: 'Conception et développement d\'une application web pour la gestion des stages.',
       dateDebut: new Date('2027-04-05T00:00:00.000Z'),
       dateFin: new Date('2027-06-25T00:00:00.000Z'),
-      type: Stage_Type.stage,
+      type: true,
       confidentielle: false,
       numEtu: etudiants[0]!.numEtu,
       idTuteurEntreprise: tuteurs[0]!.idTuteurEntreprise,
@@ -427,7 +422,7 @@ async function createStages(tuteurs: TuteurEntreprise[], enseignants: Enseignant
       description: 'Réalisation d\'un site web vitrine pour une entreprise du numérique.',
       dateDebut: new Date('2027-04-05T00:00:00.000Z'),
       dateFin: new Date('2027-06-25T00:00:00.000Z'),
-      type: Stage_Type.stage,
+      type: true,
       confidentielle: false,
       numEtu: etudiants[1]!.numEtu,
       idTuteurEntreprise: tuteurs[1]!.idTuteurEntreprise,
