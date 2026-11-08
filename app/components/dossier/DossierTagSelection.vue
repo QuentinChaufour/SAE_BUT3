@@ -13,6 +13,7 @@ const { idDepartement, idDossier } = defineProps<{
 const dossierTags = ref<string[]>(tags.value)
 const optionTags = ref<string[]>([])
 const disabled = ref<boolean>(false)
+const session = useUserSession()
 
 watch(
   () => idDepartement,
@@ -53,7 +54,7 @@ async function getDepartementTags(idDepartement: number | null) {
 async function deleteTag(tagToDelete: string) {
   const index = tags.value.indexOf(tagToDelete)
   if (index !== -1) {
-    const response = await $fetch<APIResponse<null>>(`/api/dossier/${idDossier}/tags`, {
+    const response = await $fetch<APIResponse<null>>(`/api/students/${session.user.value?.numId}/dossier/${idDossier}/tags`, {
       method: 'DELETE',
       body: { tag: tagToDelete }
     })
@@ -70,7 +71,7 @@ async function addTag(newTag: string) {
   }
 
   // TODO manage errors
-  const response = await $fetch<APIResponse<null>>(`/api/dossier/${idDossier}/tags`, {
+  const response = await $fetch<APIResponse<null>>(`/api/students/${session.user.value?.numId}/dossier/${idDossier}/tags`, {
     method: 'POST',
     body: { tag: newTag }
   })

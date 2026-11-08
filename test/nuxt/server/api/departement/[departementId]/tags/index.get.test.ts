@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { H3Event } from 'h3'
 
 import { prisma } from '~~/server/utils/prisma'
+import UserRole from '~~/shared/types/role'
 
 vi.mock('~~/server/utils/prisma', () => ({
   prisma: {
@@ -12,6 +13,9 @@ vi.mock('~~/server/utils/prisma', () => ({
 }))
 
 vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
+vi.stubGlobal('requireUserSession', async () => ({
+  user: { role: UserRole.Student, numId: 'o123456789' }
+}))
 vi.stubGlobal(
   'getValidatedRouterParams',
   async (

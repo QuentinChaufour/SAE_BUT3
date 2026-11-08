@@ -9,6 +9,9 @@ const mocks = vi.hoisted(() => ({
 }))
 
 mockNuxtImport('$fetch', () => mocks.fetch)
+mockNuxtImport('useUserSession', () => () => ({
+  user: { value: { numId: 'o123456789' } }
+}))
 
 const contact = {
   idContact: 1,
@@ -81,8 +84,8 @@ describe('dossierStore', () => {
 
     await store.initState(42)
 
-    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/dossier/42', { method: 'GET' })
-    expect(mocks.fetch).toHaveBeenNthCalledWith(2, '/api/dossier/42/contacts', { method: 'GET' })
+    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/students/o123456789/dossier/42', { method: 'GET' })
+    expect(mocks.fetch).toHaveBeenNthCalledWith(2, '/api/students/o123456789/dossier/42/contacts', { method: 'GET' })
     expect(store.getDossierId).toBe(42)
     expect(store.dossierTags).toEqual(['Java'])
     expect(store.events).toEqual([{
@@ -118,7 +121,7 @@ describe('dossierStore', () => {
 
     await store.updateDossier({ titre: 'Nouveau titre', description: 'Nouvelle description' })
 
-    expect(mocks.fetch).toHaveBeenCalledWith('/api/dossier/42', {
+    expect(mocks.fetch).toHaveBeenCalledWith('/api/studentso123456789/dossier/42', {
       method: 'PATCH',
       body: { titre: 'Nouveau titre', description: 'Nouvelle description' }
     })
@@ -146,7 +149,7 @@ describe('dossierStore', () => {
 
     await store.createEvent(event)
 
-    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/dossier/42/evenements', {
+    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/studentso123456789/dossier/42/evenements', {
       method: 'POST',
       body: { ...event, idDemarche: undefined, contacts: [contact.idContact] }
     })
@@ -179,7 +182,7 @@ describe('dossierStore', () => {
 
     await store.updateEvent(updatedEvent)
 
-    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/dossier/42/evenements/9', {
+    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/studentso123456789/dossier/42/evenements/9', {
       method: 'PUT',
       body: { ...updatedEvent, contacts: [contact.idContact] }
     })
@@ -211,7 +214,7 @@ describe('dossierStore', () => {
 
     await store.deleteEvent(event)
 
-    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/dossier/42/evenements/0', { method: 'DELETE' })
+    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/studentso123456789/dossier/42/evenements/0', { method: 'DELETE' })
     expect(store.events).toEqual([])
     expect(store.contacts).toEqual([])
   })

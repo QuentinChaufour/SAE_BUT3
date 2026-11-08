@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui'
 import { z } from 'zod/v4'
+import ConfirmModal from '~/components/common/ConfirmModal.vue'
 
 /**
  * Component allowing a authentificated user
@@ -56,28 +57,24 @@ const schema = z
 
 const toaster = useToast()
 const loading = ref<boolean>(false)
+const isConfirmModalOpen = ref<boolean>(false)
+const payload = ref<FormSubmitEvent<z.output<typeof schema>> | null>(null)
 
 type Schema = z.output<typeof schema>
 
 /**
  * Submit the form content to the API
- *
- * @param { FormSubmitEvent } payload the data from the form
  */
-async function onSubmit(payload: FormSubmitEvent<Schema>) {
-  if (!confirm('Voulez-vous vraiment modifier votre mot de passe ?')) {
-    return
-  }
-
+async function onSubmit() {
   let response: LoginResponse
 
   try {
     response = await $fetch<LoginResponse>(`/api/auth/password`, {
       method: 'POST',
       body: {
-        login: payload.data.login,
-        oldPassword: payload.data.oldPassword,
-        newPassword: payload.data.newPassword
+        login: payload.value?.data.login,
+        oldPassword: payload.value?.data.oldPassword,
+        newPassword: payload.value?.data.newPassword
       }
     })
 
@@ -115,7 +112,18 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
       }"
       :loading="loading"
       class="w-full max-w-md p-5"
-      @submit="onSubmit"
+      @submit="($event) => {
+        payload = $event;
+        isConfirmModalOpen = true
+      }"
     />
   </div>
+
+  <ConfirmModal
+    v-model:open="isConfirmModalOpen"
+    title="Confirmer le changement de mot de passe"
+    description="Êtes-vous sûr de vouloir changer votre mot de passe ?"
+    @confirm="onSubmit()"
+    @cancel="isConfirmModalOpen = false"
+  />
 </template>

@@ -9,6 +9,9 @@ const mocks = vi.hoisted(() => ({
 }))
 
 mockNuxtImport('$fetch', () => mocks.fetch)
+mockNuxtImport('useUserSession', () => () => ({
+  user: { value: { numId: 'o123456789' } }
+}))
 
 const departementTags = {
   statusCode: 200,
@@ -88,7 +91,7 @@ describe('DossierTagSelection', () => {
     await wrapper.findComponent(TagSelection).vm.$emit('updatedTags', ['Java', 'Python'])
 
     await vi.waitFor(() => {
-      expect(mocks.fetch).toHaveBeenCalledWith('/api/dossier/42/tags', {
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/studentso123456789/dossier/42/tags', {
         method: 'POST',
         body: { tag: 'Python' }
       })
@@ -107,7 +110,7 @@ describe('DossierTagSelection', () => {
     await vi.waitFor(() => {
       expect(mocks.fetch).toHaveBeenCalledWith('/api/departments/7/tags', { method: 'GET' })
     })
-    expect(mocks.fetch).not.toHaveBeenCalledWith('/api/dossier/42/tags', expect.anything())
+    expect(mocks.fetch).not.toHaveBeenCalledWith('/api/studentso123456789/dossier/42/tags', expect.anything())
   })
 
   it('deletes tags removed from the dossier', async () => {
@@ -120,7 +123,7 @@ describe('DossierTagSelection', () => {
     await wrapper.findComponent(TagSelection).vm.$emit('updatedTags', ['Java'])
 
     await vi.waitFor(() => {
-      expect(mocks.fetch).toHaveBeenCalledWith('/api/dossier/42/tags', {
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/students/o123456789/dossier/42/tags', {
         method: 'DELETE',
         body: { tag: 'Python' }
       })
@@ -137,12 +140,12 @@ describe('DossierTagSelection', () => {
     await wrapper.findComponent(TagSelection).vm.$emit('updatedTags', ['Python'])
 
     await vi.waitFor(() => {
-      expect(mocks.fetch).toHaveBeenCalledWith('/api/dossier/42/tags', {
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/studentso123456789/dossier/42/tags', {
         method: 'POST',
         body: { tag: 'Python' }
       })
     })
-    expect(mocks.fetch).toHaveBeenCalledWith('/api/dossier/42/tags', {
+    expect(mocks.fetch).toHaveBeenCalledWith('/api/students/o123456789/dossier/42/tags', {
       method: 'DELETE',
       body: { tag: 'Java' }
     })

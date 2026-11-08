@@ -10,6 +10,7 @@ import type { EventInfo } from '~~/shared/types/event'
 import StatusBadge from '~/components/dossier/StatusBadge.vue'
 import ContactForm from '../forms/ContactForm.vue'
 import ContactCard from '~/components/common/ContactCard.vue'
+import ConfirmModal from '~/components/common/ConfirmModal.vue'
 
 type ContactItem = {
   value: number
@@ -48,6 +49,7 @@ const selectedContact = ref<ContactItem>()
 const searchTermContact = ref<string>('')
 const isCreatingContact = ref<boolean>(false)
 const isContactSelectorOpen = ref<boolean>(false)
+const isConfirmModalOpen = ref<boolean>(false)
 const toast = useToast()
 
 const schema = z.object({
@@ -117,10 +119,6 @@ function createEvent() {
 function updateEvent() {
   if (props.creation) return
 
-  if (!confirm('Etes vous sûr de vouloir mettre à jour cet événement ?')) {
-    return
-  }
-
   return {
     ...props.event,
     ...state,
@@ -139,9 +137,8 @@ async function deleteEvent() {
     return
   }
 
-  if (confirm('Etes vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.')) {
-    emits('deleted')
-  }
+  emits('deleted')
+  isConfirmModalOpen.value = false
 }
 
 function createdContact(contact: DemarcheContact) {
@@ -205,7 +202,7 @@ onMounted(async () => {
           icon="i-lucide-trash-2"
           color="error"
           size="lg"
-          @click="deleteEvent"
+          @click="isConfirmModalOpen = true"
         />
       </UTooltip>
     </div>
@@ -417,4 +414,12 @@ onMounted(async () => {
       </div>
     </template>
   </UModal>
+
+  <ConfirmModal
+    v-model:open="isConfirmModalOpen"
+    title="Confirmer la suppression"
+    description="Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible."
+    @confirm="deleteEvent"
+    @cancel="isConfirmModalOpen = false"
+  />
 </template>

@@ -74,8 +74,10 @@ export const useDossierStore = defineStore('dossier', {
 
   actions: {
     async initState(idDossier: number) {
+
+      const session = useUserSession()
       const response = await $fetch<APIResponse<DossierFull>>(
-        `/api/dossier/${idDossier}`,
+        `/api/students/${session.user.value?.numId}/dossier/${idDossier}`,
         { method: 'GET' }
       )
 
@@ -136,7 +138,8 @@ export const useDossierStore = defineStore('dossier', {
       if (!this.dossier) throw new Error('No dossier selected')
 
       try {
-        const response = await $fetch<APIResponse<null>>(`/api/dossier/${this.getDossierId}`, {
+        const session = useUserSession()
+        const response = await $fetch<APIResponse<null>>(`/api/students/${session.user.value?.numId}/dossier/${this.getDossierId}`, {
           method: 'PATCH',
           body: state
         })
@@ -154,7 +157,8 @@ export const useDossierStore = defineStore('dossier', {
     },
     async createEvent(event: EventInfo) {
       try {
-        const response = await $fetch<APIResponse<EventInfo>>(`/api/dossier/${this.getDossierId}/evenements`, {
+        const session = useUserSession()
+        const response = await $fetch<APIResponse<EventInfo>>(`/api/students/${session.user.value?.numId}/dossier/${this.getDossierId}/evenements`, {
           method: 'POST',
           body: {
             ...event,
@@ -187,7 +191,8 @@ export const useDossierStore = defineStore('dossier', {
     async updateEvent(event: EventInfo) {
       const dossierId = this.getDossierId
       try {
-        const response = await $fetch<APIResponse<EventInfo>>(`/api/dossier/${dossierId}/evenements/${event.idDemarche}`, {
+        const session = useUserSession()
+        const response = await $fetch<APIResponse<EventInfo>>(`/api/students/${session.user.value?.numId}/dossier/${dossierId}/evenements/${event.idDemarche}`, {
           method: 'PUT',
           body: {
             ...event,
@@ -218,7 +223,8 @@ export const useDossierStore = defineStore('dossier', {
     },
     async deleteEvent(event: EventInfo) {
       try {
-        const response = await $fetch<APIResponse<EventInfo>>(`/api/dossier/${this.getDossierId}/evenements/${event.idDemarche}`, {
+        const session = useUserSession()
+        const response = await $fetch<APIResponse<EventInfo>>(`/api/students/${session.user.value?.numId}/dossier/${this.getDossierId}/evenements/${event.idDemarche}`, {
           method: 'DELETE'
         })
 
@@ -280,7 +286,8 @@ export const useDossierStore = defineStore('dossier', {
     },
 
     async fetchContacts() {
-      const response = await $fetch<APIResponse<DemarcheContact[]>>(`/api/dossier/${this.getDossierId}/contacts`, {
+      const session = useUserSession()
+      const response = await $fetch<APIResponse<DemarcheContact[]>>(`/api/students/${session.user.value?.numId}/dossier/${this.getDossierId}/contacts`, {
         method: 'GET'
       })
       return response.data ?? []

@@ -4,21 +4,23 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 import type { APIResponse } from '~~/shared/types/apiResponse'
 import type { DemarcheContact } from '~~/generated/prisma/client'
 import { contactSchema } from '~~/shared/schemas/contact'
+import ConfirmModal from '~/components/common/ConfirmModal.vue'
 
 // Define the props for the component
 // The component can be used in two modes: create or update
 type CreateProps = {
   create: true
   update?: false
+  dossierId: number
 
   // prefilled values for the form in create mode
-  dossierId: number
   state?: Partial<DemarcheContact>
 }
 
 type UpdateProps = {
   update: true
   create?: false
+  dossierId: number
 
   // required only in update mode
   contact: DemarcheContact
@@ -35,7 +37,9 @@ const emits = defineEmits<{
 }>()
 
 const isUpdateMode = props.update === true
+const isConfirmModalOpen = ref<boolean>(false)
 const toast = useToast()
+const session = useUserSession()
 
 const state = reactive({
   idContact: isUpdateMode ? props.contact.idContact : props.state?.idContact ?? null,
@@ -64,7 +68,7 @@ async function updateContact(_event: FormSubmitEvent<Schema>) {
       })
     }
 
-    const response = await $fetch<APIResponse<DemarcheContact>>(`/api/contacts/${props.contact.idContact}`, {
+    const response = await $fetch<APIResponse<DemarcheContact>>(`/api/students/${session.user.value?.numId}/dossier/${props.dossierId}/contacts/${props.contact.idContact}`, {
       method: 'PATCH',
       body: state
     })
@@ -95,7 +99,7 @@ async function updateContact(_event: FormSubmitEvent<Schema>) {
 
 async function createContact(_event: FormSubmitEvent<Schema>) {
   try {
-    const response = await $fetch<APIResponse<DemarcheContact>>(`/api/contacts`, {
+    const response = await $fetch<APIResponse<DemarcheContact>>(`/api/students/${session.user.value?.numId}/dossier/${props.dossierId}/contacts`, {
       method: 'POST',
       body: state
     })
@@ -125,10 +129,6 @@ async function createContact(_event: FormSubmitEvent<Schema>) {
 }
 
 async function deleteContact() {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer ce contact ? Cette action est irréversible.')) {
-    return
-  }
-
   try {
     if (!isUpdateMode || !props.contact) {
       throw createError({
@@ -137,7 +137,7 @@ async function deleteContact() {
       })
     }
 
-    const response = await $fetch<APIResponse<null>>(`/api/contacts/${props.contact.idContact}`, {
+    const response = await $fetch<APIResponse<null>>(`/api/students/${session.user.value?.numId}/dossier/${props.dossierId}/contacts/${props.contact.idContact}`, {
       method: 'DELETE'
     })
 
@@ -252,7 +252,7 @@ async function deleteContact() {
         v-else
         :color="'error'"
         label="Supprimer"
-        @click="deleteContact"
+        @click="isConfirmModalOpen = true"
       />
       <UButton
         type="submit"
@@ -260,4 +260,12 @@ async function deleteContact() {
       />
     </div>
   </UForm>
+
+  <ConfirmModal
+    v-model:open="isConfirmModalOpen"
+    title="Confirmer la suppression"
+    description="Êtes-vous sûr de vouloir supprimer ce contact ? Cette action est irréversible."
+    @confirm="deleteContact"
+    @cancel="isConfirmModalOpen = false"
+  />
 </template>

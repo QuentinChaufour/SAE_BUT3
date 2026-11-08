@@ -12,6 +12,9 @@ const mocks = vi.hoisted(() => ({
 
 mockNuxtImport('$fetch', () => mocks.fetch)
 mockNuxtImport('useToast', () => () => mocks.toast)
+mockNuxtImport('useUserSession', () => () => ({
+  user: { value: { numId: 'o123456789' } }
+}))
 
 const contact: DemarcheContact = {
   idContact: 7,
@@ -56,7 +59,7 @@ describe('ContactForm', () => {
   })
 
   it('initializes update mode from the contact and renders update/delete actions', async () => {
-    const wrapper = await mountWithUApp(ContactForm, { update: true, contact })
+    const wrapper = await mountWithUApp(ContactForm, { update: true, dossierId: 12, contact })
     const form = wrapper.findComponent(UForm)
 
     expect(form.props()).toMatchObject({ state: contact })
@@ -103,7 +106,7 @@ describe('ContactForm', () => {
     wrapper.findComponent(UForm).vm.$emit('submit', { data: {} })
     await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalled())
 
-    expect(mocks.fetch).toHaveBeenCalledWith('/api/contacts', {
+    expect(mocks.fetch).toHaveBeenCalledWith('/api/students/o123456789/dossier/12/contacts', {
       method: 'POST',
       body: expect.objectContaining({ idRecherche: 12 })
     })
@@ -145,12 +148,12 @@ describe('ContactForm', () => {
 
   it('updates a contact and emits the response data', async () => {
     mocks.fetch.mockResolvedValueOnce({ statusCode: 200, data: contact })
-    const wrapper = await mountWithUApp(ContactForm, { update: true, contact })
+    const wrapper = await mountWithUApp(ContactForm, { update: true, dossierId: 12, contact })
 
     wrapper.findComponent(UForm).vm.$emit('submit', { data: {} })
     await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalled())
 
-    expect(mocks.fetch).toHaveBeenCalledWith('/api/contacts/7', {
+    expect(mocks.fetch).toHaveBeenCalledWith('/api/students/o123456789/dossier/12/contacts/7', {
       method: 'PATCH',
       body: contact
     })
@@ -166,7 +169,7 @@ describe('ContactForm', () => {
     ['without response data', { statusCode: 200 }],
     ['with an unexpected status', { statusCode: 201, data: contact }]
   ])('shows an error when update is rejected %s', async (_reason, response) => {
-    const wrapper = await mountWithUApp(ContactForm, { update: true, contact })
+    const wrapper = await mountWithUApp(ContactForm, { update: true, dossierId: 12, contact })
     mocks.fetch.mockResolvedValueOnce(response)
 
     wrapper.findComponent(UForm).vm.$emit('submit', { data: {} })
@@ -182,7 +185,7 @@ describe('ContactForm', () => {
 
   it('does not delete a contact when confirmation is canceled', async () => {
     confirmMock.mockReturnValue(false)
-    const wrapper = await mountWithUApp(ContactForm, { update: true, contact })
+    const wrapper = await mountWithUApp(ContactForm, { update: true, dossierId: 12, contact })
 
     await wrapper.findAllComponents(UButton).find(button => button.text() === 'Supprimer')!.trigger('click')
 
@@ -193,12 +196,12 @@ describe('ContactForm', () => {
   it('deletes a contact after confirmation and emits deleted', async () => {
     confirmMock.mockReturnValue(true)
     mocks.fetch.mockResolvedValueOnce({ statusCode: 204, data: null })
-    const wrapper = await mountWithUApp(ContactForm, { update: true, contact })
+    const wrapper = await mountWithUApp(ContactForm, { update: true, dossierId: 12, contact })
 
     await wrapper.findAllComponents(UButton).find(button => button.text() === 'Supprimer')!.trigger('click')
     await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalled())
 
-    expect(mocks.fetch).toHaveBeenCalledWith('/api/contacts/7', { method: 'DELETE' })
+    expect(mocks.fetch).toHaveBeenCalledWith('/api/students/o123456789/dossier/12/contacts/7', { method: 'DELETE' })
     expect(mocks.toast.add).toHaveBeenCalledWith({
       color: 'success',
       title: 'Succès',
@@ -210,7 +213,7 @@ describe('ContactForm', () => {
   it('shows an error when deletion returns an unexpected status', async () => {
     confirmMock.mockReturnValue(true)
     mocks.fetch.mockResolvedValueOnce({ statusCode: 200, data: null })
-    const wrapper = await mountWithUApp(ContactForm, { update: true, contact })
+    const wrapper = await mountWithUApp(ContactForm, { update: true, dossierId: 12, contact })
 
     await wrapper.findAllComponents(UButton).find(button => button.text() === 'Supprimer')!.trigger('click')
     await vi.waitFor(() => expect(mocks.toast.add).toHaveBeenCalled())
@@ -226,7 +229,7 @@ describe('ContactForm', () => {
   it('shows an error when deletion fails', async () => {
     confirmMock.mockReturnValue(true)
     mocks.fetch.mockRejectedValueOnce(new Error('Network error'))
-    const wrapper = await mountWithUApp(ContactForm, { update: true, contact })
+    const wrapper = await mountWithUApp(ContactForm, { update: true, dossierId: 12, contact })
 
     await wrapper.findAllComponents(UButton).find(button => button.text() === 'Supprimer')!.trigger('click')
     await vi.waitFor(() => expect(mocks.toast.add).toHaveBeenCalled())

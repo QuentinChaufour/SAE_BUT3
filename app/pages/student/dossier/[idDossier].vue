@@ -208,6 +208,10 @@ onMounted(async () => {
               Retour
             </UButton>
 
+            <p>
+              Type de recherche : {{ dossierStore.dossier.alternance ? 'Alternance' : 'Stage' }}
+            </p>
+
             <div class="flex items-center">
               <p class="text-sm">
                 Status de la recherche :
@@ -340,6 +344,7 @@ onMounted(async () => {
                   <template #content="{ item }">
                     <ContactForm
                       update
+                      :dossier-id="dossierStore.getDossierId!"
                       :contact="item"
                       @deleted="contactDeleted(Number(item.value))"
                       @updated="contactUpdated"

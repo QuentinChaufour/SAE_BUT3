@@ -1,17 +1,18 @@
 import { z } from 'zod/v4'
 import { studentIdSchema } from '~~/shared/schemas/student'
 import { prisma } from '~~/server/utils/prisma'
+import UserRole from '~~/shared/types/role'
+import { checkAuthWithOnlySelfStudentData } from '~~/server/utils/middleware'
 
 const routeSchema = z.object({
   numEtu: studentIdSchema
 })
 
-// TODO API route protection
-
 export default defineEventHandler(async (event) => {
   const { numEtu } = routeSchema.parse(event.context.params)
 
-  // Get the department ID of the student
+  await checkAuthWithOnlySelfStudentData(event, numEtu, [UserRole.Student, UserRole.Secretary, UserRole.Teacher, UserRole.Admin])
+  
   const departementId = await prisma.etudiant.findFirst({
     where: {
       numEtu
