@@ -359,9 +359,8 @@ async function createRecherches(entreprises: Entreprise[], inscriptions: Inscrip
 }
 
 async function createDemarches(recherches: RechercheStage[]) {
-
   const evenements = [
-    { idRecherche: recherches[0]!.idRecherche,titre: 'Envoi candidature par mail', description: 'Envoi candidature par mail', status: Recherche_Stage_Status.AttenteReponse, source: Demarche_Source.Email },
+    { idRecherche: recherches[0]!.idRecherche, titre: 'Envoi candidature par mail', description: 'Envoi candidature par mail', status: Recherche_Stage_Status.AttenteReponse, source: Demarche_Source.Email },
     { idRecherche: recherches[0]!.idRecherche, titre: 'Entretien Teams', description: 'Entretien Teams', status: Recherche_Stage_Status.Entretien, source: Demarche_Source.Telephone },
     { idRecherche: recherches[1]!.idRecherche, titre: 'Dépôt candidature en main propre', description: 'Dépôt candidature en main propre', status: Recherche_Stage_Status.AttenteReponse, source: Demarche_Source.Presentiel }
   ]
@@ -372,7 +371,7 @@ async function createDemarches(recherches: RechercheStage[]) {
     { idContact: 3, nom: 'Martin', prenom: 'Pierre', fonction: 'Directeur', email: 'directeur@entreprise.fr', telephone: '0607080912', idRecherche: recherches[2]!.idRecherche }
   ]
 
-  for(const contact of contacts) {
+  for (const contact of contacts) {
     await ensure(
       () => prisma.demarcheContact.findFirst({ where: { idContact: contact.idContact } }),
       () => prisma.demarcheContact.create({

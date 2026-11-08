@@ -1,11 +1,11 @@
 import { z } from 'zod/v4'
 import { emptyToNull } from './utils'
 
-export const  contactSchema = z.object({
+export const contactSchema = z.object({
   nom: z.string()
     .trim()
     .min(1, 'Le nom est requis')
-    .optional(),
+    .nonoptional(),
 
   prenom: z.string()
     .trim()

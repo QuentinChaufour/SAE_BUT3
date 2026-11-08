@@ -28,22 +28,21 @@ export default defineEventHandler(async (event) => {
       throw new Error('Tag not found')
     }
 
-    const createdTag = await prisma.departementTagRecherche.create({
+    await prisma.departementTagRecherche.create({
       data: {
         idRecherche: dossierId,
         idTag: tagId.idTag
       }
     })
-  } 
-  catch {
+
+    return {
+      statusCode: 200,
+      message: `Tag : ${tag} Added successfully`
+    }
+  } catch {
     throw createError({
       statusCode: 404,
       message: `Tag: ${tag} not found`
     })
-  }
-
-  return {
-    statusCode: 200,
-    message: `Tag : ${tag} Added successfully`
   }
 })

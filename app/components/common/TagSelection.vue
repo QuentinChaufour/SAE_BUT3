@@ -5,7 +5,7 @@ const props = withDefaults(defineProps<{
   disabled?: boolean
 }>(), {
   optionTags: () => [],
-  disabled: false,
+  disabled: false
 })
 
 const loading = computed(() => !(props.optionTags.length > 0))
@@ -15,7 +15,6 @@ const emits = defineEmits<{
 }>()
 
 const dossierTags = ref<string[]>(tags.value)
-
 </script>
 
 <template>

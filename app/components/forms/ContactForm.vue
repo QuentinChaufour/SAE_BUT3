@@ -55,9 +55,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   }
 }
 
-async function updateContact(event: FormSubmitEvent<Schema>) {
+async function updateContact(_event: FormSubmitEvent<Schema>) {
   try {
-
     if (!isUpdateMode || !props.contact) {
       throw createError({
         statusCode: 400,
@@ -94,7 +93,7 @@ async function updateContact(event: FormSubmitEvent<Schema>) {
   }
 }
 
-async function createContact(event: FormSubmitEvent<Schema>) {
+async function createContact(_event: FormSubmitEvent<Schema>) {
   try {
     const response = await $fetch<APIResponse<DemarcheContact>>(`/api/contacts`, {
       method: 'POST',
@@ -126,12 +125,12 @@ async function createContact(event: FormSubmitEvent<Schema>) {
 }
 
 async function deleteContact() {
-  if(!confirm('Êtes-vous sûr de vouloir supprimer ce contact ? Cette action est irréversible.')) {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer ce contact ? Cette action est irréversible.')) {
     return
   }
-  
-  try{
-    if(!isUpdateMode || !props.contact) {
+
+  try {
+    if (!isUpdateMode || !props.contact) {
       throw createError({
         statusCode: 400,
         message: 'A Contact is required for deletion'
@@ -142,7 +141,7 @@ async function deleteContact() {
       method: 'DELETE'
     })
 
-    if(response.statusCode !== 204) {
+    if (response.statusCode !== 204) {
       throw createError({
         statusCode: 500,
         message: 'Failed to delete contact'
@@ -155,8 +154,7 @@ async function deleteContact() {
     })
 
     emits('deleted')
-  }
-  catch(error) {
+  } catch (error) {
     console.error('Error deleting contact:', error)
     toast.add({
       color: 'error',
@@ -174,7 +172,6 @@ async function deleteContact() {
     class=" mt-6 mb-5 min-w-0 space-y-4"
     @submit="onSubmit"
   >
-
     <div class="flex gap-4 justify-around">
       <UFormField
         label="Nom"
@@ -245,9 +242,22 @@ async function deleteContact() {
     </div>
 
     <div class="flex gap-4 justify-between pt-3">
-      <UButton v-if="props.create" :color="'neutral'" label="Annuler" @click="emits('cancel')"/>
-      <UButton v-else :color="'error'" label="Supprimer" @click="deleteContact"/>
-      <UButton type="submit" :label="props.create ? 'Créer' : 'Modifier'"/>
+      <UButton
+        v-if="props.create"
+        :color="'neutral'"
+        label="Annuler"
+        @click="emits('cancel')"
+      />
+      <UButton
+        v-else
+        :color="'error'"
+        label="Supprimer"
+        @click="deleteContact"
+      />
+      <UButton
+        type="submit"
+        :label="props.create ? 'Créer' : 'Modifier'"
+      />
     </div>
   </UForm>
 </template>

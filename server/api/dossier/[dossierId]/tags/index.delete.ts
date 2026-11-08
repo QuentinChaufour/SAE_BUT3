@@ -24,8 +24,7 @@ export default defineEventHandler(async (event) => {
         }
       }
     })
-  } 
-  catch {
+  } catch {
     throw createError({
       statusCode: 404,
       message: `Tag: ${tag} not found`
@@ -38,8 +37,7 @@ export default defineEventHandler(async (event) => {
   }
 })
 
-async function findTagIdByName(dossierId: number, tagName: string){
-
+async function findTagIdByName(dossierId: number, tagName: string) {
   const tag = await prisma.departementTagRecherche.findFirst({
     where: {
       idRecherche: dossierId,
@@ -49,10 +47,10 @@ async function findTagIdByName(dossierId: number, tagName: string){
     },
     select: {
       idTag: true
-      }
+    }
   })
 
-  if(!tag) {
+  if (!tag) {
     throw new Error('Tag not found')
   }
 

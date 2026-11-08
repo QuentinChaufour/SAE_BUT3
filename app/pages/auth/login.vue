@@ -88,28 +88,6 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
     return
   }
 }
-
-async function populate(){
-  try {
-    const response = await $fetch<APIResponse<null>>(`/api/dev/dbpopulate`, {
-      method: 'POST'
-    })
-
-    if(!response.statusCode || response.statusCode !== 200) {
-      throw new Error('Populate failed')
-    }
-
-    toaster.add({
-      color: 'success',
-      title: 'Base de données peuplée !'
-    })
-  } catch {
-    toaster.add({
-      color: 'error',
-      title: 'Erreur lors du peuplement de la base de données !'
-    })
-  }
-}
 </script>
 
 <template>
@@ -129,12 +107,4 @@ async function populate(){
       @submit="onSubmit"
     />
   </div>
-
-  <UButton
-    label="Peupler la base de données"
-    class="fixed bottom-4 right-4"
-    color="primary"
-    variant="subtle"
-    @click="populate"
-  />
 </template>

@@ -5,5 +5,5 @@ export const DetailsSource = {
   [Demarche_Source.Presentiel]: { label: 'Présentiel' },
   [Demarche_Source.Email]: { label: 'Email' },
   [Demarche_Source.Visio]: { label: 'Visioconférence' },
-  [Demarche_Source.Autre]: { label: 'Autre' },
+  [Demarche_Source.Autre]: { label: 'Autre' }
 }

@@ -82,7 +82,7 @@ describe('POST /api/dossier/:dossierId/evenements', () => {
 
     vi.mocked(prisma.demarcheEvenement.create).mockResolvedValue(newEvent as never)
     vi.mocked(prisma.demarcheRechercheContact.findMany).mockResolvedValue(
-      contacts.map((DemarcheContact) => ({ DemarcheContact })) as never
+      contacts.map(DemarcheContact => ({ DemarcheContact })) as never
     )
 
     const event = {

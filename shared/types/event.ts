@@ -3,6 +3,6 @@ import type { DemarcheEvenement, DemarcheContact, PieceJointe } from '~~/generat
 export type EventInfo = Pick<DemarcheEvenement, 'description' | 'titre' | 'status' | 'source' | 'idDemarche'> & {
   date: string
 } & {
-  contacts?: DemarcheContact[],
+  contacts?: DemarcheContact[]
   files?: Pick<PieceJointe, 'idPieceJointe' | 'nom'>[]
 }

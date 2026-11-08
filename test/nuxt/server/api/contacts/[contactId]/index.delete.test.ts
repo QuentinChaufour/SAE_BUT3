@@ -5,7 +5,7 @@ import { prisma } from '~~/server/utils/prisma'
 
 vi.mock('~~/server/utils/prisma', () => ({
   prisma: {
-    $transaction: vi.fn(),
+    $transaction: vi.fn()
   }
 }))
 
@@ -53,7 +53,7 @@ describe('DELETE /api/contacts/:contactId', () => {
       '~~/server/api/contacts/[contactId]/index.delete'
     )).default
     vi.mocked(prisma.$transaction).mockImplementation(
-      async (callback) => callback(transaction as never)
+      async callback => callback(transaction as never)
     )
   })
 

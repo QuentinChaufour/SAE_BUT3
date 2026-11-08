@@ -160,9 +160,8 @@ function getDropdownActions(search: RechercheStageWithEntreprise): DropdownMenuI
 }
 
 function searchSelected(row: RechercheStageWithEntreprise) {
-    navigateTo(`/student/dossier/${row.idRecherche}`)
+  navigateTo(`/student/dossier/${row.idRecherche}`)
 }
-
 </script>
 
 <template>
@@ -173,8 +172,8 @@ function searchSelected(row: RechercheStageWithEntreprise) {
       :search-fields="searchFields"
       search-placeholder="Rechercher parmi les recherches..."
       :page-size="5"
-      @selected="searchSelected"
       sortable
+      @selected="searchSelected"
     >
       <template #action-cell="{ row }">
         <UDropdownMenu

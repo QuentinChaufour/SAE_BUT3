@@ -47,7 +47,7 @@ const TimelineStub = defineComponent({
       ...(props.items as Array<{ title: string }>).map(item => h('p', item.title)),
       h('button', {
         'data-testid': 'select-event',
-        onClick: () => emit('select', new Event('click'), events[1])
+        'onClick': () => emit('select', new Event('click'), events[1])
       })
     ])
   }

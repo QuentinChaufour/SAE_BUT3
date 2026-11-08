@@ -162,7 +162,7 @@ describe('dossierStore', () => {
     store.$patch({ dossier: { ...dossierResponse, DemarcheEvenement: [], DepartementTagRecherche: [] } })
     mocks.fetch.mockResolvedValueOnce({ statusCode: 400, data: null })
 
-    await expect(store.createEvent(event)).rejects.toThrow("Erreur lors de la création de l'événement")
+    await expect(store.createEvent(event)).rejects.toThrow('Erreur lors de la création de l\'événement')
   })
 
   it('updates an event and refreshes contacts', async () => {
@@ -195,7 +195,7 @@ describe('dossierStore', () => {
     await expect(store.updateEvent(event)).rejects.toThrow('Événement introuvable dans le store')
 
     mocks.fetch.mockResolvedValueOnce({ statusCode: 500, data: null })
-    await expect(store.updateEvent(event)).rejects.toThrow("Erreur lors de la mise à jour de l'événement")
+    await expect(store.updateEvent(event)).rejects.toThrow('Erreur lors de la mise à jour de l\'événement')
   })
 
   it('deletes an event and refreshes contacts', async () => {

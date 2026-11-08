@@ -5,6 +5,7 @@ import { reactive, defineComponent, h, nextTick, ref } from 'vue'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import DossierPage from '~/pages/student/dossier/[idDossier].vue'
 import { Demarche_Source, Recherche_Stage_Status } from '~~/generated/prisma/enums'
+import { withUApp } from '~~/test/nuxt/utils/utils'
 
 const mocks = vi.hoisted(() => ({
   store: undefined as unknown as ReturnType<typeof createStore>,
@@ -125,7 +126,7 @@ const TooltipStub = defineComponent({
 })
 
 async function mountPage() {
-  return mountSuspended(DossierPage, {
+  return mountSuspended(withUApp(DossierPage), {
     global: {
       stubs: {
         EventsManagement: EventsManagementStub,
@@ -157,9 +158,6 @@ describe('Student dossier page', () => {
   })
 
   it('initializes the dossier and department on mount', async () => {
-    mocks.store.initState.mockImplementation(async () => {
-      mocks.store.dossier = mocks.store.dossier
-    })
     await mountPage()
 
     await vi.waitFor(() => expect(mocks.store.initState).toHaveBeenCalledWith(42))

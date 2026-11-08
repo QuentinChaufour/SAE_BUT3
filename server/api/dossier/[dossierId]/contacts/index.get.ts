@@ -11,14 +11,14 @@ export default defineEventHandler(async (event) => {
 
   const contacts = await prisma.demarcheContact.findMany({
     where: {
-      idRecherche: dossierId,
-    },
+      idRecherche: dossierId
+    }
   })
 
-  if(!contacts) {
+  if (!contacts) {
     return {
       statusCode: 404,
-      data: null  
+      data: null
     }
   }
 

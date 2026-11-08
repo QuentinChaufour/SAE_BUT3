@@ -90,7 +90,7 @@ describe('PUT /api/dossier/:dossierId/evenements/:eventId', () => {
         { DemarcheContact: { idContact: 8 } }
       ] as never)
       .mockResolvedValueOnce(
-        contacts.map((DemarcheContact) => ({ DemarcheContact })) as never
+        contacts.map(DemarcheContact => ({ DemarcheContact })) as never
       )
 
     const event = {

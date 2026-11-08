@@ -3,8 +3,8 @@ import { dossierIdSchema, eventIdSchema } from '~~/shared/schemas/dossier'
 import { prisma } from '~~/server/utils/prisma'
 
 const routeSchema = z.object({
-  dossierId : dossierIdSchema,
-  eventId: eventIdSchema,
+  dossierId: dossierIdSchema,
+  eventId: eventIdSchema
 })
 
 export default defineEventHandler(async (event) => {
@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
 
   await prisma.demarcheRechercheContact.deleteMany({
     where: {
-      idDemarche: eventId,
+      idDemarche: eventId
     }
   })
 
@@ -23,14 +23,14 @@ export default defineEventHandler(async (event) => {
     }
   })
 
-  if(!updatedEvent) {
-    return sendError(event,createError({
+  if (!updatedEvent) {
+    return sendError(event, createError({
       statusCode: 404,
-      message: "Impossible de trouver l'événement à mettre à jour",
+      message: 'Impossible de trouver l\'événement à mettre à jour'
     }))
   }
 
   return {
-    statusCode: 204,
+    statusCode: 204
   }
 })

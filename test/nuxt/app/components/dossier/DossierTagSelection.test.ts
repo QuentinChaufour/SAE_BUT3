@@ -29,7 +29,7 @@ describe('DossierTagSelection', () => {
     })
 
     await vi.waitFor(() => {
-      expect(mocks.fetch).toHaveBeenCalledWith('/api/departement/7/tags', { method: 'GET' })
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/departments/7/tags', { method: 'GET' })
     })
 
     const tagSelection = wrapper.findComponent(TagSelection)
@@ -105,7 +105,7 @@ describe('DossierTagSelection', () => {
     await wrapper.findComponent(TagSelection).vm.$emit('updatedTags', ['Java'])
 
     await vi.waitFor(() => {
-      expect(mocks.fetch).toHaveBeenCalledWith('/api/departement/7/tags', { method: 'GET' })
+      expect(mocks.fetch).toHaveBeenCalledWith('/api/departments/7/tags', { method: 'GET' })
     })
     expect(mocks.fetch).not.toHaveBeenCalledWith('/api/dossier/42/tags', expect.anything())
   })

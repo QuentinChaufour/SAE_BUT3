@@ -25,7 +25,7 @@ watch(
         toast.add({
           color: 'error',
           title: 'Erreur',
-          description: 'Impossible de récupérer les tags du département',
+          description: 'Impossible de récupérer les tags du département'
         })
       }
     }
@@ -34,14 +34,13 @@ watch(
 )
 
 async function getDepartementTags(idDepartement: number | null) {
-
   if (!idDepartement) {
     throw new Error('idDepartement is null or undefined')
   }
 
   const response = await $fetch<APIResponse<{ nomTag: string }[]>>(
     `/api/departments/${idDepartement}/tags`,
-    { method: 'GET' },
+    { method: 'GET' }
   )
 
   if (response.statusCode !== 200 || !response.data) {
@@ -52,7 +51,6 @@ async function getDepartementTags(idDepartement: number | null) {
 }
 
 async function deleteTag(tagToDelete: string) {
-
   const index = tags.value.indexOf(tagToDelete)
   if (index !== -1) {
     const response = await $fetch<APIResponse<null>>(`/api/dossier/${idDossier}/tags`, {
@@ -60,25 +58,24 @@ async function deleteTag(tagToDelete: string) {
       body: { tag: tagToDelete }
     })
 
-    if(!response.statusCode || response.statusCode !== 200) {
+    if (!response.statusCode || response.statusCode !== 200) {
       throw new Error('Failed to add tag')
     }
   }
 }
 
 async function addTag(newTag: string) {
-
   if (!dossierTags.value.includes(newTag)) {
     dossierTags.value.push(newTag)
   }
 
   // TODO manage errors
   const response = await $fetch<APIResponse<null>>(`/api/dossier/${idDossier}/tags`, {
-      method: 'POST',
-      body: { tag: newTag }
-    })
+    method: 'POST',
+    body: { tag: newTag }
+  })
 
-  if(!response.statusCode || response.statusCode !== 200) {
+  if (!response.statusCode || response.statusCode !== 200) {
     throw new Error('Failed to add tag')
   }
 }

@@ -4,7 +4,7 @@ import { z } from 'zod/v4'
 import { DetailStatus } from '~/utils/RechercheStatusDetails'
 import { DetailsSource } from '~/utils/RechercheSourceDetails'
 import { getCurrentDateString } from '~~/shared/utils/date'
-import { Demarche_Source , Recherche_Stage_Status } from '~~/generated/prisma/enums'
+import { Demarche_Source, Recherche_Stage_Status } from '~~/generated/prisma/enums'
 import type { DemarcheContact } from '~~/generated/prisma/client'
 import type { EventInfo } from '~~/shared/types/event'
 import StatusBadge from '~/components/dossier/StatusBadge.vue'
@@ -53,7 +53,7 @@ const toast = useToast()
 const schema = z.object({
   titre: z.string().min(1, 'Le titre est obligatoire'),
   description: z.string(),
-  date: z.string().refine((date) => !isNaN(Date.parse(date)), {
+  date: z.string().refine(date => !isNaN(Date.parse(date)), {
     message: 'La date est invalide'
   }),
   status: z.enum(Recherche_Stage_Status),
@@ -72,25 +72,24 @@ const state = reactive({
 
 const options = computed(() => contactsOptions.value.map(contact => ({ value: contact.idContact, label: `${contact.nom} ${contact.prenom}` })).filter(contact => contact.label.toLowerCase().includes(searchTermContact.value.toLowerCase())))
 
-async function onSubmit(e: FormSubmitEvent<EventSchema>) {
-  if(props.creation){
+async function onSubmit(_e: FormSubmitEvent<EventSchema>) {
+  if (props.creation) {
     const response = createEvent()
-    
-    if(!response) {
+
+    if (!response) {
       toast.add({ title: 'Erreur', description: 'Erreur lors de la soumission de l\'événement', color: 'error' })
       return
     }
 
     emits('created', response)
-  }
-  else {
-    if(!props.event) {
+  } else {
+    if (!props.event) {
       return
     }
 
     const response = updateEvent()
-    
-    if(!response) {
+
+    if (!response) {
       return
     }
 
@@ -101,7 +100,7 @@ async function onSubmit(e: FormSubmitEvent<EventSchema>) {
 }
 
 function createEvent() {
-  if(!props.creation) return
+  if (!props.creation) return
 
   return {
     ...state,
@@ -112,13 +111,13 @@ function createEvent() {
       value: String(contact.idContact),
       content: ''
     }))
-  }  
+  }
 }
 
-function updateEvent(){
-  if(props.creation) return
+function updateEvent() {
+  if (props.creation) return
 
-  if(!confirm("Etes vous sûr de vouloir mettre à jour cet événement ?")) {
+  if (!confirm('Etes vous sûr de vouloir mettre à jour cet événement ?')) {
     return
   }
 
@@ -134,23 +133,20 @@ function updateEvent(){
   }
 }
 
-async function deleteEvent(){
-
-  if(!props.creation && !props.event){
+async function deleteEvent() {
+  if (!props.creation && !props.event) {
     toast.add({ title: 'Erreur', description: 'Aucun événement sélectionné pour la suppression', color: 'error' })
     return
   }
 
-  if(confirm("Etes vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.")) {
+  if (confirm('Etes vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.')) {
     emits('deleted')
   }
 }
 
 function createdContact(contact: DemarcheContact) {
-
   contactsOptions.value.push(contact)
   contactsEvent.value.push(contact)
-
 
   // réinitialiser les champs du formulaire de contact
   selectedContact.value = undefined
@@ -160,7 +156,7 @@ function createdContact(contact: DemarcheContact) {
   isContactSelectorOpen.value = false
 }
 
-function addContact(contactElement: {value: number, label: string}) {
+function addContact(contactElement: { value: number, label: string }) {
   const contact = contactsOptions.value.find(c => c.idContact === contactElement.value)
   selectedContact.value = undefined
 
@@ -170,7 +166,7 @@ function addContact(contactElement: {value: number, label: string}) {
   }
 
   // Prevent adding the same contact multiple times
-  if(contactsEvent.value.some(c => c.idContact === contact.idContact)) {
+  if (contactsEvent.value.some(c => c.idContact === contact.idContact)) {
     return
   }
 
@@ -195,13 +191,15 @@ onMounted(async () => {
   }
   loading.value = false
 })
-
 </script>
 
 <template>
   <div class="min-w-0 mr-5 ml-5">
     <div class="flex justify-end">
-      <UTooltip text="Supprimer l'événement" placement="bottom">
+      <UTooltip
+        text="Supprimer l'événement"
+        placement="bottom"
+      >
         <UButton
           :disabled="props.creation"
           icon="i-lucide-trash-2"
@@ -225,10 +223,10 @@ onMounted(async () => {
         required
       >
         <UInput
+          v-model="state.titre"
           class="w-full"
           required
           placeholder="Dépôt de candidature"
-          v-model="state.titre"
         />
       </UFormField>
       <UFormField
@@ -237,12 +235,11 @@ onMounted(async () => {
         class="min-w-[80%]"
       >
         <UTextarea
+          v-model="state.description"
           class="w-full"
           placeholder="envoie de la candidature, relance, entretien, etc..."
-          v-model="state.description"
         />
       </UFormField>
-
 
       <div class="flex flex-nowrap justify-around gap-10">
         <UFormField
@@ -251,19 +248,25 @@ onMounted(async () => {
           class="flex-1"
         >
           <USelect
+            v-model="state.status"
             label="Status"
             name="status"
             class="w-full"
             :ui="{ value: 'w-full' }"
             :items="Object.values(Recherche_Stage_Status).map(status => ({ value: status, label: status }))"
-            v-model="state.status"
           >
             <template #default>
-              <p class="justify-self-start">{{ DetailStatus[state.status]?.label }}</p>
+              <p class="justify-self-start">
+                {{ DetailStatus[state.status]?.label }}
+              </p>
             </template>
 
             <template #item="{ item }">
-              <StatusBadge :status="item.value" class="w-full" :size="'lg'" />
+              <StatusBadge
+                :status="item.value"
+                class="w-full"
+                :size="'lg'"
+              />
             </template>
           </USelect>
         </UFormField>
@@ -274,16 +277,16 @@ onMounted(async () => {
           class="flex-1"
         >
           <USelect
+            v-model="state.source"
             label="Source de l'événement"
             name="source"
             class="w-full"
             :items="Object.values(Demarche_Source).map(source => ({ value: source, label: DetailsSource[source]?.label || source }))"
-            v-model="state.source"
           />
         </UFormField>
       </div>
 
-      <USeparator/>
+      <USeparator />
 
       <UFormField
         label="Contacts"
@@ -291,7 +294,7 @@ onMounted(async () => {
         description="Ajoutez les contacts impliqués dans l’événement. Recherchez un contact existant ou saisissez un prénom pour en créer un nouveau."
       >
         <UInputMenu
-          v-model="selectedContact" 
+          v-model="selectedContact"
           v-model:search-term="searchTermContact"
           v-model:open="isContactSelectorOpen"
           :items="options"
@@ -305,14 +308,20 @@ onMounted(async () => {
         >
           <template #create-item-label>
             <div class="flex items-center gap-2">
-              <UIcon name="i-lucide-plus" class="size-4 text-primary-600" />
+              <UIcon
+                name="i-lucide-plus"
+                class="size-4 text-primary-600"
+              />
               <span>Créer un contact : {{ searchTermContact }}</span>
             </div>
           </template>
         </UInputMenu>
       </UFormField>
 
-      <div v-if="contactsEvent.length > 0" class="mt-4">
+      <div
+        v-if="contactsEvent.length > 0"
+        class="mt-4"
+      >
         <p class="mb-2 text-sm font-medium text-gray-700 dark:text-gray-200">
           Contacts associés à l’événement
         </p>
@@ -337,7 +346,10 @@ onMounted(async () => {
         </ul>
       </div>
 
-      <div v-else class="emptyDataPlaceholder">
+      <div
+        v-else
+        class="emptyDataPlaceholder"
+      >
         <p class="text-sm text-gray-500">
           Aucun contact sélectionné.
         </p>
@@ -351,13 +363,13 @@ onMounted(async () => {
         name="files"
         description="Ajoutez des fichiers liés à l’événement (e.g. Votre CV, un capture d'écran). Vous pouvez télécharger plusieurs fichiers à la fois."
       >
-        <UFileUpload  
+        <UFileUpload
           label="Insérez vos fichier"
           description="Accepté : .pdf, .jpg, .png ..."
           layout="list"
           multiple
         >
-          <template #file-trailing="{ index }">
+          <template #file-trailing="{ }">
             <!-- TODO add download functionality -->
             <UButton
               icon="i-lucide-trash-2"
@@ -369,7 +381,7 @@ onMounted(async () => {
           </template>
         </UFileUpload>
       </UFormField>
-      
+
       <div class="mt-6 flex justify-center border-t border-gray-200 pt-4 dark:border-gray-700">
         <UButton
           type="submit"
@@ -381,7 +393,6 @@ onMounted(async () => {
       </div>
     </UForm>
   </div>
-
 
   <UModal
     v-model:open="isCreatingContact"
@@ -395,13 +406,13 @@ onMounted(async () => {
         <ContactForm
           create
           :dossier-id="props.dossierId"
+          :state="{ prenom: searchTermContact }"
           @created="createdContact"
           @cancel="() => {
-            isCreatingContact = false 
+            isCreatingContact = false
             isContactSelectorOpen = false
             searchTermContact = ''
           }"
-          :state="{prenom: searchTermContact}"
         />
       </div>
     </template>

@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
 
   const body = await readValidatedBody(event, bodySchema.parse)
 
-  if(Object.keys(body).length === 0) {
+  if (Object.keys(body).length === 0) {
     return sendError(event, createError({
       statusCode: 400,
       message: 'No data provided for update'
@@ -39,8 +39,8 @@ export default defineEventHandler(async (event) => {
     }))
   }
 
-  return { 
+  return {
     statusCode: 200,
-    data: dossier 
+    data: dossier
   }
 })

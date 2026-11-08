@@ -20,15 +20,15 @@ vi.stubGlobal(
   ) => parse(event.context.params)
 )
 
-let handler: typeof import('~~/server/api/departement/[departementId]/tags/index.get')['default']
+let handler: typeof import('~~/server/api/departments/[id]/tags/index.get')['default']
 
 const departementId = '3'
 
-describe('GET /api/departement/:departementId/tags', () => {
+describe('GET /api/departments/:departementId/tags', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     handler = (await import(
-      '~~/server/api/departement/[departementId]/tags/index.get'
+      '~~/server/api/departments/[id]/tags/index.get'
     )).default
   })
 
@@ -42,7 +42,7 @@ describe('GET /api/departement/:departementId/tags', () => {
 
     const event = {
       context: {
-        params: { departementId }
+        params: { id: departementId }
       }
     } as unknown as H3Event
 
@@ -63,7 +63,7 @@ describe('GET /api/departement/:departementId/tags', () => {
 
     const event = {
       context: {
-        params: { departementId }
+        params: { id: departementId }
       }
     } as unknown as H3Event
 
@@ -78,7 +78,7 @@ describe('GET /api/departement/:departementId/tags', () => {
   it('reject request if the department ID is invalid', async () => {
     const event = {
       context: {
-        params: { departementId: 'invalid' }
+        params: { id: 'invalid' }
       }
     } as unknown as H3Event
 

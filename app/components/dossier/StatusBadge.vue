@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Recherche_Stage_Status } from '~~/generated/prisma/enums'
+import type { Recherche_Stage_Status } from '~~/generated/prisma/enums'
 import { DetailStatus } from '~/utils/RechercheStatusDetails'
 
 const props = defineProps<{

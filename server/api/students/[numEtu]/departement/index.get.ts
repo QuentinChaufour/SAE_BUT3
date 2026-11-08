@@ -6,10 +6,9 @@ const routeSchema = z.object({
   numEtu: studentIdSchema
 })
 
-//TODO API route protection
+// TODO API route protection
 
 export default defineEventHandler(async (event) => {
-
   const { numEtu } = routeSchema.parse(event.context.params)
 
   // Get the department ID of the student
@@ -30,7 +29,7 @@ export default defineEventHandler(async (event) => {
     }
   })
 
-  if(!departementId || !departementId.Inscription || departementId.Inscription.length === 0) {
+  if (!departementId || !departementId.Inscription || departementId.Inscription.length === 0) {
     throw createError({
       statusCode: 404,
       message: 'Departement not found for the given studentId'
@@ -46,5 +45,5 @@ export default defineEventHandler(async (event) => {
   return {
     statusCode: 200,
     data: departement
-  } 
+  }
 })

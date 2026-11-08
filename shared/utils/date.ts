@@ -1,4 +1,3 @@
-
 export function getCurrentDateString() {
   const today = new Date()
 
@@ -8,12 +7,11 @@ export function getCurrentDateString() {
 
   const dayString = day < 10 ? '0' + day : day.toString()
   const monthString = month < 10 ? '0' + month : month.toString()
-  
+
   return dayString + '/' + monthString + '/' + year
 }
 
-export function dateToString(date: Date){
-
+export function dateToString(date: Date) {
   const day = date.getUTCDate()
   const month = date.getUTCMonth() + 1
   const year = date.getUTCFullYear()
@@ -27,7 +25,7 @@ export function dateToString(date: Date){
 export function stringToDate(dateString: string): Date {
   const [day, month, year] = dateString.split('/').map(Number)
 
-  if(!day || !month || !year) {
+  if (!day || !month || !year) {
     throw new Error('Invalid date string format. Expected format: "DD/MM/YYYY"')
   }
 

@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<{
 })
 
 const emits = defineEmits<{
-  'selected': [row: T]
+  selected: [row: T]
 }>()
 
 const table = useTemplateRef('table')
@@ -122,10 +122,9 @@ function getSortableHeader(column: Column<T>, label: string) {
   )
 }
 
-function rowSelected(_e:Event, row: TableRow<T>) {
+function rowSelected(_e: Event, row: TableRow<T>) {
   emits('selected', row.original)
 }
-
 </script>
 
 <template>
@@ -147,12 +146,12 @@ function rowSelected(_e:Event, row: TableRow<T>) {
       v-model:pagination="pagination"
       :data="filteredData"
       :columns="tableColumns"
-      @select="rowSelected"
       :pagination-options="{
         getPaginationRowModel: getPaginationRowModel()
       }"
       :empty="emptyText"
       class="flex-1"
+      @select="rowSelected"
     >
       <template
         v-for="(_, name) in $slots"

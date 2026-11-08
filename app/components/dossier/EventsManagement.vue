@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import EventDescription from '~/components/dossier/EventDescription.vue';
-import StatusBadge from '~/components/dossier/StatusBadge.vue';
+import EventDescription from '~/components/dossier/EventDescription.vue'
+import StatusBadge from '~/components/dossier/StatusBadge.vue'
 import type { TimelineItem } from '@nuxt/ui'
 import type { EventInfo } from '~~/shared/types/event'
 // TODO documentation
 
 const props = defineProps<{
-  dossierId: number,
+  dossierId: number
   events: EventInfo[]
 }>()
 
@@ -14,8 +14,6 @@ const emits = defineEmits<{
   updated: [EventInfo]
   deleted: [EventInfo]
 }>()
-
-const emitDeleted = emits as unknown as (event: 'deleted', payload: EventInfo) => void
 
 const showEventDetails = ref<boolean>(false)
 const selectedEvent = ref<EventInfo | null>(props.events[0] ?? null)
@@ -34,15 +32,13 @@ function onTimelineSelect(_: Event, item: EventInfo) {
 }
 
 function deleteEvent() {
-
-  if(!selectedEvent.value) {
+  if (!selectedEvent.value) {
     return
   }
 
   emits('deleted', selectedEvent.value as EventInfo)
   showEventDetails.value = false
 }
-
 </script>
 
 <template>
@@ -66,12 +62,12 @@ function deleteEvent() {
       ...event,
       title: event.titre || 'Pas de titre',
       description: event.description || '',
-      icon: '',
+      icon: ''
     } satisfies TimelineItem & EventInfo))"
-    @select="onTimelineSelect"
     :ui="{
       item: 'cursor-pointer'
     }"
+    @select="onTimelineSelect"
   >
     <template #title="{ item }">
       <div class="flex flex-row gap-2 items-center justify-between">
@@ -92,16 +88,19 @@ function deleteEvent() {
       </div>
     </template>
   </UTimeline>
-  <div v-else class="emptyDataPlaceholder">
+  <div
+    v-else
+    class="emptyDataPlaceholder"
+  >
     <p class="text-sm text-gray-500">
       Aucun événement à afficher.
     </p>
   </div>
 
   <USlideover
+    v-model:open="showEventDetails"
     :title="'Visualisation d\'un événement'"
     class="slidingModal"
-    v-model:open="showEventDetails"
   >
     <template #body>
       <EventDescription
