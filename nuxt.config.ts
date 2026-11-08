@@ -4,11 +4,12 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/ui',
     'nuxt-auth-utils',
-    '@nuxt/test-utils/module'
+    '@nuxt/test-utils/module',
+    '@pinia/nuxt'
   ],
 
   devtools: {
-    enabled: false
+    enabled: true
   },
 
   css: ['~/assets/css/main.css'],

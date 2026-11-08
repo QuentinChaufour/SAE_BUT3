@@ -39,6 +39,13 @@ vi.stubGlobal(
     parse: (params: unknown) => unknown
   ) => parse(event.context.params)
 )
+vi.stubGlobal(
+  'getValidatedQuery',
+  async (
+    event: H3Event & { query?: unknown },
+    parse: (query: unknown) => unknown
+  ) => parse(event.query)
+)
 vi.stubGlobal('requireUserSession', async () => ({
   user: { role: UserRole.Student, numId: 'o123456789' }
 }))
@@ -74,14 +81,15 @@ describe('GET /api/student/[numEtu]/search', () => {
     const event = {
       context: {
         params: { numEtu: 'o123456789' }
-      }
+      },
+      query: { idInscription: '1' }
     } as unknown as H3Event
 
     const response = await handler(event)
 
     expect(prisma.rechercheStage.findMany).toHaveBeenCalledTimes(1)
     expect(prisma.rechercheStage.findMany).toHaveBeenCalledWith({
-      where: { numEtu: 'o123456789' },
+      where: { Inscription: { numEtu: 'o123456789', idInscription: 1 } },
       orderBy: { dateCreation: 'desc' },
       select: expect.any(Object)
     })
@@ -92,7 +100,21 @@ describe('GET /api/student/[numEtu]/search', () => {
     const event = {
       context: {
         params: { numEtu: 'INVALID_ID_xxxxxxxxxxx' }
-      }
+      },
+      query: { idInscription: '1' }
+    } as unknown as H3Event
+
+    await expect(handler(event)).rejects.toThrow()
+
+    expect(prisma.rechercheStage.findMany).not.toHaveBeenCalled()
+  })
+
+  it('reject request if invalid query idInscription', async () => {
+    const event = {
+      context: {
+        params: { numEtu: 'o123456789' }
+      },
+      query: { idInscription: '-5' }
     } as unknown as H3Event
 
     await expect(handler(event)).rejects.toThrow()

@@ -9,12 +9,23 @@ import UserRole from '~~/shared/types/role'
 const mocks = vi.hoisted(() => ({
   fetch: vi.fn(),
   userSession: vi.fn(),
-  toast: { add: vi.fn() }
+  toast: { add: vi.fn() },
+  getSelectedPromotion: vi.fn(() => ({
+    idInscription: 1,
+    annee: '2026-2027',
+    formation: {
+      nom: 'BUT2 Informatique',
+      departement: 'Informatique'
+    }
+  }))
 }))
 
 mockNuxtImport('$fetch', () => mocks.fetch)
 mockNuxtImport('useUserSession', () => mocks.userSession)
 mockNuxtImport('useToast', () => () => mocks.toast)
+mockNuxtImport('useConnectedStudentStore', () => () => ({
+  getSelectedPromotion: mocks.getSelectedPromotion()
+}))
 
 const createdSearch = { idRecherche: 1, titre: 'Stage développeur', numEtu: 'o123456789' }
 
@@ -96,7 +107,7 @@ describe('CreateSearchModal', () => {
           description: 'Une description',
           alternance: true,
           idEntreprise: 42,
-          annee: '2026-2027'
+          idInscription: 1
         }
       })
     })
