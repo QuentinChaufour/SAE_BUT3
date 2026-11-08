@@ -3,17 +3,19 @@ import { studentIdSchema } from '~~/shared/schemas/student'
 import { prisma } from '~~/server/utils/prisma'
 
 const routeSchema = z.object({
-  studentId: studentIdSchema
+  numEtu: studentIdSchema
 })
+
+//TODO API route protection
 
 export default defineEventHandler(async (event) => {
 
-  const { studentId } = routeSchema.parse(event.context.params)
+  const { numEtu } = routeSchema.parse(event.context.params)
 
   // Get the department ID of the student
   const departementId = await prisma.etudiant.findFirst({
     where: {
-      numEtu: studentId
+      numEtu
     },
     select: {
       Inscription: {
@@ -31,7 +33,7 @@ export default defineEventHandler(async (event) => {
   if(!departementId || !departementId.Inscription || departementId.Inscription.length === 0) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Departement not found for the given studentId'
+      message: 'Departement not found for the given studentId'
     })
   }
 

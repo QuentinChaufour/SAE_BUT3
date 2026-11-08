@@ -173,7 +173,7 @@ onMounted(async () => {
   } catch (error) {
     showError({
       statusCode: 500,
-      statusMessage: 'Failed to load dossier data with id ' + idDossier,
+      message: 'Failed to load dossier data with id ' + idDossier,
       data: error
     })
   }

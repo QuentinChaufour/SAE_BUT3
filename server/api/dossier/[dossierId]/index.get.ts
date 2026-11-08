@@ -1,4 +1,5 @@
 import { z } from 'zod/v4'
+import { prisma } from '~~/server/utils/prisma'
 import { dossierIdSchema } from '~~/shared/schemas/dossier'
 
 const paramsSchema = z.object({
@@ -65,7 +66,7 @@ export default defineEventHandler(async (event) => {
   if (!dossier) {
     return sendError(event, createError({
       statusCode: 404,
-      statusMessage: 'Dossier not found'
+      message: 'Dossier not found'
     }))
   }
   

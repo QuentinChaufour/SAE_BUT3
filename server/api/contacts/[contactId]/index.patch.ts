@@ -1,4 +1,5 @@
 import { z } from 'zod/v4'
+import { prisma } from '~~/server/utils/prisma'
 import { contactIdSchema, contactSchema } from '~~/shared/schemas/contact'
 
 const schema = z.object({

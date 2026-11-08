@@ -35,7 +35,7 @@ describe('middleware', () => {
       mockRequireUserSession.mockResolvedValue(sessionWithRole(UserRole.Student))
       await expect(checkAuth(event, [UserRole.Admin])).rejects.toMatchObject({
         statusCode: 403,
-        statusMessage: 'Forbidden'
+        message: 'Forbidden'
       })
     })
 
@@ -66,7 +66,7 @@ describe('middleware', () => {
 
       await expect(checkAuthWithOnlySelfStudentData(event, '654321', [UserRole.Student])).rejects.toMatchObject({
         statusCode: 403,
-        statusMessage: 'Forbidden'
+        message: 'Forbidden'
       })
     })
 

@@ -1,14 +1,15 @@
 import { z } from 'zod/v4'
 import { emptyToNull } from './utils'
 
-export const contactSchema = z.object({
+export const  contactSchema = z.object({
   nom: z.string()
     .trim()
-    .nonoptional('Le nom est requis'),
+    .min(1, 'Le nom est requis')
+    .optional(),
 
   prenom: z.string()
     .trim()
-    .nonoptional('Le prénom est requis'),
+    .optional(),
 
   email: emptyToNull(
     z.email('L\'email doit être valide').trim().optional()

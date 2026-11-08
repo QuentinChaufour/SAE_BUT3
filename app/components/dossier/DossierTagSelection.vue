@@ -3,24 +3,35 @@ import TagSelection from '~/components/common/TagSelection.vue'
 // TODO bug
 
 const tags = defineModel<string[]>('tags', { required: true })
+const toast = useToast()
 
 const { idDepartement, idDossier } = defineProps<{
   idDepartement: number | null
   idDossier: number
 }>()
 
+const dossierTags = ref<string[]>(tags.value)
+const optionTags = ref<string[]>([])
+const disabled = ref<boolean>(false)
+
 watch(
   () => idDepartement,
   async (newId) => {
     if (newId !== null) {
-      await getDepartementTags(newId)
+      try {
+        await getDepartementTags(newId)
+      } catch (error) {
+        console.error(error)
+        toast.add({
+          color: 'error',
+          title: 'Erreur',
+          description: 'Impossible de récupérer les tags du département',
+        })
+      }
     }
   },
   { immediate: true }
 )
-
-const dossierTags = ref<string[]>(tags.value)
-const optionTags = ref<string[]>([])
 
 async function getDepartementTags(idDepartement: number | null) {
 
@@ -40,20 +51,10 @@ async function getDepartementTags(idDepartement: number | null) {
   optionTags.value = response.data.map(tag => tag.nomTag)
 }
 
-onMounted(async () => {
-  try {
-    await getDepartementTags(idDepartement)
-  } catch (error) {
-    // TODO disable the tag selection if the fetch fails
-    console.error(error)
-  }
-})
-
 async function deleteTag(tagToDelete: string) {
 
   const index = tags.value.indexOf(tagToDelete)
   if (index !== -1) {
-    dossierTags.value.splice(index, 1)
     const response = await $fetch<APIResponse<null>>(`/api/dossier/${idDossier}/tags`, {
       method: 'DELETE',
       body: { tag: tagToDelete }
@@ -83,6 +84,7 @@ async function addTag(newTag: string) {
 }
 
 async function updateDossierTags(newTags: string[]) {
+  dossierTags.value = newTags
 
   tags.value.forEach((tag) => {
     if (!dossierTags.value.includes(tag)) {
@@ -98,6 +100,14 @@ async function updateDossierTags(newTags: string[]) {
     }
   })
 }
+
+onMounted(async () => {
+  try {
+    await getDepartementTags(idDepartement)
+  } catch (error) {
+    console.error(error)
+  }
+})
 // TODO loading state and error handling for the tag operations
 </script>
 
@@ -105,7 +115,8 @@ async function updateDossierTags(newTags: string[]) {
   <TagSelection
     v-model:tags="dossierTags"
     :option-tags="optionTags"
+    :disabled="disabled"
     placeholder="Ajouter un tag"
-    @update:tags="updateDossierTags"
+    @updated-tags="updateDossierTags"
   />
 </template>

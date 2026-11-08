@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
   if (!contact) {
     return sendError(event, createError({
       statusCode: 500,
-      statusMessage: 'Erreur lors de la création du contact'
+      message: 'Erreur lors de la création du contact'
     }))
   }
 

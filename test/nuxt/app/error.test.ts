@@ -3,16 +3,16 @@ import { mountSuspended } from '@nuxt/test-utils/runtime'
 import ErrorComponent from '~/error.vue'
 import type { NuxtError } from '#app'
 
-function createMockError(statusCode: number, statusMessage: string): NuxtError {
+function createMockError(statusCode: number, message: string): NuxtError {
   return {
     statusCode,
-    statusText: statusMessage,
+    statusText: message,
     status: statusCode,
     name: 'NuxtError',
-    message: statusMessage,
+    message: message,
     fatal: false,
     unhandled: false,
-    toJSON: () => ({ message: statusMessage, statusCode })
+    toJSON: () => ({ message: message, statusCode })
   }
 }
 

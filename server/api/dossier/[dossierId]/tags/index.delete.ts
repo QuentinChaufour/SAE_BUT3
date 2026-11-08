@@ -1,5 +1,6 @@
 import { z } from 'zod/v4'
 import { dossierIdSchema } from '~~/shared/schemas/dossier'
+import { prisma } from '~~/server/utils/prisma'
 
 const paramsSchema = z.object({
   dossierId: dossierIdSchema
@@ -27,7 +28,7 @@ export default defineEventHandler(async (event) => {
   catch {
     throw createError({
       statusCode: 404,
-      statusMessage: `Tag: ${tag} not found`
+      message: `Tag: ${tag} not found`
     })
   }
 

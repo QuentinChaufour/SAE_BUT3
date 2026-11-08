@@ -1,5 +1,6 @@
 import { z } from 'zod/v4'
 import { contactIdSchema } from '~~/shared/schemas/contact'
+import { prisma } from '~~/server/utils/prisma'
 
 const schema = z.object({
   contactId: contactIdSchema
@@ -24,7 +25,7 @@ export default defineEventHandler(async (event) => {
   if (!deletedContact) {
     return sendError(event, createError({
       statusCode: 404,
-      statusMessage: 'Contact not found'
+      message: 'Contact not found'
     }))
   }
   return {

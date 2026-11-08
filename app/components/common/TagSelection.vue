@@ -2,8 +2,10 @@
 const tags = defineModel<string[]>('tags', { required: true })
 const props = withDefaults(defineProps<{
   optionTags?: string[]
+  disabled?: boolean
 }>(), {
-  optionTags: () => []
+  optionTags: () => [],
+  disabled: false,
 })
 
 const loading = computed(() => !(props.optionTags.length > 0))
@@ -22,7 +24,8 @@ const dossierTags = ref<string[]>(tags.value)
     :autocomplete="'on'"
     multiple
     :loading="loading"
-    :disabled="loading"
+    :disabled="props.disabled || loading"
     :items="props.optionTags"
+    @update:model-value="emits('updatedTags', $event)"
   />
 </template>

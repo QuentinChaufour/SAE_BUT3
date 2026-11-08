@@ -26,7 +26,7 @@ export default defineEventHandler(async (event) => {
   if(!updatedEvent) {
     return sendError(event,createError({
       statusCode: 404,
-      statusMessage: "Impossible de trouver l'événement à mettre à jour",
+      message: "Impossible de trouver l'événement à mettre à jour",
     }))
   }
 

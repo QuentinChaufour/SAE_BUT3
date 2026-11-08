@@ -11,9 +11,20 @@ const routeSchema = z.object({
 const bodySchema = z.object({
   titre: z.string().trim().min(1, 'Le titre est obligatoire'),
   description: z.string().trim().optional(),
-  date: z.string().trim().refine((date) => !isNaN(Date.parse(date)), {
-    message: "La date n'est pas valide",
-  }),
+  date: z.string().trim().refine((date) => {
+      const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(date)
+      
+      if (!match) return false
+      
+      const [, day, month, year] = match
+      const parsed = new Date(Number(year), Number(month) - 1, Number(day))
+      
+      return parsed.getFullYear() === Number(year)
+        && parsed.getMonth() === Number(month) - 1
+        && parsed.getDate() === Number(day)
+    }, {
+      message: "La date n'est pas valide",
+    }),
   source: z.enum(Demarche_Source),
   status: z.enum(Recherche_Stage_Status),
   contacts: z.array(z.number()).optional().default([]),
@@ -44,7 +55,7 @@ export default defineEventHandler(async (event) => {
   if(!newEvent) {
     return sendError(event,createError({
       statusCode: 500,
-      statusMessage: "Erreur lors de la création de l'événement",
+      message: "Erreur lors de la création de l'événement",
     }))
   }
 

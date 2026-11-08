@@ -22,8 +22,8 @@ vi.stubGlobal('setUserSession', mocks.setUserSession)
 
 vi.stubGlobal(
   'createError',
-  (error: { statusCode: number, statusMessage: string }) =>
-    Object.assign(new Error(error.statusMessage), error)
+  (error: { statusCode: number, message: string }) =>
+    Object.assign(new Error(error.message), error)
 )
 
 vi.stubGlobal(
@@ -338,7 +338,7 @@ describe('POST /api/auth/login', () => {
     // reject API call
     await expect(handler(event)).rejects.toMatchObject({
       statusCode: 401,
-      statusMessage: 'Unauthorised'
+      message: 'Unauthorised'
     })
 
     // rejects right after not finding the user
@@ -369,7 +369,7 @@ describe('POST /api/auth/login', () => {
     // reject API call
     await expect(handler(event)).rejects.toMatchObject({
       statusCode: 401,
-      statusMessage: 'Unauthorised'
+      message: 'Unauthorised'
     })
 
     // rejects right after failling password verification

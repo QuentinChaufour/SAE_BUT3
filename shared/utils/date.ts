@@ -2,7 +2,7 @@
 export function getCurrentDateString() {
   const today = new Date()
 
-  const day = today.getUTCDay() + 1
+  const day = today.getUTCDate()
   const month = today.getUTCMonth() + 1
   const year = today.getUTCFullYear()
 
@@ -14,7 +14,7 @@ export function getCurrentDateString() {
 
 export function dateToString(date: Date){
 
-  const day = date.getUTCDay() + 1
+  const day = date.getUTCDate()
   const month = date.getUTCMonth() + 1
   const year = date.getUTCFullYear()
 

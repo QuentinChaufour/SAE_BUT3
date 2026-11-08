@@ -61,7 +61,7 @@ async function updateContact(event: FormSubmitEvent<Schema>) {
     if (!isUpdateMode || !props.contact) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'Contact is required for updating'
+        message: 'Contact is required for updating'
       })
     }
 
@@ -73,7 +73,7 @@ async function updateContact(event: FormSubmitEvent<Schema>) {
     if (!response.data || response.statusCode !== 200) {
       throw createError({
         statusCode: 500,
-        statusMessage: 'Failed to update contact'
+        message: 'Failed to update contact'
       })
     }
 
@@ -104,7 +104,7 @@ async function createContact(event: FormSubmitEvent<Schema>) {
     if (!response.data || response.statusCode !== 201) {
       throw createError({
         statusCode: 500,
-        statusMessage: 'Failed to create contact'
+        message: 'Failed to create contact'
       })
     }
 
@@ -134,7 +134,7 @@ async function deleteContact() {
     if(!isUpdateMode || !props.contact) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'A Contact is required for deletion'
+        message: 'A Contact is required for deletion'
       })
     }
 
@@ -145,7 +145,7 @@ async function deleteContact() {
     if(response.statusCode !== 204) {
       throw createError({
         statusCode: 500,
-        statusMessage: 'Failed to delete contact'
+        message: 'Failed to delete contact'
       })
     }
     toast.add({

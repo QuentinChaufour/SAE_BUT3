@@ -31,7 +31,7 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   if (process.env.NODE_ENV !== 'development') {
-    throw createError({ statusCode: 403, statusMessage: 'Forbidden' })
+    throw createError({ statusCode: 403, message: 'Forbidden' })
   }
 
   await createYear()
