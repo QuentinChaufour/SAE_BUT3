@@ -1,5 +1,5 @@
 import { prisma } from '~~/server/utils/prisma'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { studentIdSchema } from '~~/shared/schemas/student'
 import { studentSearchFields } from '~~/shared/schemas/student-search'

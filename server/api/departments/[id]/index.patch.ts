@@ -1,5 +1,5 @@
 import { prisma } from '~~/server/utils/prisma'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import { checkAuth } from '~~/server/utils/middleware'
 import UserRole from '~~/shared/types/role'
 import { yearSchema } from '~~/shared/schemas/year'

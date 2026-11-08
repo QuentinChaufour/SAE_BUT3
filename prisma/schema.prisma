@@ -60,7 +60,7 @@ model DemarcheContact {
   email                    String?                    @db.VarChar
   telephone                String?                    @db.VarChar
   idRecherche              Int?
-  RechercheStage         RechercheStage?            @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
+  RechercheStage           RechercheStage?            @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
   DemarcheRechercheContact DemarcheRechercheContact[]
 }
 

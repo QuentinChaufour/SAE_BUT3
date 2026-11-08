@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 export const yearSchema = z.string().regex(/^\d{4}-\d{4}$/, 'L\'année doit être au format "YYYY-YYYY".').refine(
   (year) => {

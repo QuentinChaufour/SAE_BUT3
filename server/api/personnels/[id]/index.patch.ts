@@ -1,7 +1,7 @@
 import { prisma } from '~~/server/utils/prisma'
 import UserRole from '~~/shared/types/role'
 import { checkAuth } from '~~/server/utils/middleware'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import { numPersonnelSchema, personnelUpdateBodySchema } from '~~/shared/schemas/personnel'
 
 const paramsSchema = z.object({ id: numPersonnelSchema })

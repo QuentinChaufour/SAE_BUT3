@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
-import type { TableColumn } from '@nuxt/ui'
+import type { TableColumn, TableRow } from '@nuxt/ui'
 import { getPaginationRowModel, type Column, type SortingState } from '@tanstack/vue-table'
 
 const props = withDefaults(defineProps<{
@@ -18,6 +18,10 @@ const props = withDefaults(defineProps<{
   pageSize: 10,
   emptyText: 'Aucune donnée disponible.'
 })
+
+const emits = defineEmits<{
+  'selected': [row: T]
+}>()
 
 const table = useTemplateRef('table')
 const pagination = ref({ pageIndex: 0, pageSize: props.pageSize })
@@ -117,6 +121,11 @@ function getSortableHeader(column: Column<T>, label: string) {
       })
   )
 }
+
+function rowSelected(_e:Event, row: TableRow<T>) {
+  emits('selected', row.original)
+}
+
 </script>
 
 <template>
@@ -138,6 +147,7 @@ function getSortableHeader(column: Column<T>, label: string) {
       v-model:pagination="pagination"
       :data="filteredData"
       :columns="tableColumns"
+      @select="rowSelected"
       :pagination-options="{
         getPaginationRowModel: getPaginationRowModel()
       }"

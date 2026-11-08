@@ -91,7 +91,7 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
 
 async function populate(){
   try {
-    const response = await $fetch<APIResponse<null>>(`/api/dbpopulate`, {
+    const response = await $fetch<APIResponse<null>>(`/api/dev/dbpopulate`, {
       method: 'POST'
     })
 

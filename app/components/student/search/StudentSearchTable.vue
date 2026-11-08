@@ -158,6 +158,11 @@ function getDropdownActions(search: RechercheStageWithEntreprise): DropdownMenuI
     ]
   ]
 }
+
+function searchSelected(row: RechercheStageWithEntreprise) {
+    navigateTo(`/student/dossier/${row.idRecherche}`)
+}
+
 </script>
 
 <template>
@@ -168,6 +173,7 @@ function getDropdownActions(search: RechercheStageWithEntreprise): DropdownMenuI
       :search-fields="searchFields"
       search-placeholder="Rechercher parmi les recherches..."
       :page-size="5"
+      @selected="searchSelected"
       sortable
     >
       <template #action-cell="{ row }">

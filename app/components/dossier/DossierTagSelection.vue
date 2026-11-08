@@ -40,7 +40,7 @@ async function getDepartementTags(idDepartement: number | null) {
   }
 
   const response = await $fetch<APIResponse<{ nomTag: string }[]>>(
-    `/api/departement/${idDepartement}/tags`,
+    `/api/departments/${idDepartement}/tags`,
     { method: 'GET' },
   )
 

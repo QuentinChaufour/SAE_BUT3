@@ -359,24 +359,27 @@ async function createRecherches(entreprises: Entreprise[], inscriptions: Inscrip
 }
 
 async function createDemarches(recherches: RechercheStage[]) {
-  const contact = await ensure(
-    () => prisma.demarcheContact.findFirst({ where: { email: 'contact@entreprise.fr' } }),
-    () => prisma.demarcheContact.create({
-      data: {
-        nom: 'Roux',
-        prenom: 'Nicolas',
-        fonction: 'Gérant',
-        email: 'contact@entreprise.fr',
-        telephone: '0607080910'
-      }
-    })
-  )
 
   const evenements = [
-    { idRecherche: recherches[0]!.idRecherche, description: 'Envoi candidature par mail', status: Recherche_Stage_Status.AttenteReponse, source: Demarche_Source.Email },
-    { idRecherche: recherches[0]!.idRecherche, description: 'Entretien Teams', status: Recherche_Stage_Status.Entretien, source: Demarche_Source.Telephone },
-    { idRecherche: recherches[1]!.idRecherche, description: 'Dépôt candidature en main propre', status: Recherche_Stage_Status.AttenteReponse, source: Demarche_Source.Presentiel }
+    { idRecherche: recherches[0]!.idRecherche,titre: 'Envoi candidature par mail', description: 'Envoi candidature par mail', status: Recherche_Stage_Status.AttenteReponse, source: Demarche_Source.Email },
+    { idRecherche: recherches[0]!.idRecherche, titre: 'Entretien Teams', description: 'Entretien Teams', status: Recherche_Stage_Status.Entretien, source: Demarche_Source.Telephone },
+    { idRecherche: recherches[1]!.idRecherche, titre: 'Dépôt candidature en main propre', description: 'Dépôt candidature en main propre', status: Recherche_Stage_Status.AttenteReponse, source: Demarche_Source.Presentiel }
   ]
+
+  const contacts = [
+    { idContact: 1, nom: 'Roux', prenom: 'Nicolas', fonction: 'Gérant', email: 'contact@entreprise.fr', telephone: '0607080910', idRecherche: recherches[0]!.idRecherche },
+    { idContact: 2, nom: 'Dubois', prenom: 'Marie', fonction: 'Responsable RH', email: 'rh@entreprise.fr', telephone: '0607080911', idRecherche: recherches[1]!.idRecherche },
+    { idContact: 3, nom: 'Martin', prenom: 'Pierre', fonction: 'Directeur', email: 'directeur@entreprise.fr', telephone: '0607080912', idRecherche: recherches[2]!.idRecherche }
+  ]
+
+  for(const contact of contacts) {
+    await ensure(
+      () => prisma.demarcheContact.findFirst({ where: { idContact: contact.idContact } }),
+      () => prisma.demarcheContact.create({
+        data: contact
+      })
+    )
+  }
 
   for (const [index, item] of evenements.entries()) {
     const evenement = await ensure(
@@ -384,7 +387,7 @@ async function createDemarches(recherches: RechercheStage[]) {
       () => prisma.demarcheEvenement.create({ data: item })
     )
 
-    const data = { idDemarche: evenement.idDemarche, idContact: contact.idContact }
+    const data = { idDemarche: evenement.idDemarche, idContact: contacts[index]!.idContact }
     await prisma.demarcheRechercheContact.upsert({
       where: { idDemarche_idContact: data },
       create: data,
