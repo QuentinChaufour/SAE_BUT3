@@ -191,7 +191,7 @@ describe('POST /api/auth/login', () => {
       Personnel: {
         nom: 'Lyve',
         prenom: 'Sylvain',
-        role: 'secretary'
+        role: 'secretariat'
       }
     })
 
@@ -238,7 +238,7 @@ describe('POST /api/auth/login', () => {
       Personnel: {
         nom: null,
         prenom: null,
-        role: 'secretary'
+        role: 'secretariat'
       }
     })
 

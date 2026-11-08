@@ -50,6 +50,8 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
   const session = useUserSession()
   const numEtu = session.user.value!.numId
 
+  const store = useConnectedStudentStore()
+
   try {
     const response = await $fetch<RechercheStage>(`/api/students/${numEtu}/search`, {
       method: 'POST',
@@ -58,7 +60,7 @@ async function onSubmit(_event: FormSubmitEvent<Schema>) {
         description: state.description,
         alternance: state.alternance,
         idEntreprise: state.idEntreprise as number,
-        annee: '2026-2027' // TODO: récupérer l'année actuelle (via pinia?)
+        idInscription: store.getSelectedPromotion!.idInscription
       } satisfies Omit<RechercheStageUncheckedCreateInput, 'numEtu'>
     })
 

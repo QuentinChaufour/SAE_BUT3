@@ -8,7 +8,8 @@ import UserRole from '~~/shared/types/role'
 import { mockUserSession, resetNuxtMocks } from '~~/test/nuxt/utils/utils'
 
 const mocks = vi.hoisted(() => ({
-  userSession: vi.fn()
+  userSession: vi.fn(),
+  connectedStudentStore: vi.fn()
 }))
 
 const student = {
@@ -18,7 +19,13 @@ const student = {
   prenom: 'Prénom'
 }
 
+const mockStore = {
+  getSelectedPromotion: { idInscription: 123 },
+  isReadOnlyYear: false
+}
+
 mockNuxtImport('useUserSession', () => mocks.userSession)
+mockNuxtImport('useConnectedStudentStore', () => () => mockStore)
 
 describe('Student Search Index Page', () => {
   beforeEach(() => {
@@ -46,7 +53,10 @@ describe('Student Search Index Page', () => {
   it('check body component', async () => {
     const wrapper = await mountSuspended(StudentSearchPage)
 
-    const createModal = wrapper.findComponent(StudentSearchTable)
-    expect(createModal.exists()).toBe(true)
+    const searchTable = wrapper.findComponent(StudentSearchTable)
+    expect(searchTable.exists()).toBe(true)
+    expect(searchTable.props('numEtu')).toBe(student.numId)
+    expect(searchTable.props('idInscription')).toBe(mockStore.getSelectedPromotion.idInscription)
+    expect(searchTable.props('readOnly')).toBe(mockStore.isReadOnlyYear)
   })
 })

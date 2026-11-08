@@ -1,9 +1,20 @@
 import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import ConfirmModal from '~/components/common/ConfirmModal.vue'
 import StudentSearchTable from '~/components/student/search/StudentSearchTable.vue'
 
-const mocks = vi.hoisted(() => ({ useFetch: vi.fn() }))
+const mocks = vi.hoisted(() => ({
+  useFetch: vi.fn(),
+  fetch: vi.fn(),
+  refresh: vi.fn(),
+  toast: {
+    add: vi.fn()
+  }
+}))
+
+mockNuxtImport('$fetch', () => mocks.fetch)
 mockNuxtImport('useFetch', () => mocks.useFetch)
+mockNuxtImport('useToast', () => () => mocks.toast)
 
 const searches = [
   {
@@ -27,11 +38,17 @@ const searches = [
 ]
 
 describe('StudentSearchTable', () => {
-  it('renders rows and cell values', async () => {
-    mocks.useFetch.mockReturnValue({ data: ref(searches) })
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+  beforeEach(() => {
+    mocks.useFetch.mockReturnValue({
+      data: ref(searches),
+      refresh: mocks.refresh
+    })
+  })
 
-    expect(mocks.useFetch).toHaveBeenCalledWith('/api/students/o123456789/search', expect.any(String))
+  it('renders rows and cell values', async () => {
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
+
+    expect(mocks.useFetch).toHaveBeenCalledWith('/api/students/o123456789/search?idInscription=1', expect.any(String))
     const rows = wrapper.findComponent({ name: 'UTable' }).findAll('tbody tr')
 
     expect(rows).toHaveLength(2)
@@ -51,8 +68,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('check content', async () => {
-    mocks.useFetch.mockReturnValue({ data: ref(searches) })
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
 
     const searchbar = wrapper.findComponent({ name: 'UInput' })
     expect(searchbar.exists()).toBe(true)
@@ -77,8 +93,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('filters elements', async () => {
-    mocks.useFetch.mockReturnValue({ data: ref(searches) })
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
     const input = wrapper.findComponent({ name: 'UInput' }).find('input')
 
     await input.setValue('  WEB paris  ')
@@ -93,9 +108,8 @@ describe('StudentSearchTable', () => {
     expect(wrapper.findComponent({ name: 'UTable' }).findAll('tbody tr')).toHaveLength(2)
   })
 
-  it('emits edit and delete actions', async () => {
-    mocks.useFetch.mockReturnValue({ data: ref(searches) })
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+  it('emits edit action', async () => {
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
     const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
       const items = menu.props('items') as { label: string, onSelect: () => void }[][]
       return items[0]?.[0]?.label === 'Modifier'
@@ -105,14 +119,10 @@ describe('StudentSearchTable', () => {
 
     actions[0]![0]!.onSelect()
     expect(wrapper.emitted('edit')?.[0]).toEqual([searches[0]])
-
-    actions[0]![1]!.onSelect()
-    expect(wrapper.emitted('delete')?.[0]).toEqual([1])
   })
 
   it('check read-only mode', async () => {
-    mocks.useFetch.mockReturnValue({ data: ref(searches) })
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789', readOnly: true } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1, readOnly: true } })
     const viewButton = wrapper.find('button[aria-label="Voir"]')
 
     expect(viewButton.exists()).toBe(true)
@@ -123,9 +133,7 @@ describe('StudentSearchTable', () => {
   })
 
   it('updates pagination and sorting', async () => {
-    mocks.useFetch.mockReturnValue({ data: ref(searches) })
-
-    const wrapper = await mountSuspended(StudentSearchTable, { props: { etudiantId: 'o123456789' } })
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
     const table = wrapper.findComponent({ name: 'UTable' })
     const pagination = wrapper.findComponent({ name: 'UPagination' })
 
@@ -154,5 +162,121 @@ describe('StudentSearchTable', () => {
     getSortItems()[1]!.onSelect()
     await nextTick()
     expect(sortHeader.attributes('aria-label')).toBe('Trier par croissant')
+  })
+
+  it('opens delete modal with selected search', async () => {
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
+
+    const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
+      const items = menu.props('items') as { label: string, onSelect: () => void }[][]
+      return items[0]?.[1]?.label === 'Supprimer'
+    })
+
+    expect(dropdown).toBeDefined()
+
+    const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
+    actions[0]![1]!.onSelect()
+
+    await nextTick()
+
+    const modal = wrapper.findComponent(ConfirmModal)
+
+    expect(modal.exists()).toBe(true)
+    expect(modal.props('title')).toBe('Supprimer la recherche')
+    expect(modal.props('description')).toContain('Êtes-vous sûr de vouloir supprimer la recherche Développeur web ? L\'ensemble des éléments liés (fichiers, contacts, etc.) seront supprimés. Cette action est irréversible.')
+  })
+
+  it('deletes search on modal confirm', async () => {
+    mocks.fetch.mockResolvedValueOnce(undefined)
+    mocks.refresh.mockResolvedValueOnce(undefined)
+
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
+
+    const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
+      const items = menu.props('items') as { label: string, onSelect: () => void }[][]
+      return items[0]?.[1]?.label === 'Supprimer'
+    })
+
+    const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
+    actions[0]![1]!.onSelect()
+
+    const modal = wrapper.findComponent(ConfirmModal)
+    modal.vm.$emit('confirm')
+
+    expect(mocks.fetch).toHaveBeenCalledWith(
+      '/api/students/o123456789/search/1',
+      { method: 'DELETE' }
+    )
+
+    await vi.waitFor(() => {
+      expect(mocks.refresh).toHaveBeenCalledTimes(1)
+      expect(mocks.toast.add).toHaveBeenCalledWith({
+        title: 'Recherche supprimée',
+        description: 'La recherche Développeur web a été supprimée avec succès.',
+        color: 'success'
+      })
+    })
+  })
+
+  it('network error on deletes search on modal confirm', async () => {
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
+    mocks.fetch.mockRejectedValueOnce(new Error('Network error'))
+
+    const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
+      const items = menu.props('items') as { label: string, onSelect: () => void }[][]
+      return items[0]?.[1]?.label === 'Supprimer'
+    })
+
+    const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
+    actions[0]![1]!.onSelect()
+
+    const modal = wrapper.findComponent(ConfirmModal)
+    modal.vm.$emit('confirm')
+
+    expect(mocks.fetch).toHaveBeenCalledWith(
+      '/api/students/o123456789/search/1',
+      { method: 'DELETE' }
+    )
+
+    await vi.waitFor(() => {
+      expect(mocks.toast.add).toHaveBeenCalledWith({
+        title: 'Erreur',
+        description: 'Une erreur est survenue lors de la suppression de la recherche Développeur web.',
+        color: 'error'
+      })
+    })
+  })
+
+  it('closes delete modal on cancel', async () => {
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
+
+    const dropdown = wrapper.findAllComponents({ name: 'UDropdownMenu' }).find((menu) => {
+      const items = menu.props('items') as { label: string, onSelect: () => void }[][]
+      return items[0]?.[1]?.label === 'Supprimer'
+    })
+
+    const actions = dropdown!.props('items') as { label: string, onSelect: () => void }[][]
+    actions[0]![1]!.onSelect()
+    await nextTick()
+
+    const modal = wrapper.findComponent(ConfirmModal)
+
+    modal.vm.$emit('cancel')
+    await nextTick()
+
+    expect(modal.findComponent({ name: 'UModal' }).props('open')).toBe(false)
+  })
+
+  it('does not delete a department when none is selected', async () => {
+    const wrapper = await mountSuspended(StudentSearchTable, { props: { numEtu: 'o123456789', idInscription: 1 } })
+
+    const modal = wrapper.findComponent(ConfirmModal)
+    modal.vm.$emit('confirm')
+
+    await nextTick()
+
+    expect(mocks.fetch).not.toHaveBeenCalled()
+    expect(mocks.refresh).not.toHaveBeenCalled()
+    expect(mocks.toast.add).not.toHaveBeenCalled()
   })
 })

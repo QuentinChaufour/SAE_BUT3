@@ -37,7 +37,7 @@ export default defineConfig({
     ],
     coverage: {
       enabled: true,
-      exclude: ['app/app.vue', 'server/utils/prisma.ts', 'app/app.config.ts', 'server/api/dbpopulate.post.ts', 'shared/types/**'],
+      exclude: ['app/app.vue', 'server/utils/prisma.ts', 'app/app.config.ts', 'server/api/dev/*.ts', '**/*.d.ts'],
       include: [
         'app/**/*.{ts,vue}',
         'server/**/*.ts',

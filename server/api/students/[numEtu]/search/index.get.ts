@@ -8,6 +8,10 @@ const paramsSchema = z.object({
   numEtu: studentIdSchema
 })
 
+const querySchema = z.object({
+  idInscription: z.coerce.number().positive('L\'identifiant de l\'inscription doit être un entier positif.')
+})
+
 defineRouteMeta({
   openAPI: {
     tags: ['students'],
@@ -20,6 +24,15 @@ defineRouteMeta({
         description: 'Numéro de l\'étudiant.',
         schema: {
           type: 'string'
+        }
+      },
+      {
+        name: 'idInscription',
+        in: 'query',
+        required: true,
+        description: 'Identifiant de l\'inscription de l\'étudiant.',
+        schema: {
+          type: 'number'
         }
       }
     ],
@@ -80,13 +93,14 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  const params = await getValidatedRouterParams(event, paramsSchema.parse)
-  const numEtu = params.numEtu
+  const { numEtu } = await getValidatedRouterParams(event, paramsSchema.parse)
 
   await checkAuthWithOnlySelfStudentData(event, numEtu, [UserRole.Student, UserRole.Secretary, UserRole.Admin])
 
+  const { idInscription } = await getValidatedQuery(event, querySchema.parse)
+
   const searchResults = await prisma.rechercheStage.findMany({
-    where: { numEtu },
+    where: { Inscription: { numEtu, idInscription } },
     orderBy: { dateCreation: 'desc' },
     select: {
       idRecherche: true,

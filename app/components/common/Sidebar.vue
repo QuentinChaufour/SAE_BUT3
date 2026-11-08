@@ -2,12 +2,17 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 import UserMenu from './UserMenu.vue'
 import UserRole from '~~/shared/types/role.js'
+import StudentFormationSwitcher from './sidebar/StudentFormationSwitcher.vue'
+import PersonnelDepartmentSwitcher from './sidebar/PersonnelDepartmentSwitcher.vue'
 
 const open = ref(true)
 
-const role = useState<UserRole>('current-user-role', () => UserRole.Secretary)
+const session = useUserSession()
+const role = session.user.value?.role
 
-function getLinksByRole(role: UserRole): NavigationMenuItem[] {
+function getLinksByRole(role: UserRole | undefined): NavigationMenuItem[] {
+  if (!role) return []
+
   switch (role) {
     case UserRole.Student:
       return [{
@@ -42,11 +47,18 @@ function getLinksByRole(role: UserRole): NavigationMenuItem[] {
         }
       ]
     case UserRole.Admin:
-      return [{
-        label: 'Secrétariats',
-        icon: 'i-lucide-users',
-        to: '/secretariats/'
-      }]
+      return [
+        {
+          label: 'Départements',
+          icon: 'i-lucide-building',
+          to: '/departments/'
+        },
+        {
+          label: 'Administrateurs',
+          icon: 'i-lucide-user',
+          to: '/admins/'
+        }
+      ]
     default:
       return []
   }
@@ -77,6 +89,21 @@ function getLinksByRole(role: UserRole): NavigationMenuItem[] {
           orientation="vertical"
           tooltip
           popover
+        />
+
+        <StudentFormationSwitcher
+          v-if="role === UserRole.Student"
+          :collapsed="collapsed"
+          orientation="vertical"
+          tooltip
+          class="mt-auto"
+        />
+        <PersonnelDepartmentSwitcher
+          v-else-if="[UserRole.Teacher, UserRole.Secretary].includes(role!)"
+          :collapsed="collapsed"
+          orientation="vertical"
+          tooltip
+          class="mt-auto"
         />
       </template>
 

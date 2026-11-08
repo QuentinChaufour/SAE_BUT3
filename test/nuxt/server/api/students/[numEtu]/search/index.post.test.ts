@@ -8,7 +8,8 @@ vi.mock('~~/server/utils/prisma', () => ({
   prisma: {
     rechercheStage: {
       create: vi.fn()
-    }
+    },
+    inscription: { count: vi.fn() }
   }
 }))
 
@@ -43,7 +44,7 @@ describe('POST /api/students/[numEtu]/search', () => {
       titre: 'Stage Développeur Nuxt',
       description: 'Développement d’applications web',
       alternance: true,
-      annee: '2026-2027',
+      idInscription: 1,
       idEntreprise: 1
     }
 
@@ -55,6 +56,7 @@ describe('POST /api/students/[numEtu]/search', () => {
       dateDerniereModification: new Date()
     }
 
+    vi.mocked(prisma.inscription.count).mockResolvedValue(1)
     vi.mocked(prisma.rechercheStage.create).mockResolvedValue(mockCreatedRecord as never)
 
     const event = {
@@ -72,9 +74,8 @@ describe('POST /api/students/[numEtu]/search', () => {
         titre: validBody.titre,
         description: validBody.description,
         alternance: validBody.alternance,
-        annee: validBody.annee,
-        idEntreprise: validBody.idEntreprise,
-        numEtu
+        idInscription: validBody.idInscription,
+        idEntreprise: validBody.idEntreprise
       }
     })
     expect(response).toEqual(mockCreatedRecord)
@@ -84,6 +85,7 @@ describe('POST /api/students/[numEtu]/search', () => {
     const invalidBody = {
       titre: '',
       alternance: false,
+      idInscription: null,
       idEntreprise: null
     }
 
@@ -96,6 +98,28 @@ describe('POST /api/students/[numEtu]/search', () => {
 
     await expect(handler(event)).rejects.toThrow()
 
+    expect(prisma.rechercheStage.create).not.toHaveBeenCalled()
+  })
+
+  it('reject request if invalid inscription', async () => {
+    const validBody = {
+      titre: 'Stage Développeur Nuxt',
+      description: 'Développement d’applications web',
+      alternance: true,
+      idInscription: 999,
+      idEntreprise: 1
+    }
+
+    vi.mocked(prisma.inscription.count).mockResolvedValue(0)
+
+    const event = {
+      context: {
+        params: { numEtu },
+        body: validBody
+      }
+    } as unknown as H3Event
+
+    await expect(handler(event)).rejects.toThrow('Le numéro d\'inscription est invalide pour cet étudiant.')
     expect(prisma.rechercheStage.create).not.toHaveBeenCalled()
   })
 })
