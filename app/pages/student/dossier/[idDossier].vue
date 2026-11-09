@@ -291,7 +291,7 @@ onMounted(async () => {
                   >
                     <UTextarea
                       v-model="state.description"
-                      placeholder="envoie de la candidature, relance, entretien, etc..."
+                      placeholder="Envoi de la candidature, relance, entretien, etc..."
                       class="w-full"
                       @blur="updateDossier"
                     />
