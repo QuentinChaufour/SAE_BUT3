@@ -322,7 +322,7 @@ onMounted(async () => {
                 </UFormField>
 
                 <USeparator
-                  label="Contacts de la Recherche"
+                  label="Contacts de la recherche"
                   size="sm"
                 />
 
