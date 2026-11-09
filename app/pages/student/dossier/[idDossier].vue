@@ -391,7 +391,7 @@ onMounted(async () => {
                   class="emptyDataPlaceholder"
                 >
                   <p class="text-sm text-gray-500">
-                    Aucun fichiers téléversé au cours de la recherche.
+                    Aucun fichier téléversé au cours de la recherche.
                   </p>
                 </div>
               </div>
