@@ -307,7 +307,7 @@ onMounted(async () => {
                     <div class="flex items-center gap-2">
                       <p>Étiquettes de la recherche</p>
                       <UTooltip
-                        text="Pour créer une éttiquette, demandez a votre secrétariat de département."
+                        text="Pour créer une étiquette, demandez au secrétariat de votre département."
                       >
                         <UIcon name="i-lucide-info" />
                       </UTooltip>
