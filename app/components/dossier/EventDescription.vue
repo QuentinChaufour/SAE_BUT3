@@ -192,7 +192,10 @@ onMounted(async () => {
 
 <template>
   <div class="min-w-0 mr-5 ml-5">
-    <div class="flex justify-end">
+    <div
+      v-if="!props.creation"
+      class="flex justify-end"
+    >
       <UTooltip
         text="Supprimer l'événement"
         placement="bottom"

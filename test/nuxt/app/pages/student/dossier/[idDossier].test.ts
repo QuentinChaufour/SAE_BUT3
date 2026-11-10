@@ -167,13 +167,11 @@ describe('Student dossier page', () => {
   it('renders dossier details and empty contact/file states', async () => {
     const wrapper = await mountPage()
 
-    const inputs = wrapper.findAllComponents(UInput) as unknown as VueWrapper[]
-    const inputValues = inputs.map(input => (input.props() as { modelValue?: string }).modelValue)
-    expect(inputValues).toContain('Stage développeur')
-    expect(inputValues).toContain('Acme')
-    expect(inputValues).toContain('1 rue du Test')
+    expect(wrapper.text()).toContain('Stage développeur')
+    expect(wrapper.text()).toContain('Acme')
+    expect(wrapper.text()).toContain('1 rue du Test')
     expect(wrapper.text()).toContain('Aucun contact au cours de la recherche.')
-    expect(wrapper.text()).toContain('Aucun fichiers téléversé au cours de la recherche.')
+    expect(wrapper.text()).toContain('Aucun fichier téléversé au cours de la recherche.')
     expect(wrapper.findComponent(EventsManagementStub).props('dossierId')).toBe(42)
     expect(wrapper.findComponent(DossierTagSelectionStub).props('idDossier')).toBe(42)
   })
@@ -200,7 +198,8 @@ describe('Student dossier page', () => {
 
     await vi.waitFor(() => expect(mocks.store.updateDossier).toHaveBeenCalledWith({
       titre: 'Nouveau titre',
-      description: 'Nouvelle description'
+      description: 'Nouvelle description',
+      alternance: false
     }))
   })
 

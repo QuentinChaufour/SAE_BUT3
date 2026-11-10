@@ -25,9 +25,9 @@ const bodySchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const { numEtu, dossierId, eventId } = await getValidatedRouterParams(event, routeSchema.parse)
-  
+
   await checkAuthWithOnlySelfStudentData(event, numEtu, [UserRole.Student])
-  
+
   const body = await readValidatedBody(event, bodySchema.parse)
 
   const updatedEvent = await prisma.demarcheEvenement.update({

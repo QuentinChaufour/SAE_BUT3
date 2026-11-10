@@ -13,7 +13,7 @@ const routeSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const { numEtu, dossierId, eventId } = (await getValidatedRouterParams(event, routeSchema.parse))
-  
+
   await checkAuthWithOnlySelfStudentData(event, numEtu, [UserRole.Student])
 
   await prisma.demarcheRechercheContact.deleteMany({

@@ -18,9 +18,9 @@ const bodySchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const { numEtu, dossierId } = await getValidatedRouterParams(event, paramsSchema.parse)
-  
+
   await checkAuthWithOnlySelfStudentData(event, numEtu, [UserRole.Student])
-  
+
   const body = await readValidatedBody(event, bodySchema.parse)
 
   if (Object.keys(body).length === 0) {

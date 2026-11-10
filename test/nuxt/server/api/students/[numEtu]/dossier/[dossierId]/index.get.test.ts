@@ -87,6 +87,7 @@ describe('GET /api/students/[numEtu]/dossier/:dossierId', () => {
         Entreprise: {
           select: {
             nom: true,
+            nomEtab: true,
             adresse: true,
             codePostal: true,
             ville: true
@@ -127,7 +128,10 @@ describe('GET /api/students/[numEtu]/dossier/:dossierId', () => {
         }
       },
       where: {
-        idRecherche: 12
+        idRecherche: 12,
+        Inscription: {
+          numEtu: 'o123456789'
+        }
       }
     })
     expect(response).toEqual({

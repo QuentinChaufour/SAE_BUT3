@@ -119,11 +119,11 @@ describe('dossierStore', () => {
     store.$patch({ dossier: { ...dossierResponse, DemarcheEvenement: [], DepartementTagRecherche: [] } })
     mocks.fetch.mockResolvedValueOnce({ statusCode: 200, data: null })
 
-    await store.updateDossier({ titre: 'Nouveau titre', description: 'Nouvelle description' })
+    await store.updateDossier({ titre: 'Nouveau titre', description: 'Nouvelle description', alternance: false })
 
-    expect(mocks.fetch).toHaveBeenCalledWith('/api/studentso123456789/dossier/42', {
+    expect(mocks.fetch).toHaveBeenCalledWith('/api/students/o123456789/dossier/42', {
       method: 'PATCH',
-      body: { titre: 'Nouveau titre', description: 'Nouvelle description' }
+      body: { titre: 'Nouveau titre', description: 'Nouvelle description', alternance: false }
     })
     expect(store.dossier?.titre).toBe('Nouveau titre')
     expect(store.dossier?.description).toBe('Nouvelle description')
@@ -132,11 +132,11 @@ describe('dossierStore', () => {
   it('rejects dossier updates without a selected dossier or with an API error', async () => {
     const store = useDossierStore()
 
-    await expect(store.updateDossier({ titre: 'Titre', description: '' })).rejects.toThrow('No dossier selected')
+    await expect(store.updateDossier({ titre: 'Titre', description: '', alternance: false })).rejects.toThrow('No dossier selected')
 
     store.$patch({ dossier: { ...dossierResponse, DemarcheEvenement: [], DepartementTagRecherche: [] } })
     mocks.fetch.mockResolvedValueOnce({ statusCode: 500 })
-    await expect(store.updateDossier({ titre: 'Titre', description: '' })).rejects.toThrow('Failed to update dossier')
+    await expect(store.updateDossier({ titre: 'Titre', description: '', alternance: false })).rejects.toThrow('Failed to update dossier')
   })
 
   it('creates an event, refreshes contacts, and orders events', async () => {
@@ -149,7 +149,7 @@ describe('dossierStore', () => {
 
     await store.createEvent(event)
 
-    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/studentso123456789/dossier/42/evenements', {
+    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/students/o123456789/dossier/42/evenements', {
       method: 'POST',
       body: { ...event, idDemarche: undefined, contacts: [contact.idContact] }
     })
@@ -182,7 +182,7 @@ describe('dossierStore', () => {
 
     await store.updateEvent(updatedEvent)
 
-    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/studentso123456789/dossier/42/evenements/9', {
+    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/students/o123456789/dossier/42/evenements/9', {
       method: 'PUT',
       body: { ...updatedEvent, contacts: [contact.idContact] }
     })
@@ -214,7 +214,7 @@ describe('dossierStore', () => {
 
     await store.deleteEvent(event)
 
-    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/studentso123456789/dossier/42/evenements/0', { method: 'DELETE' })
+    expect(mocks.fetch).toHaveBeenNthCalledWith(1, '/api/students/o123456789/dossier/42/evenements/0', { method: 'DELETE' })
     expect(store.events).toEqual([])
     expect(store.contacts).toEqual([])
   })

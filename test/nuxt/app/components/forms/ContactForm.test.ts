@@ -2,6 +2,7 @@ import { UButton, UForm, UInput } from '#components'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ContactForm from '~/components/forms/ContactForm.vue'
+import ConfirmModal from '~/components/common/ConfirmModal.vue'
 import { mountWithUApp, resetNuxtMocks } from '../../../utils/utils'
 import type { DemarcheContact } from '~~/generated/prisma/client'
 
@@ -27,13 +28,9 @@ const contact: DemarcheContact = {
 }
 
 const createdContact = { ...contact, idContact: 8 }
-const confirmMock = vi.fn()
-vi.stubGlobal('confirm', confirmMock)
-
 describe('ContactForm', () => {
   beforeEach(() => {
     resetNuxtMocks(mocks)
-    confirmMock.mockReset()
   })
 
   it('initializes create mode with state and create/cancel actions', async () => {
@@ -184,21 +181,22 @@ describe('ContactForm', () => {
   })
 
   it('does not delete a contact when confirmation is canceled', async () => {
-    confirmMock.mockReturnValue(false)
     const wrapper = await mountWithUApp(ContactForm, { update: true, dossierId: 12, contact })
 
     await wrapper.findAllComponents(UButton).find(button => button.text() === 'Supprimer')!.trigger('click')
+    const modal = wrapper.findComponent(ConfirmModal)
 
-    expect(confirmMock).toHaveBeenCalledWith('Êtes-vous sûr de vouloir supprimer ce contact ? Cette action est irréversible.')
+    expect(modal.props('description')).toBe('Êtes-vous sûr de vouloir supprimer ce contact ? Cette action est irréversible.')
+    modal.vm.$emit('cancel')
     expect(mocks.fetch).not.toHaveBeenCalled()
   })
 
   it('deletes a contact after confirmation and emits deleted', async () => {
-    confirmMock.mockReturnValue(true)
     mocks.fetch.mockResolvedValueOnce({ statusCode: 204, data: null })
     const wrapper = await mountWithUApp(ContactForm, { update: true, dossierId: 12, contact })
 
     await wrapper.findAllComponents(UButton).find(button => button.text() === 'Supprimer')!.trigger('click')
+    wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
     await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalled())
 
     expect(mocks.fetch).toHaveBeenCalledWith('/api/students/o123456789/dossier/12/contacts/7', { method: 'DELETE' })
@@ -211,11 +209,11 @@ describe('ContactForm', () => {
   })
 
   it('shows an error when deletion returns an unexpected status', async () => {
-    confirmMock.mockReturnValue(true)
     mocks.fetch.mockResolvedValueOnce({ statusCode: 200, data: null })
     const wrapper = await mountWithUApp(ContactForm, { update: true, dossierId: 12, contact })
 
     await wrapper.findAllComponents(UButton).find(button => button.text() === 'Supprimer')!.trigger('click')
+    wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
     await vi.waitFor(() => expect(mocks.toast.add).toHaveBeenCalled())
 
     expect(mocks.toast.add).toHaveBeenCalledWith({
@@ -227,11 +225,11 @@ describe('ContactForm', () => {
   })
 
   it('shows an error when deletion fails', async () => {
-    confirmMock.mockReturnValue(true)
     mocks.fetch.mockRejectedValueOnce(new Error('Network error'))
     const wrapper = await mountWithUApp(ContactForm, { update: true, dossierId: 12, contact })
 
     await wrapper.findAllComponents(UButton).find(button => button.text() === 'Supprimer')!.trigger('click')
+    wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
     await vi.waitFor(() => expect(mocks.toast.add).toHaveBeenCalled())
 
     expect(wrapper.findComponent(ContactForm).emitted('deleted')).toBeUndefined()

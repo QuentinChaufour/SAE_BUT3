@@ -60,8 +60,6 @@ const loading = ref<boolean>(false)
 const isConfirmModalOpen = ref<boolean>(false)
 const payload = ref<FormSubmitEvent<z.output<typeof schema>> | null>(null)
 
-type Schema = z.output<typeof schema>
-
 /**
  * Submit the form content to the API
  */

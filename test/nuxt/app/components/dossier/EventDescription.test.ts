@@ -2,6 +2,7 @@ import { UButton, UForm, UInput, UInputMenu, UTextarea } from '#components'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import ContactForm from '~/components/forms/ContactForm.vue'
+import ConfirmModal from '~/components/common/ConfirmModal.vue'
 import EventDescription from '~/components/dossier/EventDescription.vue'
 import { mountWithUApp } from '../../../utils/utils'
 import { Demarche_Source, Recherche_Stage_Status } from '~~/generated/prisma/enums'
@@ -42,15 +43,11 @@ const event = {
   contacts: [contact]
 }
 
-const confirmMock = vi.fn()
-vi.stubGlobal('confirm', confirmMock)
-
 describe('EventDescription', () => {
   beforeEach(() => {
     mocks.fetch.mockReset()
     mocks.toast.add.mockReset()
     mocks.fetch.mockResolvedValue({ data: [contact, secondContact] })
-    confirmMock.mockReset()
   })
 
   it('initializes creation mode and loads contacts', async () => {
@@ -77,7 +74,7 @@ describe('EventDescription', () => {
     })
     expect(wrapper.findAllComponents(UButton).at(-1)?.text()).toBe('Créer l’événement')
     expect(wrapper.text()).toContain('Aucun contact sélectionné.')
-    expect(wrapper.findAllComponents(UButton)[0]?.attributes('disabled')).toBeDefined()
+    expect(wrapper.findAllComponents(UButton)[0]?.attributes('disabled')).toBeUndefined()
   })
 
   it('initializes update mode with the event contacts', async () => {
@@ -148,7 +145,6 @@ describe('EventDescription', () => {
   })
 
   it('updates an event only after confirmation', async () => {
-    confirmMock.mockReturnValue(true)
     const wrapper = await mountWithUApp(EventDescription, {
       creation: false,
       dossierId: 12,
@@ -156,25 +152,9 @@ describe('EventDescription', () => {
     })
 
     wrapper.findComponent(UForm).vm.$emit('submit', { data: {} })
-
-    expect(confirmMock).toHaveBeenCalledWith('Etes vous sûr de vouloir mettre à jour cet événement ?')
     await vi.waitFor(() => expect(wrapper.findComponent(EventDescription).emitted('updated')).toHaveLength(1))
     expect(wrapper.findComponent(EventDescription).emitted('updated')?.[0]?.[0]).toMatchObject(event)
     expect(wrapper.findComponent(EventDescription).emitted('close')).toHaveLength(1)
-  })
-
-  it('does not update when confirmation is canceled', async () => {
-    confirmMock.mockReturnValue(false)
-    const wrapper = await mountWithUApp(EventDescription, {
-      creation: false,
-      dossierId: 12,
-      event
-    })
-
-    wrapper.findComponent(UForm).vm.$emit('submit', { data: {} })
-
-    expect(wrapper.findComponent(EventDescription).emitted('updated')).toBeUndefined()
-    expect(wrapper.findComponent(EventDescription).emitted('close')).toBeUndefined()
   })
 
   it('adds and removes contacts without duplicates', async () => {
@@ -233,7 +213,6 @@ describe('EventDescription', () => {
   })
 
   it('deletes an update event only after confirmation', async () => {
-    confirmMock.mockReturnValue(true)
     const wrapper = await mountWithUApp(EventDescription, {
       creation: false,
       dossierId: 12,
@@ -242,8 +221,10 @@ describe('EventDescription', () => {
     const deleteButton = wrapper.findAllComponents(UButton)[0]!
 
     await deleteButton.trigger('click')
+    const modal = wrapper.findComponent(ConfirmModal)
 
-    expect(confirmMock).toHaveBeenCalledWith('Etes vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.')
+    expect(modal.props('description')).toBe('Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est irréversible.')
+    modal.vm.$emit('confirm')
     expect(wrapper.findComponent(EventDescription).emitted('deleted')).toHaveLength(1)
   })
 

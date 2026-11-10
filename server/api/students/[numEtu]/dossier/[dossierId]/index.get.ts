@@ -12,9 +12,12 @@ const paramsSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   const { numEtu, dossierId } = await getValidatedRouterParams(event, paramsSchema.parse)
-  
+
   await checkAuthWithOnlySelfStudentData(event, numEtu, [UserRole.Student, UserRole.Secretary, UserRole.Teacher, UserRole.Admin])
   // récupérer le dossier de recherche
+
+  // TODO Forbidden access if the user is not the student himself or a secretary, teacher or admin
+
   const dossier = await prisma.rechercheStage.findUnique({
     select: {
       idRecherche: true,
@@ -24,6 +27,7 @@ export default defineEventHandler(async (event) => {
       Entreprise: {
         select: {
           nom: true,
+          nomEtab: true,
           adresse: true,
           codePostal: true,
           ville: true
@@ -64,7 +68,10 @@ export default defineEventHandler(async (event) => {
       }
     },
     where: {
-      idRecherche: dossierId
+      idRecherche: dossierId,
+      Inscription: {
+        numEtu: numEtu
+      }
     }
   })
 

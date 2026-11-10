@@ -12,7 +12,7 @@ export default defineEventHandler(async (event) => {
   const { numEtu } = routeSchema.parse(event.context.params)
 
   await checkAuthWithOnlySelfStudentData(event, numEtu, [UserRole.Student, UserRole.Secretary, UserRole.Teacher, UserRole.Admin])
-  
+
   const departementId = await prisma.etudiant.findFirst({
     where: {
       numEtu

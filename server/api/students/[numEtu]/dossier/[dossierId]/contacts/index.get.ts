@@ -12,9 +12,9 @@ const schema = z.object({
 
 export default defineEventHandler(async (event) => {
   const { numEtu, dossierId } = await getValidatedRouterParams(event, schema.parse)
-  
+
   await checkAuthWithOnlySelfStudentData(event, numEtu, [UserRole.Student, UserRole.Secretary, UserRole.Teacher, UserRole.Admin])
-  
+
   const contacts = await prisma.demarcheContact.findMany({
     where: {
       idRecherche: dossierId

@@ -18,7 +18,7 @@ type DossierFull = Pick<
 > & {
   Entreprise: Pick<
     Entreprise,
-    'nom' | 'adresse' | 'codePostal' | 'ville'
+    'nom' | 'adresse' | 'codePostal' | 'ville' | 'nomEtab'
   >
 
   DemarcheEvenement: Array<
@@ -74,7 +74,6 @@ export const useDossierStore = defineStore('dossier', {
 
   actions: {
     async initState(idDossier: number) {
-
       const session = useUserSession()
       const response = await $fetch<APIResponse<DossierFull>>(
         `/api/students/${session.user.value?.numId}/dossier/${idDossier}`,
@@ -134,7 +133,7 @@ export const useDossierStore = defineStore('dossier', {
             })
 */
     },
-    async updateDossier(state: { description: string, titre: string }) {
+    async updateDossier(state: { description: string, titre: string, alternance: boolean }) {
       if (!this.dossier) throw new Error('No dossier selected')
 
       try {
@@ -150,6 +149,7 @@ export const useDossierStore = defineStore('dossier', {
 
         this.dossier.description = state.description
         this.dossier.titre = state.titre
+        this.dossier.alternance = state.alternance
       } catch (error) {
         console.error('Error updating dossier:', error)
         throw error
