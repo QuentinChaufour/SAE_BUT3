@@ -4,9 +4,10 @@ import { checkAuth } from '~~/server/utils/middleware'
 import { z } from 'zod'
 import { Personnel_Role } from '~~/generated/prisma/enums'
 import type { PersonnelWhereInput } from '~~/generated/prisma/models'
+import { idDepartementSchema } from '~~/shared/schemas/department'
 
 const querySchema = z.object({
-  department_id: z.coerce.number().int().positive().optional(),
+  department_id: idDepartementSchema,
   role: z.enum(Personnel_Role).optional(),
   search: z.string().max(100, { message: 'La recherche ne peut pas dépasser 100 caractères.' }).optional()
 })

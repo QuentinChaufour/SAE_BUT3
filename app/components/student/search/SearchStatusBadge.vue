@@ -5,8 +5,6 @@ const props = defineProps<{
   status: Recherche_Stage_Status
 }>()
 
-const UBadge = resolveComponent('UBadge')
-
 const detailStatus = {
   [Recherche_Stage_Status.Accepte]: { label: 'Accepté', color: 'success' as const },
   [Recherche_Stage_Status.Abandon]: { label: 'Abandonné', color: 'error' as const },

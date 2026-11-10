@@ -35,7 +35,7 @@ defineRouteMeta({
     ],
     responses: {
       200: {
-        description: 'La liste des entreprises correspondant à la recherche.',
+        description: 'La liste des 10 premières entreprises correspondant à la recherche.',
         content: {
           'application/json': {
             schema: {
