@@ -3,7 +3,6 @@ import { dossierIdSchema } from '~~/shared/schemas/dossier'
 import { studentIdSchema } from '~~/shared/schemas/student'
 import { prisma } from '~~/server/utils/prisma'
 import { Demarche_Source, Recherche_Stage_Status } from '~~/generated/prisma/enums'
-import { stringToDate } from '~~/shared/utils/date'
 import { checkAuthWithOnlySelfStudentData } from '~~/server/utils/middleware'
 import UserRole from '~~/shared/types/role'
 
@@ -15,19 +14,8 @@ const routeSchema = z.object({
 const bodySchema = z.object({
   titre: z.string().trim().min(1, 'Le titre est obligatoire'),
   description: z.string().trim().optional(),
-  date: z.string().trim().refine((date) => {
-    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(date)
-
-    if (!match) return false
-
-    const [, day, month, year] = match
-    const parsed = new Date(Number(year), Number(month) - 1, Number(day))
-
-    return parsed.getFullYear() === Number(year)
-      && parsed.getMonth() === Number(month) - 1
-      && parsed.getDate() === Number(day)
-  }, {
-    message: 'La date n\'est pas valide'
+  date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, {
+    message: 'La date doit être au format YYYY-MM-DD'
   }),
   source: z.enum(Demarche_Source),
   status: z.enum(Recherche_Stage_Status),
@@ -44,7 +32,7 @@ export default defineEventHandler(async (event) => {
       idRecherche: dossierId,
       titre: body.titre,
       description: body.description,
-      date: stringToDate(body.date),
+      date: new Date(`${body.date}T00:00:00.000Z`),
       source: body.source,
       status: body.status,
       DemarcheRechercheContact: {

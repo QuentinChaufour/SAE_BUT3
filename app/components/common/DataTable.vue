@@ -141,7 +141,7 @@ function rowSelected(_e: Event, row: TableRow<T>) {
         :placeholder="searchPlaceholder"
       />
     </div>
-
+    <!-- eslint-disable vue/no-parsing-error -->
     <UTable
       ref="table"
       v-model:sorting="sorting"
@@ -153,7 +153,7 @@ function rowSelected(_e: Event, row: TableRow<T>) {
       }"
       :empty="emptyText"
       class="flex-1"
-      @[props.selectable&&'select']="rowSelected" 
+      @[props.selectable&&'select']="rowSelected"
     >
       <template
         v-for="(_, name) in $slots"
@@ -165,6 +165,7 @@ function rowSelected(_e: Event, row: TableRow<T>) {
         />
       </template>
     </UTable>
+    <!-- eslint-enable vue/no-parsing-error -->
 
     <div class="flex justify-end border-t border-default pt-4 px-4">
       <UPagination

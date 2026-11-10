@@ -89,7 +89,7 @@ describe('dossierStore', () => {
     expect(store.getDossierId).toBe(42)
     expect(store.dossierTags).toEqual(['Java'])
     expect(store.events).toEqual([{
-      date: '07/11/2026',
+      date: '2026-11-07T00:00:00.000Z',
       idDemarche: 8,
       titre: 'Pas de titre',
       description: '',
@@ -155,7 +155,7 @@ describe('dossierStore', () => {
     })
     expect(store.events[0]).toMatchObject({
       idDemarche: 9,
-      date: '08/11/2026'
+      date: '2026-11-08T00:00:00.000Z'
     })
     expect(store.contacts).toEqual([contact])
   })

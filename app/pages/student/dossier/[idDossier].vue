@@ -109,7 +109,8 @@ async function createEvent(event: EventInfo) {
   try {
     await dossierStore.createEvent(event)
     openedEventCreation.value = false
-  } catch {
+  } catch (error) {
+    console.error('Error creating event', error)
     toast.add({ title: 'Erreur', description: 'Erreur lors de la création de l\'événement', color: 'error' })
   }
 }

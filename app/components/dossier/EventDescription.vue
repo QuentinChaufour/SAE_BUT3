@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import type { FormSubmitEvent } from '@nuxt/ui'
 import { z } from 'zod/v4'
+import { CalendarDate, parseDate } from '@internationalized/date'
 import { DetailStatus } from '~/utils/RechercheStatusDetails'
 import { DetailsSource } from '~/utils/RechercheSourceDetails'
-import { getCurrentDateString } from '~~/shared/utils/date'
 import { Demarche_Source, Recherche_Stage_Status } from '~~/generated/prisma/enums'
 import type { DemarcheContact } from '~~/generated/prisma/client'
 import type { EventInfo } from '~~/shared/types/event'
+
 import StatusBadge from '~/components/dossier/StatusBadge.vue'
 import ContactForm from '../forms/ContactForm.vue'
 import ContactCard from '~/components/common/ContactCard.vue'
@@ -50,31 +50,47 @@ const searchTermContact = ref<string>('')
 const isCreatingContact = ref<boolean>(false)
 const isContactSelectorOpen = ref<boolean>(false)
 const isConfirmModalOpen = ref<boolean>(false)
+const inputDateTemplate = useTemplateRef('inputDate')
 const toast = useToast()
 
 const schema = z.object({
   titre: z.string().min(1, 'Le titre est obligatoire'),
   description: z.string(),
-  date: z.string().refine(date => !isNaN(Date.parse(date)), {
-    message: 'La date est invalide'
-  }),
   status: z.enum(Recherche_Stage_Status),
   source: z.enum(Demarche_Source)
 })
+const today = () => {
+  const date = new Date()
+  return new CalendarDate(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate()
+  )
+}
 
-type EventSchema = z.output<typeof schema>
-
-const state = reactive({
+const state = reactive<{
+  titre: string
+  description: string
+  status: Recherche_Stage_Status
+  source: Demarche_Source
+}>({
   titre: props.creation ? props.state?.titre || '' : props.event?.titre || '',
   description: props.creation ? props.state?.description || '' : props.event?.description || '',
-  date: props.creation ? props.state?.date || getCurrentDateString() : props.event?.date ? props.event?.date : getCurrentDateString(),
   status: props.creation ? props.state?.status || Recherche_Stage_Status.AttenteEnvoi : props.event?.status || Recherche_Stage_Status.AttenteEnvoi,
   source: props.creation ? props.state?.source || Demarche_Source.Autre : props.event?.source || Demarche_Source.Autre
 })
 
+// Only keep the date part of the ISO string, and parse it to a CalendarDate object
+const date = shallowRef<CalendarDate>(
+  props.creation
+    ? props.state?.date
+      ? parseDate(props.state.date.split('T')[0]!)
+      : today()
+    : props.event?.date ? parseDate(props.event.date.split('T')[0]!) : today())
+
 const options = computed(() => contactsOptions.value.map(contact => ({ value: contact.idContact, label: `${contact.nom} ${contact.prenom}` })).filter(contact => contact.label.toLowerCase().includes(searchTermContact.value.toLowerCase())))
 
-async function onSubmit(_e: FormSubmitEvent<EventSchema>) {
+async function onSubmit() {
   if (props.creation) {
     const response = createEvent()
 
@@ -107,6 +123,7 @@ function createEvent() {
   return {
     ...state,
     idDemarche: 0,
+    date: date.value.toString(),
     contacts: contactsEvent.value.map(contact => ({
       ...contact,
       label: `${contact.prenom} ${contact.nom}`.trim() || 'Pas de nom',
@@ -122,6 +139,7 @@ function updateEvent() {
   return {
     ...props.event,
     ...state,
+    date: date.value.toString(),
     contacts: contactsEvent.value.map(contact => ({
       ...contact,
       label: `${contact.prenom} ${contact.nom}`.trim() || 'Pas de nom',
@@ -176,8 +194,6 @@ function removeContact(contact: DemarcheContact) {
   contactsEvent.value = contactsEvent.value.filter(c => c.idContact !== contact.idContact)
 }
 
-// TODO  add calendar
-
 onMounted(async () => {
   loading.value = true
   try {
@@ -192,22 +208,59 @@ onMounted(async () => {
 
 <template>
   <div class="min-w-0 mr-5 ml-5">
-    <div
-      v-if="!props.creation"
-      class="flex justify-end"
-    >
-      <UTooltip
-        text="Supprimer l'événement"
-        placement="bottom"
+    <div class="flex flex-row justify-between gap-5 mb-4">
+      <UFormField
+        label="Date"
+        name="date"
+        class="min-w-[80%]"
+        required
       >
-        <UButton
-          :disabled="props.creation"
-          icon="i-lucide-trash-2"
-          color="error"
-          size="lg"
-          @click="isConfirmModalOpen = true"
-        />
-      </UTooltip>
+        <UInputDate
+          ref="inputDate"
+          v-model="date"
+          class="w-full"
+          :range="false"
+          required
+        >
+          <template #trailing>
+            <UPopover :reference="inputDateTemplate?.inputsRef[3]?.$el">
+              <UButton
+                color="neutral"
+                variant="link"
+                size="sm"
+                icon="i-lucide-calendar"
+                aria-label="Select a date"
+                class="px-0"
+              />
+
+              <template #content>
+                <UCalendar
+                  v-model="date"
+                  :range="false"
+                  class="p-2"
+                />
+              </template>
+            </UPopover>
+          </template>
+        </UInputDate>
+      </UFormField>
+      <div
+        v-if="!props.creation"
+        class="justify-end"
+      >
+        <UTooltip
+          text="Supprimer l'événement"
+          placement="bottom"
+        >
+          <UButton
+            :disabled="props.creation"
+            icon="i-lucide-trash-2"
+            color="error"
+            size="lg"
+            @click="isConfirmModalOpen = true"
+          />
+        </UTooltip>
+      </div>
     </div>
 
     <UForm
@@ -229,6 +282,7 @@ onMounted(async () => {
           placeholder="Dépôt de candidature"
         />
       </UFormField>
+
       <UFormField
         label="Description"
         name="description"

@@ -68,7 +68,6 @@ describe('EventDescription', () => {
     expect((wrapper.findComponent(UForm).props() as { state: Record<string, unknown> }).state).toMatchObject({
       titre: 'Premier contact',
       description: 'Description',
-      date: '2026-11-07',
       status: Recherche_Stage_Status.Entretien,
       source: Demarche_Source.Telephone
     })
@@ -87,7 +86,6 @@ describe('EventDescription', () => {
     expect((wrapper.findComponent(UForm).props() as { state: Record<string, unknown> }).state).toMatchObject({
       titre: event.titre,
       description: event.description,
-      date: event.date,
       status: event.status,
       source: event.source
     })

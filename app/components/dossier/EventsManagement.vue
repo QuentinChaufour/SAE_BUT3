@@ -3,6 +3,7 @@ import EventDescription from '~/components/dossier/EventDescription.vue'
 import StatusBadge from '~/components/dossier/StatusBadge.vue'
 import type { TimelineItem } from '@nuxt/ui'
 import type { EventInfo } from '~~/shared/types/event'
+import { formatDateToFRFormat } from '~~/shared/utils/date'
 // TODO documentation
 
 const props = defineProps<{
@@ -69,6 +70,11 @@ function deleteEvent() {
     }"
     @select="onTimelineSelect"
   >
+    <template #date="{ item }">
+      <p class="text-sm text-gray-500">
+        {{ formatDateToFRFormat((item as EventInfo).date) }}
+      </p>
+    </template>
     <template #title="{ item }">
       <div class="flex flex-row gap-2 items-center justify-between">
         <p>

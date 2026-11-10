@@ -39,5 +39,7 @@ export default defineEventHandler(async (event) => {
     await tx.rechercheStage.delete({ where: { idRecherche: searchId } })
   })
 
+  // TODO delete contacts
+
   return sendNoContent(event)
 })

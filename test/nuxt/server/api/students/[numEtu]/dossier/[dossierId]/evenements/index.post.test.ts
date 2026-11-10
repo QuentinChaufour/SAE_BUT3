@@ -57,7 +57,7 @@ const dossierId = '12'
 const body = {
   titre: 'Entretien téléphonique',
   description: 'Premier échange avec l’entreprise',
-  date: '15/03/2026',
+  date: '2026-03-15',
   source: 'Telephone',
   status: 'AttenteEnvoi',
   contacts: [7, 8]
@@ -77,7 +77,7 @@ describe('POST /api/students/[numEtu]/dossier/:dossierId/evenements', () => {
       idRecherche: 12,
       titre: body.titre,
       description: body.description,
-      date: new Date(2026, 2, 14),
+      date: new Date('2026-03-15T00:00:00.000Z'),
       source: body.source,
       status: body.status
     }
@@ -105,7 +105,7 @@ describe('POST /api/students/[numEtu]/dossier/:dossierId/evenements', () => {
         idRecherche: 12,
         titre: body.titre,
         description: body.description,
-        date: new Date(2026, 2, 14),
+        date: new Date('2026-03-15T00:00:00.000Z'),
         source: body.source,
         status: body.status,
         DemarcheRechercheContact: {
@@ -133,7 +133,7 @@ describe('POST /api/students/[numEtu]/dossier/:dossierId/evenements', () => {
     const newEvent = {
       idDemarche: 21,
       titre: body.titre,
-      date: new Date(2026, 2, 14),
+      date: new Date('2026-03-15T00:00:00.000Z'),
       source: body.source,
       status: body.status
     }
@@ -190,7 +190,7 @@ describe('POST /api/students/[numEtu]/dossier/:dossierId/evenements', () => {
     const event = {
       context: {
         params: { numEtu, dossierId },
-        body: { ...body, date: '2026-03-15' }
+        body: { ...body, date: '15/03/2026' }
       }
     } as unknown as H3Event
 

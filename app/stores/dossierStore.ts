@@ -7,7 +7,6 @@ import type {
   RechercheStage
 } from '~~/generated/prisma/client'
 import { Recherche_Stage_Status } from '~~/generated/prisma/enums'
-import { dateToString } from '~~/shared/utils/date'
 import type { APIResponse } from '~~/shared/types/apiResponse'
 import type { EventInfo } from '~~/shared/types/event'
 import type { ContactInfo } from '~~/shared/types/contact'
@@ -95,7 +94,7 @@ export const useDossierStore = defineStore('dossier', {
       // populate the timeline items with the events from the dossier
       for (const event of this.dossier?.DemarcheEvenement ?? []) {
         this.events.push({
-          date: dateToString(new Date(event.date)),
+          date: event.date,
           idDemarche: event.idDemarche,
           titre: event.titre || 'Pas de titre',
           description: event.description || '',
@@ -171,7 +170,7 @@ export const useDossierStore = defineStore('dossier', {
           throw new Error('Erreur lors de la création de l\'événement')
         }
         this.events.push({
-          date: dateToString(new Date(response.data.date)),
+          date: response.data.date,
           idDemarche: response.data.idDemarche,
           titre: response.data.titre || 'Pas de titre',
           description: response.data.description || '',
@@ -216,6 +215,7 @@ export const useDossierStore = defineStore('dossier', {
         })
         // TODO delete contact if no longer used in any event
         this.contacts = await this.fetchContacts()
+        this.orderEvents()
       } catch (error) {
         console.error('Error updating event:', error)
         throw error
