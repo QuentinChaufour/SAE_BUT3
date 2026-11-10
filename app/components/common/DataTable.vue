@@ -10,13 +10,15 @@ const props = withDefaults(defineProps<{
   searchPlaceholder?: string
   pageSize?: number
   emptyText?: string
+  selectable?: boolean
 }>(), {
   data: undefined,
   sortable: false,
   searchFields: undefined,
   searchPlaceholder: 'Rechercher...',
   pageSize: 10,
-  emptyText: 'Aucune donnée disponible.'
+  emptyText: 'Aucune donnée disponible.',
+  selectable: false
 })
 
 const emits = defineEmits<{
@@ -151,7 +153,7 @@ function rowSelected(_e: Event, row: TableRow<T>) {
       }"
       :empty="emptyText"
       class="flex-1"
-      @select="rowSelected"
+      @[props.selectable&&'select']="rowSelected" 
     >
       <template
         v-for="(_, name) in $slots"

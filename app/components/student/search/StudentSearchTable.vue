@@ -173,6 +173,7 @@ function searchSelected(row: RechercheStageWithEntreprise) {
       search-placeholder="Rechercher parmi les recherches..."
       :page-size="5"
       sortable
+      selectable
       @selected="searchSelected"
     >
       <template #action-cell="{ row }">
