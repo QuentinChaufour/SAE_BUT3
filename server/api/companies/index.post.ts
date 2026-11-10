@@ -83,7 +83,7 @@ defineRouteMeta({
 })
 
 export default defineEventHandler(async (event) => {
-  await checkAuth(event, [UserRole.Student])
+  await checkAuth(event, [UserRole.Student, UserRole.Secretary, UserRole.Teacher])
 
   const body = await readValidatedBody(event, companyFields.parse)
   const created = await prisma.entreprise.create({
