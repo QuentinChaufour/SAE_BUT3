@@ -59,12 +59,15 @@ model DemarcheContact {
   fonction                 String?                    @db.VarChar
   email                    String?                    @db.VarChar
   telephone                String?                    @db.VarChar
+  idRecherche              Int?
+  RechercheStage           RechercheStage?            @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
   DemarcheRechercheContact DemarcheRechercheContact[]
 }
 
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
 model DemarcheEvenement {
   idDemarche               Int                        @id @default(autoincrement())
+  titre                    String?
   description              String?
   date                     DateTime                   @default(now()) @db.Date
   status                   Recherche_Stage_Status
@@ -226,8 +229,8 @@ model Personnel {
 
 model PieceJointe {
   idPieceJointe Int      @id @default(autoincrement())
-  nom           String   @db.VarChar
-  chemin        String   @db.VarChar
+  nom           String  @db.VarChar
+  chemin        String  @db.VarChar
   LienPj        LienPj[]
 }
 
@@ -267,6 +270,7 @@ model RechercheStage {
   dateDerniereModification DateTime                  @updatedAt
   idInscription            Int
   status                   Recherche_Stage_Status    @default(AttenteEnvoi)
+  DemarcheContact          DemarcheContact[]
   DemarcheEvenement        DemarcheEvenement[]
   DepartementTagRecherche  DepartementTagRecherche[]
   Entreprise               Entreprise                @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: NoAction, onUpdate: NoAction)
@@ -339,6 +343,7 @@ enum Demarche_Source {
   Telephone
   Presentiel
   Visio
+  Autre
 }
 
 enum Personnel_Role {

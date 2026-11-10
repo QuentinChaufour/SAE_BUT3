@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T extends Record<string, any>">
-import type { TableColumn } from '@nuxt/ui'
+import type { TableColumn, TableRow } from '@nuxt/ui'
 import { getPaginationRowModel, type Column, type SortingState } from '@tanstack/vue-table'
 
 const props = withDefaults(defineProps<{
@@ -10,14 +10,20 @@ const props = withDefaults(defineProps<{
   searchPlaceholder?: string
   pageSize?: number
   emptyText?: string
+  selectable?: boolean
 }>(), {
   data: undefined,
   sortable: false,
   searchFields: undefined,
   searchPlaceholder: 'Rechercher...',
   pageSize: 10,
-  emptyText: 'Aucune donnée disponible.'
+  emptyText: 'Aucune donnée disponible.',
+  selectable: false
 })
+
+const emits = defineEmits<{
+  selected: [row: T]
+}>()
 
 const table = useTemplateRef('table')
 const pagination = ref({ pageIndex: 0, pageSize: props.pageSize })
@@ -117,6 +123,10 @@ function getSortableHeader(column: Column<T>, label: string) {
       })
   )
 }
+
+function rowSelected(_e: Event, row: TableRow<T>) {
+  emits('selected', row.original)
+}
 </script>
 
 <template>
@@ -131,7 +141,7 @@ function getSortableHeader(column: Column<T>, label: string) {
         :placeholder="searchPlaceholder"
       />
     </div>
-
+    <!-- eslint-disable vue/no-parsing-error -->
     <UTable
       ref="table"
       v-model:sorting="sorting"
@@ -143,6 +153,7 @@ function getSortableHeader(column: Column<T>, label: string) {
       }"
       :empty="emptyText"
       class="flex-1"
+      @[props.selectable&&'select']="rowSelected"
     >
       <template
         v-for="(_, name) in $slots"
@@ -154,6 +165,7 @@ function getSortableHeader(column: Column<T>, label: string) {
         />
       </template>
     </UTable>
+    <!-- eslint-enable vue/no-parsing-error -->
 
     <div class="flex justify-end border-t border-default pt-4 px-4">
       <UPagination

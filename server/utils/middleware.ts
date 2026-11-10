@@ -13,7 +13,7 @@ export async function checkAuth(event: H3Event, allowedRoles?: UserRole[]): Prom
   if (allowedRoles && !allowedRoles.includes(session.user.role)) {
     throw createError({
       statusCode: 403,
-      statusMessage: 'Forbidden'
+      message: 'Forbidden'
     })
   }
 
@@ -32,7 +32,7 @@ export async function checkAuthWithOnlySelfStudentData(event: H3Event, numEtu: s
   if (session.user.role === UserRole.Student && session.user.numId !== numEtu) {
     throw createError({
       statusCode: 403,
-      statusMessage: 'Forbidden'
+      message: 'Forbidden'
     })
   }
 

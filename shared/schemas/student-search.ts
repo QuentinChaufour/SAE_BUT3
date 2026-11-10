@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 export const studentSearchFields = z.object({
   titre: z.string().trim().min(5, 'Le titre doit faire au moins 5 caractères.').max(100, 'Le titre ne peut pas dépasser 100 caractères.'),

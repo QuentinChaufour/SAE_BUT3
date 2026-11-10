@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import type { Departement } from '~~/generated/prisma/client.ts'
 import type { DepartementUncheckedCreateInput } from '~~/generated/prisma/models'
 import { nomDepartementSchema } from '~~/shared/schemas/department'

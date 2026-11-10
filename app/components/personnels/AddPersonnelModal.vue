@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { z } from 'zod'
+import type { z } from 'zod/v4'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { Departement, Personnel } from '~~/generated/prisma/client.ts'
 import { personnelBodySchema } from '~~/shared/schemas/personnel.ts'

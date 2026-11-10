@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { AuthFormField, FormSubmitEvent } from '@nuxt/ui'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import { getRoleRedirectPath } from '~~/shared/const/redirect'
 import type UserRole from '~~/shared/types/role'
 
