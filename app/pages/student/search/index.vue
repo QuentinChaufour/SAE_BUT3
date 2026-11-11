@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CreateSearchModal from '~/components/student/search/CreateSearchModal.vue'
 import StudentSearchTable from '~/components/student/search/StudentSearchTable.vue'
+import type { RechercheStage } from '~~/generated/prisma/client'
 import UserRole from '~~/shared/types/role'
 
 const session = useUserSession()
@@ -10,6 +11,10 @@ definePageMeta({
   middleware: ['auth', 'role'],
   role: UserRole.Student
 })
+
+function onCreateSearch(search: RechercheStage) {
+  navigateTo(`/student/dossier/${search.idRecherche}`)
+}
 </script>
 
 <template>
@@ -21,7 +26,7 @@ definePageMeta({
         </template>
 
         <template #right>
-          <CreateSearchModal />
+          <CreateSearchModal @created="onCreateSearch" />
         </template>
       </UDashboardNavbar>
     </template>

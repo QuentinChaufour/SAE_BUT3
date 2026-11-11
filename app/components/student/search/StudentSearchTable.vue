@@ -4,10 +4,12 @@ import type { Entreprise, RechercheStage, DepartementTag } from '~~/generated/pr
 import SearchStatusBadge from './SearchStatusBadge.vue'
 import DataTable from '~/components/common/DataTable.vue'
 import ConfirmModal from '~/components/common/ConfirmModal.vue'
+import { getSortableSelectHeader, getSortableMultiSelectHeader } from '~/utils/table'
+import { getCityDisplayName } from '~/utils/cities.ts'
 
 type RechercheStageWithEntreprise
   = Pick<RechercheStage, 'idRecherche' | 'titre' | 'dateDerniereModification' | 'alternance' | 'status'> & {
-    Entreprise: Pick<Entreprise, 'nom' | 'ville'>
+    Entreprise: Pick<Entreprise, 'nom' | 'ville' | 'nomEtab' | 'codePostal' | 'pays'>
   } & { DepartementTagRecherche: { DepartementTag: Pick<DepartementTag, 'nomTag'> }[] }
 
 const props = defineProps<{
@@ -49,12 +51,12 @@ const columns: TableColumn<RechercheStageWithEntreprise>[] = [
   },
   {
     id: 'entreprise',
-    accessorFn: row => row.Entreprise.nom,
+    accessorFn: row => [row.Entreprise.nom, row.Entreprise.nomEtab].filter(Boolean).join(' - '),
     header: 'Entreprise'
   },
   {
     accessorKey: 'titre',
-    header: 'Titre',
+    header: 'Mission',
     cell: ({ row }) =>
       h(
         'div',
@@ -64,14 +66,15 @@ const columns: TableColumn<RechercheStageWithEntreprise>[] = [
   },
   {
     id: 'ville',
-    accessorFn: row => row.Entreprise.ville,
+    accessorFn: row => getCityDisplayName(row.Entreprise.ville, row.Entreprise.codePostal, row.Entreprise.pays),
     header: 'Ville',
-    cell: ({ row }) => row.original.Entreprise.ville ?? 'N/A'
+    cell: ({ row }) => getCityDisplayName(row.original.Entreprise.ville, row.original.Entreprise.codePostal, row.original.Entreprise.pays)
   },
   {
     accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => h(SearchStatusBadge, { status: row.original.status })
+    header: ({ column }) => getSortableSelectHeader(column, 'Status', rechercheStage.value ?? [], 'status', Object.keys(DetailStatus), value => DetailStatus[value as keyof typeof DetailStatus]?.label),
+    cell: ({ row }) => h(SearchStatusBadge, { status: row.original.status }),
+    enableSorting: false
   },
   {
     id: 'tags',
@@ -79,7 +82,17 @@ const columns: TableColumn<RechercheStageWithEntreprise>[] = [
       row.DepartementTagRecherche.map(
         relation => relation.DepartementTag.nomTag
       ),
-    header: 'Etiquettes',
+    filterFn: (row, columnId, filterValue) => {
+      if (!filterValue) return true
+      const cellValues = row.getValue(columnId) as string[]
+      return cellValues.includes(filterValue)
+    },
+    header: ({ column }) => getSortableMultiSelectHeader(
+      column,
+      'Domaines',
+      rechercheStage.value ?? [],
+      row => row.DepartementTagRecherche.map(r => r.DepartementTag.nomTag)
+    ),
     cell: ({ row }) => {
       const tags = row.original.DepartementTagRecherche
       return h(
@@ -99,12 +112,15 @@ const columns: TableColumn<RechercheStageWithEntreprise>[] = [
             )
           : 'N/A'
       )
-    }
+    },
+    enableSorting: false
   },
   {
     accessorKey: 'alternance',
-    header: 'Alternance',
-    cell: ({ row }) => (row.getValue('alternance') ? 'Oui' : 'Non')
+    accessorFn: row => row.alternance ? 'Oui' : 'Non',
+    cell: ({ row }) => row.getValue('alternance'),
+    header: ({ column }) => getSortableSelectHeader(column, 'Alternance', rechercheStage.value ?? [], 'alternance', ['Oui', 'Non']),
+    enableSorting: false
   },
   { id: 'action' }
 ]
