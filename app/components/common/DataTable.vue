@@ -1,6 +1,7 @@
-<script setup lang="ts" generic="T extends Record<string, any>">
+<script setup lang="ts" generic="T extends Record<string, unknown>">
 import type { TableColumn, TableRow } from '@nuxt/ui'
 import { getPaginationRowModel, type Column, type SortingState } from '@tanstack/vue-table'
+import { getSortableAscDescHeader } from '~/utils/table'
 
 const props = withDefaults(defineProps<{
   data?: T[] | null
@@ -26,9 +27,6 @@ const emits = defineEmits<{
 const table = useTemplateRef('table')
 const pagination = ref({ pageIndex: 0, pageSize: props.pageSize })
 const sorting = ref<SortingState>([])
-
-const UButton = resolveComponent('UButton')
-const UDropdownMenu = resolveComponent('UDropdownMenu')
 
 const search = ref('')
 const filteredData = computed(() => {
@@ -63,65 +61,18 @@ const tableColumns = computed<TableColumn<T>[]>(() => {
 
     if (props.sortable && typeof updatedColumn.header === 'string' && updatedColumn.enableSorting !== false) {
       const label = updatedColumn.header
-      updatedColumn.header = ({ column }: { column: Column<T> }) => getSortableHeader(column, label)
+      updatedColumn.header = ({ column }: { column: Column<T> }) => getSortableAscDescHeader(column, label)
     }
 
     return updatedColumn
   })
 })
 
-function getSortableHeader(column: Column<T>, label: string) {
-  const isSorted = column.getIsSorted()
-  return h(
-    UDropdownMenu,
-    {
-      'content': { align: 'start' },
-      'aria-label': 'Actions',
-      'items': [
-        {
-          label: 'Ascendant',
-          type: 'checkbox',
-          icon: 'i-lucide-arrow-up-narrow-wide',
-          checked: isSorted === 'asc',
-          onSelect: () => {
-            if (isSorted === 'asc') {
-              column.clearSorting()
-            } else {
-              column.toggleSorting(false)
-            }
-          }
-        },
-        {
-          label: 'Descendant',
-          icon: 'i-lucide-arrow-down-wide-narrow',
-          type: 'checkbox',
-          checked: isSorted === 'desc',
-          onSelect: () => {
-            if (isSorted === 'desc') {
-              column.clearSorting()
-            } else {
-              column.toggleSorting(true)
-            }
-          }
-        }
-      ]
-    },
-    () =>
-      h(UButton, {
-        'color': 'neutral',
-        'variant': 'ghost',
-        label,
-        'icon': isSorted
-          ? isSorted === 'asc'
-            ? 'i-lucide-arrow-up-narrow-wide'
-            : 'i-lucide-arrow-down-wide-narrow'
-          : 'i-lucide-arrow-up-down',
-        'class': '-mx-2.5 data-[state=open]:bg-elevated',
-        'aria-label': `Trier par ${isSorted === 'asc' ? 'décroissant' : 'croissant'}`
-      })
-  )
-}
-
+/**
+ * Gestion de la sélection d'une ligne dans le tableau.
+ * @param _e L'événement de sélection (non utilisé).
+ * @param row La ligne sélectionnée du tableau.
+ */
 function rowSelected(_e: Event, row: TableRow<T>) {
   emits('selected', row.original)
 }
