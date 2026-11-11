@@ -164,7 +164,7 @@ model Entreprise {
   codePostal       String?            @db.VarChar
   ville            String             @db.VarChar
   siret            String?            @db.VarChar
-  pays             String?            @db.VarChar
+  pays             String             @db.VarChar
   RechercheStage   RechercheStage[]
   TuteurEntreprise TuteurEntreprise[]
 }
