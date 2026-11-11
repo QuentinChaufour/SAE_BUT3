@@ -115,7 +115,13 @@ function onEnterpriseCreated(entreprise: Entreprise) {
     </template>
 
     <template #create-item-label="{ item }">
-      Créer l'entreprise "{{ item }}"
+      <div class="flex items-center gap-2">
+        <UIcon
+          name="i-lucide-plus"
+          class="size-4 text-primary-600"
+        />
+        <span>Créer l'entreprise : {{ item }}</span>
+      </div>
     </template>
 
     <template #empty>
