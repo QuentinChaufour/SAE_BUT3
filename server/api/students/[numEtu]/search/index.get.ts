@@ -59,7 +59,10 @@ defineRouteMeta({
                     type: 'object',
                     properties: {
                       nom: { type: 'string' },
-                      ville: { type: 'string' }
+                      nomEtab: { type: 'string', nullable: true },
+                      ville: { type: 'string' },
+                      codePostal: { type: 'string', nullable: true },
+                      pays: { type: 'string', nullable: true }
                     }
                   },
                   DepartementTagRecherche: {
@@ -111,7 +114,10 @@ export default defineEventHandler(async (event) => {
       Entreprise: {
         select: {
           nom: true,
-          ville: true
+          nomEtab: true,
+          codePostal: true,
+          ville: true,
+          pays: true
         }
       },
       DepartementTagRecherche: {
