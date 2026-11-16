@@ -6,35 +6,31 @@ import { yearSchema } from '~~/shared/schemas/year'
 
 const paramsSchema = z.object({
   id: z.coerce.number().int().positive(),
-  idDept: z.coerce.number().int().positive()
 })
 
 const querySchema = z.object({
+  idDept: z.coerce.number().int().positive(),
   year: yearSchema
 })
 
 defineRouteMeta({
   openAPI: {
     tags: ['companies'],
-    description: 'Rechercher des entreprises selon leur nom. Pour les étudiants, les résultats sont limités à 10 entreprises.',
+    description: 'Retourner la liste des étudiants ayant réalisé une recherche de stage pour une entreprise donnée dans un département donné et pour une année donnée.',
     parameters: [
       {
         name: 'id',
         in: 'path',
         description: 'L\'identifiant de l\'entreprise à rechercher.',
         required: true,
-        schema: {
-          type: 'number'
-        }
+        schema: { type: 'number' }
       },
       {
         name: 'idDept',
-        in: 'path',
-        description: 'L\'identifiant du département pour lequel rechercher les entreprises.',
+        in: 'query',
+        description: 'L\'identifiant du département.',
         required: true,
-        schema: {
-          type: 'number'
-        }
+        schema: { type: 'number' }
       },
       {
         name: 'year',
@@ -80,12 +76,18 @@ export default defineEventHandler(async (event) => {
 
   return prisma.rechercheStage.findMany({
     where: {
-      idEntreprise: params.idDept,
-      Inscription: { annee: query.year, Formation: { idDepartement: params.idDept } }
+      idEntreprise: params.id,
+      Inscription: { annee: query.year, Formation: { idDepartement: query.idDept } }
     },
     select: {
       idRecherche: true,
       dateCreation: true,
+      titre: true,
+      Entreprise: {
+        select: {
+          nom: true,
+        }
+      },
       Inscription: {
         select: {
           Formation: {
