@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import CompanyStudentSearchTable from '~/components/companies/CompanyStudentSearchTable.vue';
+import { UBreadcrumb } from '#components'
+import CompanyStudentSearchTable from '~/components/companies/CompanyStudentSearchTable.vue'
 import UserRole from '~~/shared/types/role'
 
 definePageMeta({
@@ -7,20 +8,33 @@ definePageMeta({
   middleware: ['auth', 'role'],
   role: UserRole.Secretary
 })
+
+const companyName = ref<string>()
+const breadcrumbs = computed(() => [
+  { label: 'Entreprises', to: '/companies' },
+  { label: `${companyName.value ?? 'Entreprise inconnue'} > Liste des étudiants ayant postulé` }
+])
 </script>
 
 <template>
   <UDashboardPanel>
     <template #header>
-      <UDashboardNavbar :title="`Liste des étudiants ayant postulé`">
+      <UDashboardNavbar>
         <template #leading>
           <UDashboardSidebarCollapse />
+        </template>
+
+        <template #trailing>
+          <UBreadcrumb :items="breadcrumbs" />
         </template>
       </UDashboardNavbar>
     </template>
 
     <template #body>
-        <CompanyStudentSearchTable :idEntreprise="$route.params.id as string" />
+      <CompanyStudentSearchTable
+        :id-entreprise="$route.params.id as string"
+        @company-name="companyName = $event"
+      />
     </template>
   </UDashboardPanel>
 </template>
