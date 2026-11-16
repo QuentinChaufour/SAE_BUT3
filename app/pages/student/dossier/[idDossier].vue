@@ -261,8 +261,8 @@ onMounted(async () => {
               </h1>
               <div class="grid gap-4 rounded-lg bg-default p-4 sm:grid-cols-2">
                 <p class="min-w-0 font-medium">
-                  {{ dossierStore.dossier.Entreprise.nom || 'Aucune entreprise associée' }} :
-                  {{ dossierStore.dossier.Entreprise.nomEtab || '' }}
+                  {{ dossierStore.dossier.Entreprise.nom || 'Aucune entreprise associée' }}
+                  {{ ':' + dossierStore.dossier.Entreprise.nomEtab || '' }}
                 </p>
 
                 <p class="min-w-0 text-sm text-muted">
@@ -294,7 +294,7 @@ onMounted(async () => {
                 class=" mt-6 mb-5 min-w-0 space-y-4"
               >
                 <UFormField
-                  label="Titre"
+                  label="Mission"
                   name="titre"
                   required
                 >
@@ -328,9 +328,9 @@ onMounted(async () => {
               >
                 <template #label>
                   <div class="flex items-center gap-2">
-                    <p>Étiquettes de la recherche</p>
+                    <p>Domaines de la recherche</p>
                     <UTooltip
-                      text="Pour créer une étiquette, demandez au secrétariat de votre département."
+                      text="Pour créer un domaine, demandez au secrétariat de votre département."
                     >
                       <UIcon name="i-lucide-info" />
                     </UTooltip>

@@ -17,8 +17,8 @@ const bodySchema = z.object({
   date: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, {
     message: 'La date doit être au format YYYY-MM-DD'
   }),
-  source: z.enum(Demarche_Source),
-  status: z.enum(Recherche_Stage_Status),
+  source: z.enum(Demarche_Source).optional().default(Demarche_Source.Email),
+  status: z.enum(Recherche_Stage_Status).nonoptional(),
   contacts: z.array(z.number()).optional().default([])
 })
 

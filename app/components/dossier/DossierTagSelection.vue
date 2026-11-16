@@ -70,7 +70,6 @@ async function addTag(newTag: string) {
     dossierTags.value.push(newTag)
   }
 
-  // TODO manage errors
   const response = await $fetch<APIResponse<null>>(`/api/students/${session.user.value?.numId}/dossier/${idDossier}/tags`, {
     method: 'POST',
     body: { tag: newTag }
@@ -103,10 +102,9 @@ onMounted(async () => {
   try {
     await getDepartementTags(idDepartement)
   } catch (error) {
-    console.error(error)
+    console.warn(error)
   }
 })
-// TODO loading state and error handling for the tag operations
 </script>
 
 <template>

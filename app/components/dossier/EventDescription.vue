@@ -54,10 +54,10 @@ const inputDateTemplate = useTemplateRef('inputDate')
 const toast = useToast()
 
 const schema = z.object({
-  titre: z.string().min(1, 'Le titre est obligatoire'),
+  titre: z.string(),
   description: z.string(),
-  status: z.enum(Recherche_Stage_Status),
-  source: z.enum(Demarche_Source)
+  status: z.enum(Recherche_Stage_Status).nonoptional(),
+  source: z.enum(Demarche_Source).optional().default(Demarche_Source.Email)
 })
 const today = () => {
   const date = new Date()
@@ -100,7 +100,8 @@ async function onSubmit() {
     }
 
     emits('created', response)
-  } else {
+  } 
+  else {
     if (!props.event) {
       return
     }
@@ -194,6 +195,13 @@ function removeContact(contact: DemarcheContact) {
   contactsEvent.value = contactsEvent.value.filter(c => c.idContact !== contact.idContact)
 }
 
+function updateTitle(){
+  // Update the title only if not a custom title inserted by the user
+  if(state.titre.trim() === '' ||  Object.values(DetailStatus).some(s => s.label === state.titre)){
+    state.titre = DetailStatus[state.status]?.label || state.titre
+  }
+}
+
 onMounted(async () => {
   loading.value = true
   try {
@@ -208,59 +216,22 @@ onMounted(async () => {
 
 <template>
   <div class="min-w-0 mr-5 ml-5">
-    <div class="flex flex-row justify-between gap-5 mb-4">
-      <UFormField
-        label="Date"
-        name="date"
-        class="min-w-[80%]"
-        required
+    <div
+      v-if="!props.creation"
+      class="flex justify-end"
+    >
+      <UTooltip
+        text="Supprimer l'événement"
+        placement="bottom"
       >
-        <UInputDate
-          ref="inputDate"
-          v-model="date"
-          class="w-full"
-          :range="false"
-          required
-        >
-          <template #trailing>
-            <UPopover :reference="inputDateTemplate?.inputsRef[3]?.$el">
-              <UButton
-                color="neutral"
-                variant="link"
-                size="sm"
-                icon="i-lucide-calendar"
-                aria-label="Select a date"
-                class="px-0"
-              />
-
-              <template #content>
-                <UCalendar
-                  v-model="date"
-                  :range="false"
-                  class="p-2"
-                />
-              </template>
-            </UPopover>
-          </template>
-        </UInputDate>
-      </UFormField>
-      <div
-        v-if="!props.creation"
-        class="justify-end"
-      >
-        <UTooltip
-          text="Supprimer l'événement"
-          placement="bottom"
-        >
-          <UButton
-            :disabled="props.creation"
-            icon="i-lucide-trash-2"
-            color="error"
-            size="lg"
-            @click="isConfirmModalOpen = true"
-          />
-        </UTooltip>
-      </div>
+        <UButton
+          :disabled="props.creation"
+          icon="i-lucide-trash-2"
+          color="error"
+          size="lg"
+          @click="isConfirmModalOpen = true"
+        />
+      </UTooltip>
     </div>
 
     <UForm
@@ -270,16 +241,47 @@ onMounted(async () => {
       @submit="onSubmit"
     >
       <UFormField
+          label="Status de l'événement"
+          name="status"
+          class="min-w-[80%]"
+          required
+      >
+        <USelect
+          v-model="state.status"
+          label="Status"
+          name="status"
+          class="w-full"
+          required
+          :ui="{ value: 'w-full' }"
+          :items="Object.values(Recherche_Stage_Status).map(status => ({ value: status, label: status }))"
+          @change="updateTitle"
+        >
+          <template #default>
+            <p class="justify-self-start">
+              {{ DetailStatus[state.status]?.label }}
+            </p>
+          </template>
+          <template #item="{ item }">
+            <StatusBadge
+              :status="item.value"
+              class="w-full"
+              :size="'lg'"
+            />
+          </template>
+        </USelect>
+      </UFormField>
+
+      <UFormField
         label="Titre"
         name="titre"
         class="min-w-[80%]"
-        required
+        description="Par défaut, prend la valeur du status de l'événement."
       >
         <UInput
           v-model="state.titre"
           class="w-full"
-          required
           placeholder="Dépôt de candidature"
+          @blur="updateTitle"
         />
       </UFormField>
 
@@ -297,32 +299,39 @@ onMounted(async () => {
 
       <div class="flex flex-nowrap justify-around gap-10">
         <UFormField
-          label="Status de l'événement"
-          name="status"
+          label="Date"
+          name="date"
           class="flex-1"
+          required
         >
-          <USelect
-            v-model="state.status"
-            label="Status"
-            name="status"
+          <UInputDate
+            ref="inputDate"
+            v-model="date"
             class="w-full"
-            :ui="{ value: 'w-full' }"
-            :items="Object.values(Recherche_Stage_Status).map(status => ({ value: status, label: status }))"
+            :range="false"
+            required
           >
-            <template #default>
-              <p class="justify-self-start">
-                {{ DetailStatus[state.status]?.label }}
-              </p>
-            </template>
+            <template #trailing>
+              <UPopover :reference="inputDateTemplate?.inputsRef[3]?.$el">
+                <UButton
+                  color="neutral"
+                  variant="link"
+                  size="sm"
+                  icon="i-lucide-calendar"
+                  aria-label="Select a date"
+                  class="px-0"
+                />
 
-            <template #item="{ item }">
-              <StatusBadge
-                :status="item.value"
-                class="w-full"
-                :size="'lg'"
-              />
+                <template #content>
+                  <UCalendar
+                    v-model="date"
+                    :range="false"
+                    class="p-2"
+                  />
+                </template>
+              </UPopover>
             </template>
-          </USelect>
+          </UInputDate>
         </UFormField>
 
         <UFormField
@@ -415,7 +424,7 @@ onMounted(async () => {
       <UFormField
         label="Fichiers"
         name="files"
-        description="Ajoutez des fichiers liés à l’événement (e.g. Votre CV, un capture d'écran). Vous pouvez télécharger plusieurs fichiers à la fois."
+        description="Ajoutez des fichiers liés à l’événement (e.g. Votre CV,LM, une capture d'écran). Vous pouvez télécharger plusieurs fichiers à la fois."
       >
         <UFileUpload
           label="Insérez vos fichier"
