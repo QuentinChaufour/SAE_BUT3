@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mountSuspended, mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { nextTick } from 'vue'
 import UserMenu from '~/components/common/UserMenu.vue'
-import PasswordUpdate from '~/components/common/PasswordUpdate.vue'
+import PasswordUpdate from '~/components/forms/PasswordUpdate.vue'
 import UserRole from '~~/shared/types/role'
 import { mockUserSession, resetNuxtMocks } from '~~/test/nuxt/utils/utils'
 

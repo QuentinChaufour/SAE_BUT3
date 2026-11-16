@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
-import type { z } from 'zod'
+import type { z } from 'zod/v4'
 import type { Personnel } from '~~/generated/prisma/client.ts'
 import type { PersonnelUpdateInput } from '~~/generated/prisma/models'
 import { personnelUpdateBodySchema } from '~~/shared/schemas/personnel'

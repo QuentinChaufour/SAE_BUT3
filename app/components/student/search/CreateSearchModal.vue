@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from '@nuxt/ui'
-import type { z } from 'zod'
+import type { z } from 'zod/v4'
 import SelectCompanyInput from '~/components/companies/SelectCompanyInput.vue'
 import type { RechercheStage } from '~~/generated/prisma/client.ts'
 import type { RechercheStageUncheckedCreateInput } from '~~/generated/prisma/models'

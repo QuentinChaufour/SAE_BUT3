@@ -26,8 +26,8 @@ vi.stubGlobal('clearUserSession', mocks.clearUserSession)
 
 vi.stubGlobal(
   'createError',
-  (error: { statusCode: number, statusMessage: string }) =>
-    Object.assign(new Error(error.statusMessage), error)
+  (error: { statusCode: number, message: string }) =>
+    Object.assign(new Error(error.message), error)
 )
 
 vi.stubGlobal(
@@ -106,7 +106,7 @@ describe('POST /api/auth/password', () => {
     // check no user has been found
     await expect(handler(event)).rejects.toMatchObject({
       statusCode: 401,
-      statusMessage: 'Unauthorised'
+      message: 'Unauthorised'
     })
 
     // check that only necessary functions have been called
@@ -133,7 +133,7 @@ describe('POST /api/auth/password', () => {
     // check old password aren't the same
     await expect(handler(event)).rejects.toMatchObject({
       statusCode: 401,
-      statusMessage: 'Unauthorised'
+      message: 'Unauthorised'
     })
 
     expect(mocks.hashPassword).toHaveBeenCalledWith('newPassword')

@@ -1,5 +1,5 @@
 import { prisma } from '~~/server/utils/prisma'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import UserRole from '~~/shared/types/role'
 import { studentIdSchema } from '~~/shared/schemas/student'
 import { checkAuthWithOnlySelfStudentData } from '~~/server/utils/middleware'
@@ -38,6 +38,8 @@ export default defineEventHandler(async (event) => {
 
     await tx.rechercheStage.delete({ where: { idRecherche: searchId } })
   })
+
+  // TODO delete contacts
 
   return sendNoContent(event)
 })
