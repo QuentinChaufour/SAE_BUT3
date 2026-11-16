@@ -5,7 +5,7 @@ import { checkAuth } from '~~/server/utils/middleware'
 import { yearSchema } from '~~/shared/schemas/year'
 
 const paramsSchema = z.object({
-  id: z.coerce.number().int().positive(),
+  id: z.coerce.number().int().positive()
 })
 
 const querySchema = z.object({
@@ -84,9 +84,7 @@ export default defineEventHandler(async (event) => {
       dateCreation: true,
       titre: true,
       Entreprise: {
-        select: {
-          nom: true,
-        }
+        select: { nom: true }
       },
       Inscription: {
         select: {
