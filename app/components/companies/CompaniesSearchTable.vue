@@ -28,9 +28,9 @@ const columns: TableColumn<Entreprise>[] = [
   },
   {
     id: 'ville',
-    accessorFn: row => row.ville,
     header: 'Ville',
-    cell: ({ row }) => row.original.ville ?? 'N/A'
+    accessorFn: row => getCityDisplayName(row.ville, row.codePostal, row.pays),
+    cell: ({ row }) => getCityDisplayName(row.original.ville, row.original.codePostal, row.original.pays) ?? 'N/A'
   },
   { id: 'action' }
 ]
