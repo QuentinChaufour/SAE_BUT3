@@ -3,10 +3,11 @@ import { z } from 'zod/v4'
 import UserRole from '~~/shared/types/role'
 import { checkAuth } from '~~/server/utils/middleware'
 import type { EntrepriseWhereInput } from '~~/generated/prisma/models'
+import { departementIdSchema } from '~~/shared/schemas/departement'
 
 const querySchema = z.object({
   search: z.string().trim().min(1).optional(),
-  idDepartment: z.coerce.number().int().positive().optional() // TODO: A remplacer, uniformé dans les schemas dans une autre PR
+  idDepartment: departementIdSchema.optional()
 })
 
 defineRouteMeta({
@@ -65,7 +66,7 @@ export default defineEventHandler(async (event) => {
 
   const query = await getValidatedQuery(event, querySchema.parse)
 
-  if (!query.search && session.role === UserRole.Student) {
+  if (!query.search && session.user.role === UserRole.Student) {
     throw createError({
       statusCode: 403,
       message: 'La recherche d\'entreprises est obligatoire pour les étudiants.'
@@ -78,7 +79,7 @@ export default defineEventHandler(async (event) => {
 
   const searchResults = await prisma.entreprise.findMany({
     where,
-    take: session.role === UserRole.Student ? 10 : undefined,
+    take: session.user.role === UserRole.Student ? 10 : undefined,
     select: {
       idEntreprise: true,
       nom: true,
