@@ -115,7 +115,7 @@ describe('SelectCompanyInput', () => {
       expect(menu.props('items')).toHaveLength(0)
     })
 
-    expect(document.body.textContent).toContain('Créer l\'entreprise "a"')
+    expect(document.body.textContent).toContain('Créer l\'entreprise : a')
   })
 
   it('clears the results when the search term is emptied', async () => {

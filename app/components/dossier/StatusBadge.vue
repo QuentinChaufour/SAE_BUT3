@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { Recherche_Stage_Status } from '~~/generated/prisma/enums'
 import { DetailStatus } from '~/utils/RechercheStatusDetails'
+import type { BadgeProps } from '@nuxt/ui'
 
 const props = defineProps<{
   status: Recherche_Stage_Status
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  size?: BadgeProps['size']
 }>()
 
 const statusDetail = computed(() => DetailStatus[props.status])
