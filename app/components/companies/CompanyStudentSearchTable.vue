@@ -1,29 +1,47 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
 import DataTable from '~/components/common/DataTable.vue'
-import type { Entreprise } from '~~/generated/prisma/client'
+import type { Entreprise, Etudiant, Formation, RechercheStage } from '~~/generated/prisma/client'
 
 const props = defineProps<{
-  idEntreprise: number
+  idEntreprise: string
 }>()
 
 const store = useConnectedPersonnelStore()
 
-const { data: companies } = useFetch<Entreprise[]>(`/api/companies/${props.idEntreprise}/student-search/${store.getSelectedDepartment?.departement.id}?year=${store.getCurrentYear}`)
+type CompanyStudentSearch = Pick<RechercheStage, 'idRecherche' | 'dateCreation' | 'titre'> & {
+    Inscription: {  
+        Formation: Pick<Formation, 'nomFormation'>
+        Etudiant: Pick<Etudiant, 'nom' | 'prenom'>
+    },
+    Entreprise: Pick<Entreprise, 'nom'>
+}
 
-const searchFields = (company: Entreprise) => [company.nom, company.nomEtab]
+const { data: companies } = useFetch<CompanyStudentSearch[]>(`/api/companies/${props.idEntreprise}/student-search?idDept=${store.getSelectedDepartment?.departement.id}&year=${store.getCurrentYear}`)
 
-const columns: TableColumn<Entreprise>[] = [
+
+const searchFields = (search: CompanyStudentSearch) => [search.Inscription.Etudiant.nom, search.Inscription.Etudiant.prenom, search.Inscription.Formation.nomFormation]
+
+const columns: TableColumn<CompanyStudentSearch>[] = [
   {
     id: 'nom',
-    accessorFn: row => [row.nom, row.nomEtab].filter(Boolean).join(' - '),
+    accessorFn: row => row.Inscription.Etudiant.nom,
     header: 'Nom'
   },
   {
-    id: 'ville',
-    accessorFn: row => row.ville,
-    header: 'Ville',
-    cell: ({ row }) => row.original.ville ?? 'N/A'
+    id: 'firstName',
+    accessorFn: row => row.Inscription.Etudiant.prenom,
+    header: 'Prénom'
+  },
+  {
+    id: 'formation',
+    accessorFn: row => row.Inscription.Formation.nomFormation,
+    header: 'Formation'
+  },
+  {
+    id: 'Mission',
+    accessorFn: row => row.titre,
+    header: 'Mission'
   },
   { id: 'action' }
 ]

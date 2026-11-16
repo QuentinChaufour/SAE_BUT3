@@ -71,7 +71,9 @@ function getDropdownActions(company: Entreprise): DropdownMenuItem[][] {
   const viewDemarcheAction: DropdownMenuItem = {
     label: 'Recherches étudiantes',
     icon: 'i-lucide-text-search',
-    onSelect: () => emit('edit', company)
+    onSelect: () => {
+      navigateTo(`/companies/${company.idEntreprise}/student-search`)
+    }
   }
 
   return [
