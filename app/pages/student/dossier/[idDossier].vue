@@ -244,6 +244,7 @@ onMounted(async () => {
               <EventsManagement
                 :events="dossierStore.events"
                 :dossier-id="idDossier"
+                :readonly="true"
                 @updated="updateEvent"
                 @deleted="deleteEvent"
               >
@@ -370,6 +371,7 @@ onMounted(async () => {
                     update
                     :dossier-id="dossierStore.getDossierId!"
                     :contact="item"
+                    :readonly="true"
                     @deleted="contactDeleted(Number(item.value))"
                     @updated="contactUpdated"
                   />

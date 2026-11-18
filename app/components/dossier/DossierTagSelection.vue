@@ -5,10 +5,13 @@ import TagSelection from '~/components/common/TagSelection.vue'
 const tags = defineModel<string[]>('tags', { required: true })
 const toast = useToast()
 
-const { idDepartement, idDossier } = defineProps<{
+const props = withDefaults(defineProps<{
   idDepartement: number | null
   idDossier: number
-}>()
+  readonly?: boolean
+}>(), {
+  readonly: false
+})
 
 const dossierTags = ref<string[]>(tags.value)
 const optionTags = ref<string[]>([])
@@ -16,7 +19,7 @@ const disabled = ref<boolean>(false)
 const session = useUserSession()
 
 watch(
-  () => idDepartement,
+  () => props.idDepartement,
   async (newId) => {
     if (newId !== null) {
       try {
@@ -54,7 +57,7 @@ async function getDepartementTags(idDepartement: number | null) {
 async function deleteTag(tagToDelete: string) {
   const index = tags.value.indexOf(tagToDelete)
   if (index !== -1) {
-    const response = await $fetch<APIResponse<null>>(`/api/students/${session.user.value?.numId}/dossier/${idDossier}/tags`, {
+    const response = await $fetch<APIResponse<null>>(`/api/students/${session.user.value?.numId}/dossier/${props.idDossier}/tags`, {
       method: 'DELETE',
       body: { tag: tagToDelete }
     })
@@ -70,7 +73,7 @@ async function addTag(newTag: string) {
     dossierTags.value.push(newTag)
   }
 
-  const response = await $fetch<APIResponse<null>>(`/api/students/${session.user.value?.numId}/dossier/${idDossier}/tags`, {
+  const response = await $fetch<APIResponse<null>>(`/api/students/${session.user.value?.numId}/dossier/${props.idDossier}/tags`, {
     method: 'POST',
     body: { tag: newTag }
   })
@@ -100,7 +103,7 @@ async function updateDossierTags(newTags: string[]) {
 
 onMounted(async () => {
   try {
-    await getDepartementTags(idDepartement)
+    await getDepartementTags(props.idDepartement)
   } catch (error) {
     console.warn(error)
   }
@@ -111,7 +114,7 @@ onMounted(async () => {
   <TagSelection
     v-model:tags="dossierTags"
     :option-tags="optionTags"
-    :disabled="disabled"
+    :disabled="disabled || readonly"
     placeholder="Ajouter un tag"
     @updated-tags="updateDossierTags"
   />

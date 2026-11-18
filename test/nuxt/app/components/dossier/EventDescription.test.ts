@@ -80,7 +80,8 @@ describe('EventDescription', () => {
     const wrapper = await mountWithUApp(EventDescription, {
       creation: false,
       dossierId: 12,
-      event
+      event,
+      readonly: false
     })
 
     expect((wrapper.findComponent(UForm).props() as { state: Record<string, unknown> }).state).toMatchObject({

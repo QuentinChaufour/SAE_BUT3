@@ -31,7 +31,9 @@ type UpdateProps = {
   event: EventInfo
 }
 
-const props = defineProps<CreateProps | UpdateProps>()
+const props = withDefaults(defineProps<(CreateProps | UpdateProps) & { readonly?: boolean }>(), {
+  readonly: false
+})
 
 const emits = defineEmits<{
   created: [EventInfo]
@@ -100,8 +102,7 @@ async function onSubmit() {
     }
 
     emits('created', response)
-  } 
-  else {
+  } else {
     if (!props.event) {
       return
     }
@@ -195,9 +196,9 @@ function removeContact(contact: DemarcheContact) {
   contactsEvent.value = contactsEvent.value.filter(c => c.idContact !== contact.idContact)
 }
 
-function updateTitle(){
+function updateTitle() {
   // Update the title only if not a custom title inserted by the user
-  if(state.titre.trim() === '' ||  Object.values(DetailStatus).some(s => s.label === state.titre)){
+  if (state.titre.trim() === '' || Object.values(DetailStatus).some(s => s.label === state.titre)) {
     state.titre = DetailStatus[state.status]?.label || state.titre
   }
 }
@@ -217,7 +218,7 @@ onMounted(async () => {
 <template>
   <div class="min-w-0 mr-5 ml-5">
     <div
-      v-if="!props.creation"
+      v-if="!creation && !readonly"
       class="flex justify-end"
     >
       <UTooltip
@@ -234,17 +235,19 @@ onMounted(async () => {
       </UTooltip>
     </div>
 
+    <!-- eslint-disable vue/no-parsing-error -->
     <UForm
       :schema="schema"
       :state="state"
       class=" flex flex-col mb-5 min-w-0 space-y-4"
-      @submit="onSubmit"
+      @[!readonly&&'submit']="onSubmit"
     >
+      <!-- eslint-enable vue/no-parsing-error -->
       <UFormField
-          label="Status de l'événement"
-          name="status"
-          class="min-w-[80%]"
-          required
+        label="Status de l'événement"
+        name="status"
+        class="min-w-[80%]"
+        required
       >
         <USelect
           v-model="state.status"
@@ -252,6 +255,7 @@ onMounted(async () => {
           name="status"
           class="w-full"
           required
+          :disabled="readonly"
           :ui="{ value: 'w-full' }"
           :items="Object.values(Recherche_Stage_Status).map(status => ({ value: status, label: status }))"
           @change="updateTitle"
@@ -281,6 +285,7 @@ onMounted(async () => {
           v-model="state.titre"
           class="w-full"
           placeholder="Dépôt de candidature"
+          :disabled="readonly"
           @blur="updateTitle"
         />
       </UFormField>
@@ -293,6 +298,7 @@ onMounted(async () => {
         <UTextarea
           v-model="state.description"
           class="w-full"
+          :disabled="readonly"
           placeholder="envoie de la candidature, relance, entretien, etc..."
         />
       </UFormField>
@@ -309,6 +315,7 @@ onMounted(async () => {
             v-model="date"
             class="w-full"
             :range="false"
+            :disabled="readonly"
             required
           >
             <template #trailing>
@@ -343,6 +350,7 @@ onMounted(async () => {
             v-model="state.source"
             label="Source de l'événement"
             name="source"
+            :disabled="readonly"
             class="w-full"
             :items="Object.values(Demarche_Source).map(source => ({ value: source, label: DetailsSource[source]?.label || source }))"
           />
@@ -366,6 +374,7 @@ onMounted(async () => {
           placeholder="Rechercher ou créer un contact"
           class="w-full"
           create-item="always"
+          :disabled="readonly"
           @update:model-value="addContact"
           @create="isCreatingContact = true"
         >
@@ -398,6 +407,7 @@ onMounted(async () => {
             <ContactCard :contact="contact" />
 
             <UButton
+              v-if="!readonly"
               icon="i-lucide-x"
               color="error"
               variant="ghost"
@@ -431,6 +441,7 @@ onMounted(async () => {
           description="Accepté : .pdf, .jpg, .png ..."
           layout="list"
           multiple
+          :disabled="readonly"
         >
           <template #file-trailing="{ }">
             <!-- TODO add download functionality -->
@@ -445,7 +456,10 @@ onMounted(async () => {
         </UFileUpload>
       </UFormField>
 
-      <div class="mt-6 flex justify-center border-t border-gray-200 pt-4 dark:border-gray-700">
+      <div
+        v-if="!readonly"
+        class="mt-6 flex justify-center border-t border-gray-200 pt-4 dark:border-gray-700"
+      >
         <UButton
           type="submit"
           :label="props.creation ? 'Créer l’événement' : 'Enregistrer les modifications'"

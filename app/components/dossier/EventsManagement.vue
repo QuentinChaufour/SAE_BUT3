@@ -4,12 +4,14 @@ import StatusBadge from '~/components/dossier/StatusBadge.vue'
 import type { TimelineItem } from '@nuxt/ui'
 import type { EventInfo } from '~~/shared/types/event'
 import { formatDateToFRFormat } from '~~/shared/utils/date'
-// TODO documentation
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   dossierId: number
   events: EventInfo[]
-}>()
+  readonly?: boolean
+}>(), {
+  readonly: false
+})
 
 const emits = defineEmits<{
   updated: [EventInfo]
@@ -23,6 +25,15 @@ const selectedEvent = ref<EventInfo | null>(props.events[0] ?? null)
 // so we only need to reverse the order and not to sort them
 const displayedEvents = computed(() => {
   return timelineReversed.value ? [...props.events].reverse() : props.events
+})
+
+const getEventItems = computed<(TimelineItem & EventInfo)[]>(() => {
+  return displayedEvents.value.map(event => ({
+    ...event,
+    title: event.titre || 'Pas de titre',
+    description: event.description || '',
+    icon: ''
+  } satisfies TimelineItem & EventInfo))
 })
 
 const timelineReversed = ref<boolean>(false)
@@ -59,12 +70,7 @@ function deleteEvent() {
 
   <UTimeline
     v-if="displayedEvents.length > 0"
-    :items="displayedEvents.map(event => ({
-      ...event,
-      title: event.titre || 'Pas de titre',
-      description: event.description || '',
-      icon: ''
-    } satisfies TimelineItem & EventInfo))"
+    :items="getEventItems"
     :ui="{
       item: 'cursor-pointer'
     }"
@@ -113,6 +119,7 @@ function deleteEvent() {
         v-if="selectedEvent"
         :dossier-id="props.dossierId"
         :event="selectedEvent as EventInfo"
+        :readonly="readonly"
         @deleted="deleteEvent"
         @updated="emits('updated', $event)"
         @close="showEventDetails = false"
