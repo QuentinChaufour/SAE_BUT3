@@ -14,6 +14,7 @@ import DossierTagSelection from '~/components/dossier/DossierTagSelection.vue'
 import StatusBadge from '~/components/dossier/StatusBadge.vue'
 import ContactCard from '~/components/common/ContactCard.vue'
 import { useDossierStore } from '~/stores/dossierStore'
+import { useConnectedStudentStore } from '~/stores/connectedStudent'
 
 definePageMeta({
   middleware: ['auth', 'role'],
@@ -22,6 +23,7 @@ definePageMeta({
 // TODO read-only on all components
 
 const dossierStore = useDossierStore()
+const studentStore = useConnectedStudentStore()
 
 const descriptionSchema = z.object({
   description: z.string().trim()
@@ -42,14 +44,15 @@ const schema = z.object({
   alternance: alternanceSchema.shape.alternance
 })
 
-const hasDescriptionChanged = computed(() => descriptionSchema.safeParse({ description: state.description }).success && state.description !== dossierStore.dossier?.description)
-const hasTitleChanged = computed(() => titleSchema.safeParse({ titre: state.titre }).success && state.titre !== dossierStore.dossier?.titre)
-const hasAlternanceChanged = computed(() => alternanceSchema.safeParse({ alternance: state.alternance }).success && state.alternance !== dossierStore.dossier?.alternance)
+const hasDescriptionChangedAndIsValid = computed(() => descriptionSchema.safeParse({ description: state.description }).success && state.description !== dossierStore.dossier?.description)
+const hasTitleChangedAndIsValid = computed(() => titleSchema.safeParse({ titre: state.titre }).success && state.titre !== dossierStore.dossier?.titre)
+const hasAlternanceChangedAndIsValid = computed(() => alternanceSchema.safeParse({ alternance: state.alternance }).success && state.alternance !== dossierStore.dossier?.alternance)
 
 const files = ref<FileUploadItem[]>([])
 const departementId = ref<number | null>(null)
 const openedEventCreation = ref<boolean>(false)
 const idDossier = Number(useRoute().params.idDossier)
+const isReadOnly = computed(() => studentStore.isReadOnlyYear)
 const toast = useToast()
 const state = reactive({
   description: dossierStore.dossier?.description || '',
@@ -143,10 +146,13 @@ async function updateDossier() {
   }
 
   if (
-    !hasDescriptionChanged.value
-    && !hasTitleChanged.value
-    && !hasAlternanceChanged.value
+    !hasDescriptionChangedAndIsValid.value
+    && !hasTitleChangedAndIsValid.value
+    && !hasAlternanceChangedAndIsValid.value
   ) {
+    state.description = dossier.description || ''
+    state.titre = dossier.titre
+    state.alternance = dossier.alternance
     return
   }
 
@@ -166,6 +172,7 @@ async function updateDossier() {
 onMounted(async () => {
   try {
     await dossierStore.initState(idDossier)
+    await studentStore.fetchPromotions()
 
     if (dossierStore.dossier) {
       state.titre = dossierStore.dossier.titre
@@ -213,7 +220,7 @@ onMounted(async () => {
       >
         <div class="flex flex-col gap-1 justify-center items-center">
           <h1 class="text-2xl font-semibold text-highlighted">
-            {{ dossierStore.dossier.titre }}
+            Mission : {{ dossierStore.dossier.titre }}
           </h1>
           <p class="text-sm text-muted">
             {{ dossierStore.dossier.description || '' }}
@@ -244,11 +251,11 @@ onMounted(async () => {
               <EventsManagement
                 :events="dossierStore.events"
                 :dossier-id="idDossier"
-                :readonly="true"
+                :readonly="isReadOnly"
                 @updated="updateEvent"
                 @deleted="deleteEvent"
               >
-                <template #header_action>
+                <template #header_action v-if="!isReadOnly">
                   <UButton @click="openedEventCreation = true">
                     Ajouter un événement
                   </UButton>
@@ -261,10 +268,14 @@ onMounted(async () => {
                 Entreprise
               </h1>
               <div class="grid gap-4 rounded-lg bg-default p-4 sm:grid-cols-2">
-                <p class="min-w-0 font-medium">
-                  {{ dossierStore.dossier.Entreprise.nom || 'Aucune entreprise associée' }}
-                  {{ ':' + dossierStore.dossier.Entreprise.nomEtab || '' }}
-                </p>
+                <div class="flex gap-1">
+                  <p class="min-w-0 font-medium">
+                    {{ dossierStore.dossier.Entreprise.nom || 'Aucune entreprise associée' }}
+                  </p>
+                  <p class="min-w-0 font-medium" v-if="dossierStore.dossier.Entreprise.nomEtab">
+                    {{ ' : ' + dossierStore.dossier.Entreprise.nomEtab || '' }}
+                  </p>
+                </div>
 
                 <p class="min-w-0 text-sm text-muted">
                   {{
@@ -284,6 +295,7 @@ onMounted(async () => {
                   <UCheckbox
                     v-model="state.alternance"
                     description="Alternance"
+                    :disabled="isReadOnly"
                     @update:model-value="updateDossier"
                   />
                 </UFormField>
@@ -302,6 +314,7 @@ onMounted(async () => {
                   <UInput
                     v-model="state.titre"
                     type="text"
+                    :disabled="isReadOnly"
                     placeholder="Dépôt de candidature"
                     class="w-full"
                     @blur="updateDossier"
@@ -314,6 +327,7 @@ onMounted(async () => {
                 >
                   <UTextarea
                     v-model="state.description"
+                    :disabled="isReadOnly"
                     placeholder="Envoi de la candidature, relance, entretien, etc..."
                     class="w-full"
                     @blur="updateDossier"
@@ -342,6 +356,7 @@ onMounted(async () => {
                   v-model:tags="dossierStore.dossierTags"
                   :id-departement="departementId"
                   :id-dossier="idDossier"
+                  :readonly="isReadOnly"
                   class="w-full"
                 />
               </UFormField>
@@ -371,7 +386,7 @@ onMounted(async () => {
                     update
                     :dossier-id="dossierStore.getDossierId!"
                     :contact="item"
-                    :readonly="true"
+                    :readonly="isReadOnly"
                     @deleted="contactDeleted(Number(item.value))"
                     @updated="contactUpdated"
                   />

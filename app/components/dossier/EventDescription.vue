@@ -254,7 +254,6 @@ onMounted(async () => {
           label="Status"
           name="status"
           class="w-full"
-          required
           :disabled="readonly"
           :ui="{ value: 'w-full' }"
           :items="Object.values(Recherche_Stage_Status).map(status => ({ value: status, label: status }))"
@@ -314,6 +313,7 @@ onMounted(async () => {
             ref="inputDate"
             v-model="date"
             class="w-full"
+            locale="fr-FR"
             :range="false"
             :disabled="readonly"
             required
@@ -334,6 +334,7 @@ onMounted(async () => {
                     v-model="date"
                     :range="false"
                     class="p-2"
+                    locale="fr-Fr"
                   />
                 </template>
               </UPopover>
