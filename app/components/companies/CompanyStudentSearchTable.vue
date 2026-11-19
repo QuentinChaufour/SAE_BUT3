@@ -2,33 +2,24 @@
 import { UBadge } from '#components'
 import type { TableColumn } from '@nuxt/ui'
 import DataTable from '~/components/common/DataTable.vue'
-import type { Entreprise, Etudiant, Formation, RechercheStage } from '~~/generated/prisma/client'
+import StatusBadge from '~/components/dossier/StatusBadge.vue'
+import type { Etudiant, Formation, RechercheStage } from '~~/generated/prisma/client'
+import { DetailStatus } from '~/utils/RechercheStatusDetails'
 
 const props = defineProps<{
   idEntreprise: string
 }>()
 
-const emit = defineEmits<{
-  'company-name': [name: string | undefined]
-}>()
-
 const store = useConnectedPersonnelStore()
 
-type CompanyStudentSearch = Pick<RechercheStage, 'idRecherche' | 'dateCreation' | 'titre'> & {
+type CompanyStudentSearch = Pick<RechercheStage, 'idRecherche' | 'dateCreation' | 'titre' | 'status'> & {
   Inscription: {
     Formation: Pick<Formation, 'nomFormation'>
     Etudiant: Pick<Etudiant, 'nom' | 'prenom'>
   }
-  Entreprise: Pick<Entreprise, 'nom'>
 }
 
 const { data: companies } = useFetch<CompanyStudentSearch[]>(`/api/companies/${props.idEntreprise}/student-search?idDept=${store.getSelectedDepartment?.departement.id}&year=${store.getCurrentYear}`)
-
-watch(
-  companies,
-  searches => emit('company-name', searches?.[0]?.Entreprise.nom),
-  { immediate: true }
-)
 
 const searchFields = (search: CompanyStudentSearch) => [search.Inscription.Etudiant.nom, search.Inscription.Etudiant.prenom, search.Inscription.Formation.nomFormation]
 
@@ -83,9 +74,27 @@ const columns: TableColumn<CompanyStudentSearch>[] = [
     accessorFn: row => row.titre,
     header: 'Mission'
   },
+  {
+    accessorKey: 'status',
+    header: ({ column }) => getSortableSelectHeader(
+      column,
+      'Status',
+      companies.value ?? [],
+      'status',
+      Object.keys(DetailStatus),
+      value => DetailStatus[value as keyof typeof DetailStatus]?.label
+    ),
+    cell: ({ row }) => h(StatusBadge, { status: row.original.status }),
+    enableSorting: false
+  },
   // TODO: Ajouter redirection vers la recherche de l'étudiant
   { id: 'action' }
 ]
+
+function onSelected(_row: CompanyStudentSearch) {
+  // TODO: Ajouter redirection vers la recherche de l'étudiant
+  return
+}
 </script>
 
 <template>
@@ -96,7 +105,9 @@ const columns: TableColumn<CompanyStudentSearch>[] = [
       :search-fields="searchFields"
       search-placeholder="Rechercher..."
       :page-size="5"
+      selectable
       sortable
+      @selected="onSelected"
     >
       <template #action-cell>
         <UButton
