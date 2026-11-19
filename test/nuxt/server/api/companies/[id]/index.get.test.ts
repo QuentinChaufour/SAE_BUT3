@@ -7,6 +7,7 @@ vi.mock('~~/server/utils/prisma', () => ({
   prisma: { entreprise: { findUnique: vi.fn() } }
 }))
 
+vi.stubGlobal('defineRouteMeta', () => {})
 vi.stubGlobal('defineEventHandler', (handler: unknown) => handler)
 vi.stubGlobal(
   'getValidatedRouterParams',
