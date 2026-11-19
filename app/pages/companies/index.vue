@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import CompaniesSearchTable from '~/components/companies/CompaniesSearchTable.vue'
 import CreateCompanyModal from '~/components/companies/CreateCompanyModal.vue'
+import EditCompanyModal from '~/components/companies/EditCompanyModal.vue'
+import type { Entreprise } from '~~/generated/prisma/client'
 import UserRole from '~~/shared/types/role'
 
 definePageMeta({
@@ -9,9 +11,20 @@ definePageMeta({
 })
 
 const isOpenCreateCompanyModal = ref(false)
+const isOpenEditCompanyModal = ref(false)
+const companyToEdit = ref<Entreprise | null>(null)
 const companiesTable = useTemplateRef('companiesTable')
 
 const session = useUserSession()
+
+function openCompanyModal(company: Entreprise) {
+  companyToEdit.value = company
+  isOpenEditCompanyModal.value = true
+}
+
+function onCompanySaved() {
+  companiesTable.value?.refresh()
+}
 </script>
 
 <template>
@@ -22,7 +35,10 @@ const session = useUserSession()
           <UDashboardSidebarCollapse />
         </template>
 
-        <template #right>
+        <template
+          v-if="session.user?.value?.role === UserRole.Secretary"
+          #right
+        >
           <UButton
             icon="i-heroicons-plus"
             color="primary"
@@ -34,7 +50,7 @@ const session = useUserSession()
 
           <CreateCompanyModal
             v-model:open="isOpenCreateCompanyModal"
-            @company-created="() => companiesTable!.refresh()"
+            @created="() => companiesTable!.refresh()"
           />
         </template>
       </UDashboardNavbar>
@@ -44,6 +60,14 @@ const session = useUserSession()
       <CompaniesSearchTable
         ref="companiesTable"
         :read-only="session.user?.value?.role !== UserRole.Secretary"
+        @edit="openCompanyModal"
+      />
+
+      <EditCompanyModal
+        v-model:open="isOpenEditCompanyModal"
+        :edit-company="companyToEdit"
+        :read-only="session.user?.value?.role !== UserRole.Secretary"
+        @saved="onCompanySaved"
       />
     </template>
   </UDashboardPanel>
