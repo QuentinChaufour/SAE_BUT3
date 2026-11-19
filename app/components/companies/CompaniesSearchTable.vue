@@ -4,6 +4,11 @@ import DataTable from '~/components/common/DataTable.vue'
 import ConfirmModal from '~/components/common/ConfirmModal.vue'
 import type { Entreprise } from '~~/generated/prisma/client'
 
+type CompanyWithApplicationCounts = Entreprise & {
+  nbCandidatures: number
+  nbAcceptedCandidatures: number
+}
+
 const props = defineProps<{
   readOnly?: boolean
 }>()
@@ -16,11 +21,11 @@ const emit = defineEmits<{
 const isDeleteModalOpen = ref(false)
 const companyToDelete = ref<Entreprise | null>(null)
 
-const { data: companies, refresh } = useFetch<Entreprise[]>(`/api/companies`)
+const { data: companies, refresh } = useFetch<CompanyWithApplicationCounts[]>(`/api/companies`)
 
-const searchFields = (company: Entreprise) => [company.nom, company.nomEtab]
+const searchFields = (company: CompanyWithApplicationCounts) => [company.nom, company.nomEtab]
 
-const columns: TableColumn<Entreprise>[] = [
+const columns: TableColumn<CompanyWithApplicationCounts>[] = [
   {
     id: 'nom',
     accessorFn: row => [row.nom, row.nomEtab].filter(Boolean).join(' - '),
@@ -30,7 +35,17 @@ const columns: TableColumn<Entreprise>[] = [
     id: 'ville',
     header: 'Ville',
     accessorFn: row => getCityDisplayName(row.ville, row.codePostal, row.pays),
-    cell: ({ row }) => getCityDisplayName(row.original.ville, row.original.codePostal, row.original.pays) ?? 'N/A'
+    cell: ({ row }) => getCityDisplayName(row.original.ville, row.original.codePostal, row.original.pays)
+  },
+  {
+    id: 'nbCandidatures',
+    header: 'Candidatures',
+    accessorKey: 'nbCandidatures'
+  },
+  {
+    id: 'nbAcceptedCandidatures',
+    header: 'Candidatures acceptées',
+    accessorKey: 'nbAcceptedCandidatures'
   },
   { id: 'action' }
 ]
@@ -103,6 +118,10 @@ function getDropdownActions(company: Entreprise): DropdownMenuItem[][] {
   ]
 }
 
+function handleCompanySelected(company: Entreprise) {
+  navigateTo(`/companies/${company.idEntreprise}/student-search`)
+}
+
 defineExpose({ refresh })
 </script>
 
@@ -115,6 +134,8 @@ defineExpose({ refresh })
       search-placeholder="Rechercher..."
       :page-size="5"
       sortable
+      selectable
+      @selected="handleCompanySelected"
     >
       <template #action-cell="{ row }">
         <UDropdownMenu :items="getDropdownActions(row.original)">
