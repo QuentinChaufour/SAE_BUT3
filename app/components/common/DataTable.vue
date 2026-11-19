@@ -116,9 +116,11 @@ function rowSelected(_e: Event, row: TableRow<T>) {
         />
       </template>
     </UTable>
-    <!-- eslint-enable vue/no-parsing-error -->
 
-    <div class="flex justify-end border-t border-default pt-4 px-4">
+    <div class="flex items-center justify-between border-t border-default pt-4 px-4">
+      <span class="text-sm text-muted">
+        {{ filteredData.length }} élément{{ filteredData.length > 1 ? 's' : '' }}
+      </span>
       <UPagination
         :page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
         :items-per-page="table?.tableApi?.getState().pagination.pageSize"

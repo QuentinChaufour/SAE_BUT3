@@ -41,13 +41,7 @@ const columns: TableColumn<RechercheStageWithEntreprise>[] = [
   {
     accessorKey: 'dateDerniereModification',
     header: 'Date MàJ',
-    cell: ({ row }) => {
-      return new Date(row.getValue('dateDerniereModification')).toLocaleString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      })
-    }
+    cell: ({ row }) => formatDateToFRFormat(row.getValue('dateDerniereModification'))
   },
   {
     id: 'entreprise',

@@ -132,7 +132,7 @@ function createFilterDropdown<T extends Record<string, unknown>, U = unknown>(
  * @param column La colonne pour laquelle générer l'en-tête triable.
  * @param label Le texte à afficher dans l'en-tête de la colonne.
  * @param data Les données complètes du tableau pour extraire les valeurs uniques.
- * @param accessorKey Le clé d'accès pour extraire les valeurs uniques de la colonne.
+ * @param accessorKey La clé ou la fonction d'accès pour extraire les valeurs uniques de la colonne.
  * @param displayFn Fonction pour afficher les valeurs dans le menu déroulant.
  * @returns L'élément représentant l'en-tête de colonne triable.
  */
@@ -140,11 +140,14 @@ export function getSortableSelectHeader<T extends Record<string, unknown>, U = u
   column: Column<T>,
   label: string,
   data: T[],
-  accessorKey: keyof T,
+  accessorKey: keyof T | ((row: T) => U),
   uniqueValues?: U[],
   displayFn?: (value: U) => string
 ) {
-  uniqueValues ??= Array.from(new Set(data.map(row => row[accessorKey]).filter(Boolean))) as U[]
+  uniqueValues ??= Array.from(new Set(data.map((row) => {
+    const value = typeof accessorKey === 'function' ? accessorKey(row) : row[accessorKey]
+    return value
+  }).filter(Boolean))) as U[]
   return createFilterDropdown(column, label, uniqueValues, displayFn)
 }
 

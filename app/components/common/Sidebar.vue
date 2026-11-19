@@ -44,6 +44,11 @@ function getLinksByRole(role: UserRole | undefined): NavigationMenuItem[] {
           label: 'Soutenances',
           icon: 'i-lucide-calendar',
           to: '/soutenances/'
+        },
+        {
+          label: 'Entreprises',
+          icon: 'i-lucide-building',
+          to: '/companies/'
         }
       ]
     case UserRole.Admin:

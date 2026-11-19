@@ -273,7 +273,7 @@ model RechercheStage {
   DemarcheContact          DemarcheContact[]
   DemarcheEvenement        DemarcheEvenement[]
   DepartementTagRecherche  DepartementTagRecherche[]
-  Entreprise               Entreprise                @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: NoAction, onUpdate: NoAction)
+  Entreprise               Entreprise                @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: Cascade, onUpdate: NoAction)
   Inscription              Inscription               @relation(fields: [idInscription], references: [idInscription], onDelete: NoAction, onUpdate: NoAction)
 }
 
@@ -335,7 +335,7 @@ model TuteurEntreprise {
   email              String?    @db.VarChar
   idEntreprise       Int
   Stage              Stage[]
-  Entreprise         Entreprise @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: NoAction, onUpdate: NoAction)
+  Entreprise         Entreprise @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: Cascade, onUpdate: NoAction)
 }
 
 enum Demarche_Source {
