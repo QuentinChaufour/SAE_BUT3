@@ -1,5 +1,6 @@
 import { prisma } from '~~/server/utils/prisma'
 import { z } from 'zod/v4'
+import { Recherche_Stage_Status } from '~~/generated/prisma/enums'
 import UserRole from '~~/shared/types/role'
 import { checkAuth } from '~~/server/utils/middleware'
 import type { EntrepriseWhereInput } from '~~/generated/prisma/models'
@@ -47,16 +48,20 @@ defineRouteMeta({
                   idEntreprise: { type: 'number' },
                   nom: { type: 'string' },
                   ville: { type: 'string' },
-                  codePostal: { type: 'string' }
+                  codePostal: { type: 'string' },
+                  adresse: { type: 'string' },
+                  pays: { type: 'string' },
+                  nomEtab: { type: 'string' },
+                  nombreCandidatures: { type: 'number', nullable: true },
+                  nombreCandidaturesAcceptees: { type: 'number', nullable: true }
                 }
               }
             }
           }
         }
       },
-      403: {
-        description: 'Forbidden'
-      }
+      403: { description: 'Forbidden' },
+      404: { description: 'Not Found' }
     }
   }
 })
@@ -77,15 +82,38 @@ export default defineEventHandler(async (event) => {
   if (query.search) where.nom = { contains: query.search, mode: 'insensitive' }
   if (query.idDepartment) where.RechercheStage = { some: { Inscription: { Formation: { idDepartement: query.idDepartment } } } }
 
+  const canViewApplicationCounts = session.user.role !== UserRole.Student
   const searchResults = await prisma.entreprise.findMany({
     where,
     take: session.user.role === UserRole.Student ? 10 : undefined,
     select: {
       idEntreprise: true,
       nom: true,
+      nomEtab: true,
       ville: true,
-      codePostal: true
+      adresse: true,
+      pays: true,
+      siret: true,
+      codePostal: true,
+      ...(canViewApplicationCounts && {
+        _count: {
+          select: {
+            RechercheStage: true
+          }
+        },
+        RechercheStage: {
+          where: { status: Recherche_Stage_Status.Accepte },
+          select: { idRecherche: true }
+        }
+      })
     }
   })
-  return searchResults
+
+  if (!canViewApplicationCounts) return searchResults
+
+  return searchResults.map(({ _count, RechercheStage, ...company }) => ({
+    ...company,
+    nbCandidatures: _count.RechercheStage,
+    nbAcceptedCandidatures: RechercheStage.length
+  }))
 })

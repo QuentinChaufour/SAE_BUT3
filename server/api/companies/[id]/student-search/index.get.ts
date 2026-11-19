@@ -83,9 +83,7 @@ export default defineEventHandler(async (event) => {
       idRecherche: true,
       dateCreation: true,
       titre: true,
-      Entreprise: {
-        select: { nom: true }
-      },
+      status: true,
       Inscription: {
         select: {
           Formation: {
