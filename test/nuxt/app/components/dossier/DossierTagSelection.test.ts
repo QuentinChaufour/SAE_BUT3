@@ -41,7 +41,7 @@ describe('DossierTagSelection', () => {
   })
 
   it('handles a missing department when loading tags on mount', async () => {
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
     await mountWithUApp(DossierTagSelection, {
       tags: [],
@@ -50,13 +50,13 @@ describe('DossierTagSelection', () => {
     })
 
     await vi.waitFor(() => {
-      expect(consoleError).toHaveBeenCalledWith(
+      expect(consoleWarn).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'idDepartement is null or undefined' })
       )
     })
 
     expect(mocks.fetch).not.toHaveBeenCalled()
-    consoleError.mockRestore()
+    consoleWarn.mockRestore()
   })
 
   it('handles an invalid department tags response', async () => {
