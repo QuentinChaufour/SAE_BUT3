@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { z } from 'zod'
+import type { z } from 'zod/v4'
 import SearchCompanySiretForm from './forms/SearchCompanySiretForm.vue'
 import type { FormSubmitEvent } from '@nuxt/ui'
 import type { Entreprise } from '~~/generated/prisma/client.ts'

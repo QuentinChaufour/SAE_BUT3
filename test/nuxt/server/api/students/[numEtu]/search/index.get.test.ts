@@ -52,7 +52,7 @@ vi.stubGlobal('requireUserSession', async () => ({
 
 let handler: typeof import('~~/server/api/students/[numEtu]/search/index.get')['default']
 
-describe('GET /api/student/[numEtu]/search', () => {
+describe('GET /api/students/[numEtu]/search', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     handler = (await import(
