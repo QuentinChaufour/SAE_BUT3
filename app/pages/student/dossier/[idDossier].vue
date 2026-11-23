@@ -13,6 +13,7 @@ import ContactForm from '~/components/forms/ContactForm.vue'
 import DossierTagSelection from '~/components/dossier/DossierTagSelection.vue'
 import StatusBadge from '~/components/dossier/StatusBadge.vue'
 import ContactCard from '~/components/common/ContactCard.vue'
+import FileDetails from '~/components/dossier/FileDetails.vue'
 import { useDossierStore } from '~/stores/dossierStore'
 import { useConnectedStudentStore } from '~/stores/connectedStudent'
 
@@ -20,7 +21,6 @@ definePageMeta({
   middleware: ['auth', 'role'],
   role: UserRole.Student
 })
-// TODO read-only on all components
 
 const dossierStore = useDossierStore()
 const studentStore = useConnectedStudentStore()
@@ -47,12 +47,21 @@ const schema = z.object({
 const hasDescriptionChangedAndIsValid = computed(() => descriptionSchema.safeParse({ description: state.description }).success && state.description !== dossierStore.dossier?.description)
 const hasTitleChangedAndIsValid = computed(() => titleSchema.safeParse({ titre: state.titre }).success && state.titre !== dossierStore.dossier?.titre)
 const hasAlternanceChangedAndIsValid = computed(() => alternanceSchema.safeParse({ alternance: state.alternance }).success && state.alternance !== dossierStore.dossier?.alternance)
+const getEventFiles = computed(() => {
+  const files = <EventFile[]>[]
 
-const files = ref<FileUploadItem[]>([])
+  dossierStore.events.forEach(event => {
+    if (event.files) {
+      files.push(...event.files)
+    }
+  })
+  return files
+})
+
 const departementId = ref<number | null>(null)
 const openedEventCreation = ref<boolean>(false)
 const idDossier = Number(useRoute().params.idDossier)
-const isReadOnly = computed(() => studentStore.isReadOnlyYear)
+const isreadOnly = computed(() => studentStore.isreadOnlyYear)
 const toast = useToast()
 const state = reactive({
   description: dossierStore.dossier?.description || '',
@@ -88,11 +97,6 @@ async function getDepartementId(): Promise<number | null> {
   }
 }
 
-function deleteFile(index: number) {
-  // TODO
-  console.log('File deleted:', index)
-}
-
 // keep the contact list up to date when a contact is added or updated
 // without reloading the page & without making another API call
 function contactUpdated(contact: DemarcheContact) {
@@ -108,9 +112,11 @@ function contactDeleted(idContact: number) {
   dossierStore.deleteContact(idContact)
 }
 
-async function createEvent(event: EventInfo) {
+async function createEvent(event: EventInfo, files: File[]) {
   try {
-    await dossierStore.createEvent(event)
+    const createdEvent = await dossierStore.createEvent(event)
+    await dossierStore.uploadFiles(files, createdEvent.idDemarche, idDossier)
+
     openedEventCreation.value = false
   } catch (error) {
     console.error('Error creating event', error)
@@ -118,9 +124,10 @@ async function createEvent(event: EventInfo) {
   }
 }
 
-async function updateEvent(event: EventInfo) {
+async function updateEvent(event: EventInfo, files: File[]) {
   try {
     await dossierStore.updateEvent(event)
+    await dossierStore.uploadFiles(files, event.idDemarche, idDossier)
   } catch {
     toast.add({ title: 'Erreur', description: 'Erreur lors de la mise à jour de l\'événement', color: 'error' })
   }
@@ -166,6 +173,34 @@ async function updateDossier() {
     toast.add({ title: 'Succès', description: 'Dossier mis à jour avec succès', color: 'success' })
   } catch (error) {
     console.error('Error updating dossier:', error)
+  }
+}
+
+async function downloadFile(file: EventFile) {
+  try {
+    const eventId = dossierStore.events.find(event => event.files?.some(f => f.id === file.id))?.idDemarche
+
+    if (!eventId) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: 'Event not found for the given file to allow download'
+      })
+    }
+
+    const blob = await dossierStore.downloadFile(file, eventId, dossierStore.getDossierId!)
+    
+    const url = URL.createObjectURL(blob)
+    
+    const link = document.createElement('a')
+    link.href = url
+    link.download = file.name
+    link.click()
+    URL.revokeObjectURL(url)
+  } 
+  catch (error) {
+    console.error('Error downloading file:', error)
+    toast.add({ title: 'Erreur', description: 'Erreur lors du téléchargement du fichier', color: 'error' })
+    return
   }
 }
 
@@ -251,11 +286,11 @@ onMounted(async () => {
               <EventsManagement
                 :events="dossierStore.events"
                 :dossier-id="idDossier"
-                :readonly="isReadOnly"
+                :readOnly="isreadOnly"
                 @updated="updateEvent"
                 @deleted="deleteEvent"
               >
-                <template #header_action v-if="!isReadOnly">
+                <template #header_action v-if="!isreadOnly">
                   <UButton @click="openedEventCreation = true">
                     Ajouter un événement
                   </UButton>
@@ -295,7 +330,7 @@ onMounted(async () => {
                   <UCheckbox
                     v-model="state.alternance"
                     description="Alternance"
-                    :disabled="isReadOnly"
+                    :disabled="isreadOnly"
                     @update:model-value="updateDossier"
                   />
                 </UFormField>
@@ -314,7 +349,7 @@ onMounted(async () => {
                   <UInput
                     v-model="state.titre"
                     type="text"
-                    :disabled="isReadOnly"
+                    :disabled="isreadOnly"
                     placeholder="Dépôt de candidature"
                     class="w-full"
                     @blur="updateDossier"
@@ -327,7 +362,7 @@ onMounted(async () => {
                 >
                   <UTextarea
                     v-model="state.description"
-                    :disabled="isReadOnly"
+                    :disabled="isreadOnly"
                     placeholder="Envoi de la candidature, relance, entretien, etc..."
                     class="w-full"
                     @blur="updateDossier"
@@ -356,7 +391,7 @@ onMounted(async () => {
                   v-model:tags="dossierStore.dossierTags"
                   :id-departement="departementId"
                   :id-dossier="idDossier"
-                  :readonly="isReadOnly"
+                  :readOnly="isreadOnly"
                   class="w-full"
                 />
               </UFormField>
@@ -386,7 +421,7 @@ onMounted(async () => {
                     update
                     :dossier-id="dossierStore.getDossierId!"
                     :contact="item"
-                    :readonly="isReadOnly"
+                    :readOnly="isreadOnly"
                     @deleted="contactDeleted(Number(item.value))"
                     @updated="contactUpdated"
                   />
@@ -406,26 +441,13 @@ onMounted(async () => {
                 size="sm"
               />
 
-              <UFileUpload
-                v-if="files.length > 0"
-                :model-value="files"
-                :ui="{ base: 'hidden' }"
-                layout="list"
-                multiple
-                class="w-fit"
-              >
-                <template #file-trailing="{ index }">
-                  <!-- TODO add download functionality -->
-                  <UButton
-                    icon="i-lucide-trash-2"
-                    color="error"
-                    variant="link"
-                    size="xs"
-                    aria-label="Delete file"
-                    @click.stop="deleteFile(index)"
-                  />
-                </template>
-              </UFileUpload>
+              <FileDetails
+                v-if="getEventFiles.length > 0"
+                :files="getEventFiles"
+                :read-only="true"
+                :dossier-id="idDossier"
+                @download="downloadFile"
+              />
 
               <div
                 v-else

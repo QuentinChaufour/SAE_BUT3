@@ -8,13 +8,13 @@ import { formatDateToFRFormat } from '~~/shared/utils/date'
 const props = withDefaults(defineProps<{
   dossierId: number
   events: EventInfo[]
-  readonly?: boolean
+  readOnly?: boolean
 }>(), {
-  readonly: false
+  readOnly: false
 })
 
 const emits = defineEmits<{
-  updated: [EventInfo]
+  updated: [EventInfo, File[]]
   deleted: [EventInfo]
 }>()
 
@@ -50,6 +50,10 @@ function deleteEvent() {
 
   emits('deleted', selectedEvent.value as EventInfo)
   showEventDetails.value = false
+}
+
+function onEventUpdated(event: EventInfo, files: File[]) {
+  emits('updated', event, files)
 }
 </script>
 
@@ -119,9 +123,9 @@ function deleteEvent() {
         v-if="selectedEvent"
         :dossier-id="props.dossierId"
         :event="selectedEvent as EventInfo"
-        :readonly="readonly"
+        :readOnly="readOnly"
         @deleted="deleteEvent"
-        @updated="emits('updated', $event)"
+        @updated="onEventUpdated"
         @close="showEventDetails = false"
       />
     </template>

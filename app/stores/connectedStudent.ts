@@ -39,7 +39,7 @@ export const useConnectedStudentStore = defineStore('connectedStudent', {
      * Indique si l'année en cours est en lecture seule.
      * @returns true si l'année en cours est en lecture seule, false sinon.
      */
-    isReadOnlyYear(): boolean {
+    isreadOnlyYear(): boolean {
       const selectedPromotion = this.getSelectedPromotion
       if (!selectedPromotion) return false
 

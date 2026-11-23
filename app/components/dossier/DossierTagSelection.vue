@@ -8,9 +8,9 @@ const toast = useToast()
 const props = withDefaults(defineProps<{
   idDepartement: number | null
   idDossier: number
-  readonly?: boolean
+  readOnly?: boolean
 }>(), {
-  readonly: false
+  readOnly: false
 })
 
 const dossierTags = ref<string[]>(tags.value)
@@ -114,7 +114,7 @@ onMounted(async () => {
   <TagSelection
     v-model:tags="dossierTags"
     :option-tags="optionTags"
-    :disabled="disabled || readonly"
+    :disabled="disabled || readOnly"
     placeholder="Ajouter un tag"
     @updated-tags="updateDossierTags"
   />

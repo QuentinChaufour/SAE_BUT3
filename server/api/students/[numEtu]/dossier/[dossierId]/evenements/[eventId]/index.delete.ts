@@ -16,6 +16,8 @@ export default defineEventHandler(async (event) => {
 
   await checkAuthWithOnlySelfStudentData(event, numEtu, [UserRole.Student])
 
+  // TODO transaction & files
+
   await prisma.demarcheRechercheContact.deleteMany({
     where: {
       idDemarche: eventId

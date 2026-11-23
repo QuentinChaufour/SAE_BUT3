@@ -35,7 +35,7 @@ function onCreateSearch(search: RechercheStage) {
       <StudentSearchTable
         :num-etu="session.user.value!.numId"
         :id-inscription="store.getSelectedPromotion!.idInscription"
-        :read-only="store.isReadOnlyYear"
+        :read-only="store.isreadOnlyYear"
       />
     </template>
   </UDashboardPanel>

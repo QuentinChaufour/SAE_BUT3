@@ -29,9 +29,9 @@ type UpdateProps = {
 type Schema = z.output<typeof contactSchema>
 
 const props = withDefaults(
-  defineProps<(CreateProps | UpdateProps) & { readonly?: boolean }>(),
+  defineProps<(CreateProps | UpdateProps) & { readOnly?: boolean }>(),
   {
-    readonly: false
+    readOnly: false
   }
 )
 const emits = defineEmits<{
@@ -187,7 +187,7 @@ async function deleteContact() {
         <UInput
           v-model="state.nom"
           type="text"
-          :disabled="readonly"
+          :disabled="readOnly"
           placeholder="Nom du contact"
           class="w-full"
         />
@@ -201,7 +201,7 @@ async function deleteContact() {
         <UInput
           v-model="state.prenom"
           type="text"
-          :disabled="readonly"
+          :disabled="readOnly"
           placeholder="Prénom du contact"
           class="w-full"
         />
@@ -215,7 +215,7 @@ async function deleteContact() {
       <UInput
         v-model="state.fonction"
         type="text"
-        :disabled="readonly"
+        :disabled="readOnly"
         placeholder="Fonction du contact au sein de l'entreprise"
         class="w-full"
       />
@@ -231,7 +231,7 @@ async function deleteContact() {
           v-model="state.telephone"
           type="tel"
           class="w-full"
-          :disabled="readonly"
+          :disabled="readOnly"
           placeholder="+33 06 00 00 00 00"
         />
       </UFormField>
@@ -244,7 +244,7 @@ async function deleteContact() {
         <UInput
           v-model="state.email"
           type="email"
-          :disabled="readonly"
+          :disabled="readOnly"
           placeholder="someEmail@example.com"
           class="w-full"
         />
@@ -252,7 +252,7 @@ async function deleteContact() {
     </div>
 
     <div
-      v-if="!readonly"
+      v-if="!readOnly"
       class="flex gap-4 justify-between pt-3"
     >
       <UButton

@@ -46,7 +46,9 @@ export default defineEventHandler(async (event) => {
               PieceJointe: {
                 select: {
                   idPieceJointe: true,
-                  nom: true
+                  nom: true,
+                  taille: true,
+                  type: true,
                 }
               }
             }

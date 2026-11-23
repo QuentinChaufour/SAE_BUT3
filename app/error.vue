@@ -21,6 +21,7 @@ const props = defineProps<{ error: NuxtError }>()
             {{ props.error.statusText || 'La page demandée est temporairement indisponible.' }}
           </p>
         </div>
+        <!-- TODO page principale selon le rôle de l'utilisateur -->
         <UButton
           to="/"
           color="primary"

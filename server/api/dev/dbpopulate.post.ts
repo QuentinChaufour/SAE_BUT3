@@ -392,20 +392,6 @@ async function createDemarches(recherches: RechercheStage[]) {
       create: data,
       update: {}
     })
-
-    if (index === 0) {
-      const piece = await ensure(
-        () => prisma.pieceJointe.findFirst({ where: { nom: 'CV.pdf' } }),
-        () => prisma.pieceJointe.create({ data: { nom: 'CV.pdf', chemin: '/uploads/CV.pdf' } })
-      )
-
-      const pjData = { idPieceJointe: piece.idPieceJointe, idDemarche: evenement.idDemarche }
-      await prisma.lienPj.upsert({
-        where: { idPieceJointe_idDemarche: pjData },
-        create: pjData,
-        update: {}
-      })
-    }
   }
 }
 

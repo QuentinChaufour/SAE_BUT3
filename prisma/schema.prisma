@@ -211,6 +211,8 @@ model Inscription {
 model LienPj {
   idPieceJointe     Int
   idDemarche        Int
+  idRecherche       Int
+  RechercheStage    RechercheStage    @relation(fields: [idRecherche], references: [idRecherche], onDelete: Cascade, onUpdate: NoAction)
   DemarcheEvenement DemarcheEvenement @relation(fields: [idDemarche], references: [idDemarche], onDelete: Cascade, onUpdate: NoAction)
   PieceJointe       PieceJointe       @relation(fields: [idPieceJointe], references: [idPieceJointe], onDelete: NoAction, onUpdate: NoAction)
 
@@ -231,6 +233,8 @@ model PieceJointe {
   idPieceJointe Int      @id @default(autoincrement())
   nom           String  @db.VarChar
   chemin        String  @db.VarChar
+  type          String?  @db.VarChar
+  taille        Int?
   LienPj        LienPj[]
 }
 
@@ -273,6 +277,7 @@ model RechercheStage {
   DemarcheContact          DemarcheContact[]
   DemarcheEvenement        DemarcheEvenement[]
   DepartementTagRecherche  DepartementTagRecherche[]
+  LienPj                   LienPj[]
   Entreprise               Entreprise                @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: NoAction, onUpdate: NoAction)
   Inscription              Inscription               @relation(fields: [idInscription], references: [idInscription], onDelete: NoAction, onUpdate: NoAction)
 }

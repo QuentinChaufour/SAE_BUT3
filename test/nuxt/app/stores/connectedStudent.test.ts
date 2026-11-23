@@ -89,20 +89,20 @@ describe('connectedStudent Store', () => {
       expect(store.getPromotions).toEqual(mockPromotions)
     })
 
-    it('isReadOnlyYear returns readOnly flag from selected promotion', () => {
+    it('isreadOnlyYear returns readOnly flag from selected promotion', () => {
       const store = useConnectedStudentStore()
       store.promotions = mockPromotions
 
       store.selectedPromotion = mockPromotions[0]!
-      expect(store.isReadOnlyYear).toBe(true)
+      expect(store.isreadOnlyYear).toBe(true)
 
       store.selectedPromotion = mockPromotions[1]!
-      expect(store.isReadOnlyYear).toBe(false)
+      expect(store.isreadOnlyYear).toBe(false)
     })
 
-    it('isReadOnlyYear returns false if no promotion is selected', () => {
+    it('isreadOnlyYear returns false if no promotion is selected', () => {
       const store = useConnectedStudentStore()
-      expect(store.isReadOnlyYear).toBe(false)
+      expect(store.isreadOnlyYear).toBe(false)
     })
   })
 

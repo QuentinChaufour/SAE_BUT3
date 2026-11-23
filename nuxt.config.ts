@@ -26,6 +26,9 @@ export default defineNuxtConfig({
     }
   },
 
+  runtimeConfig: {
+    uploadDir: process.env.UPLOAD_DIR || '/tmp/uploads',
+  },
   vite: {
     server: {
       watch: {

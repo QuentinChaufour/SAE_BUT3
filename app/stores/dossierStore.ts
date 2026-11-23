@@ -26,7 +26,7 @@ type DossierFull = Pick<
       date: string
 
       LienPj: Array<{
-        PieceJointe: Pick<PieceJointe, 'nom' | 'idPieceJointe'>
+        PieceJointe: Pick<PieceJointe, 'nom' | 'idPieceJointe' | 'taille' | 'type'>
       }>
 
       DemarcheRechercheContact: Array<{
@@ -101,36 +101,18 @@ export const useDossierStore = defineStore('dossier', {
           status: event.status,
           source: event.source,
           contacts: event.DemarcheRechercheContact.map(c => c.DemarcheContact),
-          files: event.LienPj.map((pj) => { return { nom: pj.PieceJointe.nom, idPieceJointe: pj.PieceJointe.idPieceJointe } })
+          files: event.LienPj.map((pj) => {
+            return { 
+              id: pj.PieceJointe.idPieceJointe.toString(),
+              name: pj.PieceJointe.nom!,
+              size: pj.PieceJointe.taille || undefined,
+              type: pj.PieceJointe.type || undefined
+            }
+          })
         })
       }
 
       this.contacts = await this.fetchContacts()
-      /*
-          for (const file of this.dossier.DemarcheEvenement.flatMap(e => e.LienPj.map(pj => pj.PieceJointe))) {
-            // skip files with no name
-            if (!file.nom) {
-              continue
-            }
-
-            let fileType = ''
-
-            // Only pdf and image files are supported for now,
-            // so we can use a simple check to determine the file type
-            if (file.nom.endsWith('.pdf')) {
-              fileType = 'application/pdf'
-            } else {
-              fileType = 'image/*'
-            }
-
-            this.files.push({
-              name: file.nom,
-              type: fileType,
-              avatar: {
-                icon: fileType === 'application/pdf' ? 'i-lucide-file-text' : 'i-lucide-image'
-              }
-            })
-*/
     },
     async updateDossier(state: { description: string, titre: string, alternance: boolean }) {
       if (!this.dossier) throw new Error('No dossier selected')
@@ -182,6 +164,8 @@ export const useDossierStore = defineStore('dossier', {
 
         this.contacts = await this.fetchContacts()
         this.orderEvents()
+
+        return response.data
       } catch (error) {
         console.error('Error creating event:', error)
         throw error
@@ -210,7 +194,12 @@ export const useDossierStore = defineStore('dossier', {
         }
 
         Object.assign(this.events[existingEvent], {
-          ...event,
+          titre: response.data.titre,
+          description: response.data.description,
+          status: response.data.status,
+          source: response.data.source,
+          date: response.data.date,
+          contacts: response.data.contacts,
           title: response.data.titre || 'Pas de titre'
         })
         // TODO delete contact if no longer used in any event
@@ -292,6 +281,77 @@ export const useDossierStore = defineStore('dossier', {
       })
       return response.data ?? []
     },
+
+    async uploadFiles(files:File[], eventId: number, dossierId: number) {
+      if (files.length === 0) return
+
+      const formData = new FormData()
+      files.forEach((file, index) => {
+        formData.append('files', file)
+      })
+    
+      try{
+        const session = useUserSession()
+        const response = await $fetch<APIResponse<EventFile[]>>(`/api/students/${session.user.value?.numId}/dossier/${dossierId}/evenements/${eventId}/files/upload`, 
+          { 
+            method: 'POST',
+            body: formData, 
+          }
+        )
+      
+        if(!response.statusCode || response.statusCode !== 200) {
+          throw createError({
+            statusCode: response.statusCode || 500,
+            statusMessage: response.message || 'Erreur lors de l\'upload des fichiers'
+          })
+        }
+
+        const event = this.events.find(e => e.idDemarche === eventId)
+        if (event) {
+          event.files = [...(event.files || []), ...(response.data || [])]
+        }
+      }
+      catch (error) {
+        // TODO toast
+        console.error('Error uploading files:', error)
+      }
+    },
+
+    async downloadFile(file: EventFile, eventId: number, dossierId: number) {
+
+      const session = useUserSession()
+      const response = await $fetch<Blob>(`/api/students/${session.user.value?.numId}/dossier/${dossierId}/evenements/${eventId}/files/${file.id}/download`, {
+        method: 'GET',
+        responseType: 'blob'
+      })
+
+
+      if(!response) {
+        throw new Error('Erreur lors du téléchargement du fichier')
+      }
+
+      return response
+    },
+
+    async deleteFile(file: EventFile, eventId: number, dossierId: number) {
+      const session = useUserSession()
+      const response = await $fetch<APIResponse<null>>(`/api/students/${session.user.value?.numId}/dossier/${dossierId}/evenements/${eventId}/files/${file.id}`, {
+        method: 'DELETE'
+      })
+
+      if(!response.statusCode || response.statusCode !== 204) {
+        throw createError({
+          statusCode: response.statusCode || 500,
+          statusMessage: response.message || 'Erreur lors de la suppression du fichier'
+        })
+      }
+
+      const event = this.events.find(e => e.idDemarche === eventId)
+      if (event && event.files) {
+        event.files = event.files.filter(f => f.id !== file.id)
+      }
+    },
+
     /**
         * Sort the events array by date in descending order (most recent first).
         * @param state the store State

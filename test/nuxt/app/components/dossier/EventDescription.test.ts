@@ -81,7 +81,7 @@ describe('EventDescription', () => {
       creation: false,
       dossierId: 12,
       event,
-      readonly: false
+      readOnly: false
     })
 
     expect((wrapper.findComponent(UForm).props() as { state: Record<string, unknown> }).state).toMatchObject({

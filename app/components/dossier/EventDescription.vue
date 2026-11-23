@@ -11,6 +11,7 @@ import StatusBadge from '~/components/dossier/StatusBadge.vue'
 import ContactForm from '../forms/ContactForm.vue'
 import ContactCard from '~/components/common/ContactCard.vue'
 import ConfirmModal from '~/components/common/ConfirmModal.vue'
+import FileDetails from '~/components/dossier/FileDetails.vue'
 
 type ContactItem = {
   value: number
@@ -31,13 +32,13 @@ type UpdateProps = {
   event: EventInfo
 }
 
-const props = withDefaults(defineProps<(CreateProps | UpdateProps) & { readonly?: boolean }>(), {
-  readonly: false
+const props = withDefaults(defineProps<(CreateProps | UpdateProps) & { readOnly?: boolean }>(), {
+  readOnly: false
 })
 
 const emits = defineEmits<{
-  created: [EventInfo]
-  updated: [EventInfo]
+  created: [EventInfo, File[]]
+  updated: [EventInfo, File[]]
   deleted: []
   close: []
 }>()
@@ -46,6 +47,7 @@ const dossierStore = useDossierStore()
 
 const contactsOptions = ref<DemarcheContact[]>([])
 const contactsEvent = ref<DemarcheContact[]>(props.creation ? [] : props.event?.contacts || [])
+const filesToDelete = ref<EventFile[]>([])
 const loading = ref<boolean>(true)
 const selectedContact = ref<ContactItem>()
 const searchTermContact = ref<string>('')
@@ -53,6 +55,8 @@ const isCreatingContact = ref<boolean>(false)
 const isContactSelectorOpen = ref<boolean>(false)
 const isConfirmModalOpen = ref<boolean>(false)
 const inputDateTemplate = useTemplateRef('inputDate')
+
+const files = ref<File[]>([])
 const toast = useToast()
 
 const schema = z.object({
@@ -101,19 +105,22 @@ async function onSubmit() {
       return
     }
 
-    emits('created', response)
-  } else {
+    emits('created', response, files.value)
+  } 
+  else {
     if (!props.event) {
       return
     }
-
+    
     const response = updateEvent()
 
     if (!response) {
       return
     }
 
-    emits('updated', response)
+    await Promise.all(filesToDelete.value.map(file => deleteFile(file)))
+
+    emits('updated', response, files.value)
   }
   toast.add({ title: 'Succès', description: props.creation ? 'Événement créé avec succès' : 'Événement mis à jour avec succès', color: 'success' })
   emits('close')
@@ -203,6 +210,50 @@ function updateTitle() {
   }
 }
 
+async function downloadFile(file: EventFile) {
+  
+  if(props.creation || !props.event) {
+    toast.add({ title: 'Erreur', description: 'Aucun événement sélectionné pour le téléchargement du fichier', color: 'error' })
+    return
+  }
+
+  try {
+    const blob = await dossierStore.downloadFile(file, props.event.idDemarche, props.dossierId)
+    
+    const url = URL.createObjectURL(blob)
+    
+    const link = document.createElement('a')
+    link.href = url
+    link.download = file.name
+    link.click()
+    URL.revokeObjectURL(url)
+  } 
+  catch (error) {
+    console.error('Error downloading file:', error)
+    toast.add({ title: 'Erreur', description: 'Erreur lors du téléchargement du fichier', color: 'error' })
+    return
+  }
+}
+
+async function deleteFile(file: EventFile) {
+
+  if(props.creation || !props.event) {
+    toast.add({ title: 'Erreur', description: 'Aucun événement sélectionné pour la suppression du fichier', color: 'error' })
+    return
+  }
+
+  try{
+    await dossierStore.deleteFile(file, props.event?.idDemarche!, props.dossierId)
+    toast.add({ title: 'Succès', description: 'Fichier supprimé avec succès', color: 'success' })
+  }
+  catch (error) {
+    console.error('Error deleting file:', error)
+    toast.add({ title: 'Erreur', description: 'Erreur lors de la suppression du fichier', color: 'error' })
+    return
+  }
+  
+}
+
 onMounted(async () => {
   loading.value = true
   try {
@@ -218,7 +269,7 @@ onMounted(async () => {
 <template>
   <div class="min-w-0 mr-5 ml-5">
     <div
-      v-if="!creation && !readonly"
+      v-if="!creation && !readOnly"
       class="flex justify-end"
     >
       <UTooltip
@@ -240,7 +291,7 @@ onMounted(async () => {
       :schema="schema"
       :state="state"
       class=" flex flex-col mb-5 min-w-0 space-y-4"
-      @[!readonly&&'submit']="onSubmit"
+      @[!readOnly&&'submit']="onSubmit"
     >
       <!-- eslint-enable vue/no-parsing-error -->
       <UFormField
@@ -254,7 +305,7 @@ onMounted(async () => {
           label="Status"
           name="status"
           class="w-full"
-          :disabled="readonly"
+          :disabled="readOnly"
           :ui="{ value: 'w-full' }"
           :items="Object.values(Recherche_Stage_Status).map(status => ({ value: status, label: status }))"
           @change="updateTitle"
@@ -284,7 +335,7 @@ onMounted(async () => {
           v-model="state.titre"
           class="w-full"
           placeholder="Dépôt de candidature"
-          :disabled="readonly"
+          :disabled="readOnly"
           @blur="updateTitle"
         />
       </UFormField>
@@ -297,7 +348,7 @@ onMounted(async () => {
         <UTextarea
           v-model="state.description"
           class="w-full"
-          :disabled="readonly"
+          :disabled="readOnly"
           placeholder="envoie de la candidature, relance, entretien, etc..."
         />
       </UFormField>
@@ -315,7 +366,7 @@ onMounted(async () => {
             class="w-full"
             locale="fr-FR"
             :range="false"
-            :disabled="readonly"
+            :disabled="readOnly"
             required
           >
             <template #trailing>
@@ -351,7 +402,7 @@ onMounted(async () => {
             v-model="state.source"
             label="Source de l'événement"
             name="source"
-            :disabled="readonly"
+            :disabled="readOnly"
             class="w-full"
             :items="Object.values(Demarche_Source).map(source => ({ value: source, label: DetailsSource[source]?.label || source }))"
           />
@@ -375,7 +426,7 @@ onMounted(async () => {
           placeholder="Rechercher ou créer un contact"
           class="w-full"
           create-item="always"
-          :disabled="readonly"
+          :disabled="readOnly"
           @update:model-value="addContact"
           @create="isCreatingContact = true"
         >
@@ -408,7 +459,7 @@ onMounted(async () => {
             <ContactCard :contact="contact" />
 
             <UButton
-              v-if="!readonly"
+              v-if="!readOnly"
               icon="i-lucide-x"
               color="error"
               variant="ghost"
@@ -431,34 +482,33 @@ onMounted(async () => {
 
       <USeparator />
 
-      <!-- TODO -->
       <UFormField
         label="Fichiers"
         name="files"
         description="Ajoutez des fichiers liés à l’événement (e.g. Votre CV,LM, une capture d'écran). Vous pouvez télécharger plusieurs fichiers à la fois."
       >
         <UFileUpload
+          v-model="files"
           label="Insérez vos fichier"
           description="Accepté : .pdf, .jpg, .png ..."
+          accept="image/*, application/pdf"
           layout="list"
           multiple
-          :disabled="readonly"
-        >
-          <template #file-trailing="{ }">
-            <!-- TODO add download functionality -->
-            <UButton
-              icon="i-lucide-trash-2"
-              color="error"
-              variant="link"
-              size="xs"
-              aria-label="Delete file"
-            />
-          </template>
-        </UFileUpload>
+          :disabled="readOnly"
+        />
+        <FileDetails
+          v-if="!creation && event?.files"
+          v-model="filesToDelete"
+          :files="event.files"
+          :event-id="event.idDemarche"
+          :dossier-id="dossierId"
+          :read-only="readOnly"
+          @download="downloadFile"
+        />
       </UFormField>
 
       <div
-        v-if="!readonly"
+        v-if="!readOnly"
         class="mt-6 flex justify-center border-t border-gray-200 pt-4 dark:border-gray-700"
       >
         <UButton

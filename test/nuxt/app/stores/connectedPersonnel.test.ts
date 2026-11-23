@@ -108,18 +108,18 @@ describe('connectedPersonnel', () => {
       expect(mocks.cookieValues['currentYear']).toBe('2025-2026')
     })
 
-    it('isReadOnlyYear returns true when current year is an old year', () => {
+    it('isreadOnlyYear returns true when current year is an old year', () => {
       const store = useConnectedPersonnelStore()
       store.departments = mockDepartments
       store.selectedDepartment = mockDepartments[0]!
       store.currentYear = '2023-2024'
 
-      expect(store.isReadOnlyYear).toBe(true)
+      expect(store.isreadOnlyYear).toBe(true)
     })
 
-    it('isReadOnlyYear returns false if no department or no current year', () => {
+    it('isreadOnlyYear returns false if no department or no current year', () => {
       const store = useConnectedPersonnelStore()
-      expect(store.isReadOnlyYear).toBe(false)
+      expect(store.isreadOnlyYear).toBe(false)
     })
   })
 
