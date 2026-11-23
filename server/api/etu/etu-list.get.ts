@@ -1,10 +1,9 @@
 import { prisma } from '~~/server/utils/prisma'
 
 export default defineEventHandler(async (event) => {
-
-  const query = getQuery(event);
-  const page = Number(query.page ?? 1);
-  const skpElem = (page - 1) * 20;
+  const query = getQuery(event)
+  const page = Number(query.page ?? 1)
+  const skpElem = (page - 1) * 20
 
   const stages = await prisma.stage.findMany({
     skip: skpElem,
@@ -13,7 +12,7 @@ export default defineEventHandler(async (event) => {
     include: {
       TuteurEntreprise: {
         include: {
-          Entreprise: true,
+          Entreprise: true
         }
       },
       Enseignant: true,
