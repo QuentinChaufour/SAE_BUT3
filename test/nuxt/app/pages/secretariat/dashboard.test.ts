@@ -12,13 +12,13 @@ mockNuxtImport('$fetch', () => mocks.fetch)
 
 const ClassCardStub = {
   name: 'ClassCard',
-  props: ['class_name', 'alternance', 'nb_etudiants', 'nb_stages'],
+  props: ['className', 'alternance', 'nbEtudiants', 'nbStages'],
   template: '<div />'
 }
 
 const SoutenanceCardStub = {
   name: 'SoutenanceCard',
-  props: ['class_name', 'alternance', 'stages', 'soutenances'],
+  props: ['className', 'alternance', 'stages', 'soutenances'],
   template: '<div />'
 }
 
@@ -95,23 +95,23 @@ describe('secretariat/dashboard.vue', () => {
 
     const classCards = wrapper.findAllComponents({ name: 'ClassCard' })
     expect(classCards).toHaveLength(2)
-    expect(classCards[0].props()).toMatchObject({
-      class_name: 'Informatique',
+    expect(classCards[0]?.props()).toMatchObject({
+      className: 'Informatique',
       alternance: false,
-      nb_etudiants: 24,
-      nb_stages: 18
+      nbEtudiants: 24,
+      nbStages: 18
     })
-    expect(classCards[1].props('class_name')).toBe('Formation sans nom')
+    expect(classCards[1]?.props('className')).toBe('Formation sans nom')
 
     const soutenanceCards = wrapper.findAllComponents({ name: 'SoutenanceCard' })
     expect(soutenanceCards).toHaveLength(2)
-    expect(soutenanceCards[0].props()).toMatchObject({
-      class_name: 'Informatique',
+    expect(soutenanceCards[0]?.props()).toMatchObject({
+      className: 'Informatique',
       alternance: false,
       stages: 18,
       soutenances: 15
     })
-    expect(soutenanceCards[1].props('class_name')).toBe('Formation sans nom')
+    expect(soutenanceCards[1]?.props('className')).toBe('Formation sans nom')
 
     const table = wrapper.findComponent({ name: 'TableSoutenances' })
     expect(table.props('departementId')).toBe('1')
@@ -152,7 +152,7 @@ describe('secretariat/dashboard.vue', () => {
     }])
     await dashboard.vm.$nextTick()
 
-    expect(wrapper.findComponent({ name: 'ClassCard' }).props('class_name')).toBe('Formation sans nom')
-    expect(wrapper.findComponent({ name: 'SoutenanceCard' }).props('class_name')).toBe('Formation sans nom')
+    expect(wrapper.findComponent({ name: 'ClassCard' }).props('className')).toBe('Formation sans nom')
+    expect(wrapper.findComponent({ name: 'SoutenanceCard' }).props('className')).toBe('Formation sans nom')
   })
 })

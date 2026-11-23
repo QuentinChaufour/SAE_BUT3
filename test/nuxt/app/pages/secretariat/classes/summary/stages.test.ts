@@ -51,8 +51,9 @@ describe('GET /api/classes/summary/stages', () => {
   it('rejects a non-integer department id', async () => {
     mocks.getQuery.mockReturnValue({ idDepartement: 'invalid' })
     const handler = (await import('~~/server/api/classes/summary/stages.get')).default
+    const event = {} as unknown as Parameters<typeof handler>[0]
 
-    await expect(handler({})).rejects.toMatchObject({
+    await expect(handler(event)).rejects.toMatchObject({
       statusCode: 400,
       statusMessage: 'idDepartement doit être un entier'
     })
@@ -61,8 +62,9 @@ describe('GET /api/classes/summary/stages', () => {
 
   it('counts students and distinct stages for each formation', async () => {
     const handler = (await import('~~/server/api/classes/summary/stages.get')).default
+    const event = {} as unknown as Parameters<typeof handler>[0]
 
-    await expect(handler({})).resolves.toEqual([
+    await expect(handler(event)).resolves.toEqual([
       {
         name: 'Informatique',
         etudiants: 2,

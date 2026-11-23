@@ -5,10 +5,10 @@ import ClassCard from '~/components/soutenance/ClassCard.vue'
 
 describe('ClassCard.vue', () => {
   function mountClassCard(props: {
-    class_name: string
+    className: string
     alternance: boolean
-    nb_etudiants: number
-    nb_stages: number
+    nbEtudiants: number
+    nbStages: number
   }) {
     return mount(ClassCard, {
       props,
@@ -29,10 +29,10 @@ describe('ClassCard.vue', () => {
 
   it('displays the class details and alternance labels', () => {
     const wrapper = mountClassCard({
-      class_name: 'BUT Informatique',
+      className: 'BUT Informatique',
       alternance: true,
-      nb_etudiants: 24,
-      nb_stages: 12
+      nbEtudiants: 24,
+      nbStages: 12
     })
 
     expect(wrapper.text()).toContain('BUT Informatique alternance')
@@ -42,10 +42,10 @@ describe('ClassCard.vue', () => {
 
   it('displays stages for a non-alternance class', () => {
     const wrapper = mountClassCard({
-      class_name: 'BUT Réseaux',
+      className: 'BUT Réseaux',
       alternance: false,
-      nb_etudiants: 30,
-      nb_stages: 15
+      nbEtudiants: 30,
+      nbStages: 15
     })
 
     expect(wrapper.text()).toContain('BUT Réseaux')
@@ -56,10 +56,10 @@ describe('ClassCard.vue', () => {
 
   it('sets the progress to the proportion of stages', () => {
     const wrapper = mountClassCard({
-      class_name: 'BUT Informatique',
+      className: 'BUT Informatique',
       alternance: false,
-      nb_etudiants: 24,
-      nb_stages: 6
+      nbEtudiants: 24,
+      nbStages: 6
     })
     const progress = wrapper.findComponent({ name: 'UProgress' })
 
@@ -69,10 +69,10 @@ describe('ClassCard.vue', () => {
 
   it('updates the progress when the progressbar v-model changes', async () => {
     const wrapper = mountClassCard({
-      class_name: 'BUT Informatique',
+      className: 'BUT Informatique',
       alternance: false,
-      nb_etudiants: 24,
-      nb_stages: 6
+      nbEtudiants: 24,
+      nbStages: 6
     })
     const progress = wrapper.findComponent({ name: 'UProgress' })
 

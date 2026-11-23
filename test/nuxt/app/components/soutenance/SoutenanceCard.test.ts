@@ -5,7 +5,7 @@ import SoutenanceCard from '~/components/soutenance/SoutenanceCard.vue'
 
 describe('SoutenanceCard.vue', () => {
   function mountSoutenanceCard(props: {
-    class_name: string
+    className: string
     alternance: boolean
     stages: number
     soutenances: number
@@ -29,7 +29,7 @@ describe('SoutenanceCard.vue', () => {
 
   it('displays the class details for a standard class', () => {
     const wrapper = mountSoutenanceCard({
-      class_name: 'BUT Informatique',
+      className: 'BUT Informatique',
       alternance: false,
       stages: 24,
       soutenances: 12
@@ -43,7 +43,7 @@ describe('SoutenanceCard.vue', () => {
 
   it('displays alternants and the alternance label', () => {
     const wrapper = mountSoutenanceCard({
-      class_name: 'BUT Réseaux',
+      className: 'BUT Réseaux',
       alternance: true,
       stages: 20,
       soutenances: 5
@@ -56,7 +56,7 @@ describe('SoutenanceCard.vue', () => {
 
   it('sets and updates the progress', async () => {
     const wrapper = mountSoutenanceCard({
-      class_name: 'BUT Informatique',
+      className: 'BUT Informatique',
       alternance: false,
       stages: 24,
       soutenances: 6

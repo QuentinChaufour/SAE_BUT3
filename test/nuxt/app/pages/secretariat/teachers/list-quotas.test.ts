@@ -72,8 +72,9 @@ describe('GET /api/teachers/list-quotas', () => {
   it('rejects a non-integer department id', async () => {
     mocks.getQuery.mockReturnValue({ idDepartement: 'invalid' })
     const handler = (await import('~~/server/api/teachers/list-quotas.get')).default
+    const event = {} as unknown as Parameters<typeof handler>[0]
 
-    await expect(handler({})).rejects.toMatchObject({
+    await expect(handler(event)).rejects.toMatchObject({
       statusCode: 400,
       statusMessage: 'idDepartement doit être un entier'
     })
@@ -82,8 +83,9 @@ describe('GET /api/teachers/list-quotas', () => {
 
   it('returns teacher names and stage counts by formation quota', async () => {
     const handler = (await import('~~/server/api/teachers/list-quotas.get')).default
+    const event = {} as unknown as Parameters<typeof handler>[0]
 
-    await expect(handler({})).resolves.toEqual([
+    await expect(handler(event)).resolves.toEqual([
       {
         'Nom': 'DURAND Alice',
         'Stage Informatique': '2/2',
