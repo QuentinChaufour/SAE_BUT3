@@ -1,58 +1,56 @@
 <script setup lang="ts">
-  import ClassCard from '~/components/soutenance/ClassCard.vue';
-  import SoutenanceCard from '~/components/soutenance/SoutenanceCard.vue';
-  import TableSoutenances from '~/components/soutenance/TableSoutenances.vue';
+import ClassCard from '~/components/soutenance/ClassCard.vue'
+import SoutenanceCard from '~/components/soutenance/SoutenanceCard.vue'
+import TableSoutenances from '~/components/soutenance/TableSoutenances.vue'
 
-  const idDepartement: number = 1;
+const idDepartement: number = 1
 
-  type ApiClassData = {
-    name: string | null;
-    etudiants: number;
-    stages: number;
-    alternance: boolean;
-  };
+type ApiClassData = {
+  name: string | null
+  etudiants: number
+  stages: number
+  alternance: boolean
+}
 
-  type ClassData = Omit<ApiClassData, 'name'> & {
-    name: string;
-  };
+type ClassData = Omit<ApiClassData, 'name'> & {
+  name: string
+}
 
-    type ApiSoutenanceData = {
-    name: string | null;
-    alternance: boolean;
-    stages: number;
-    soutenances: number;
-  };
+type ApiSoutenanceData = {
+  name: string | null
+  alternance: boolean
+  stages: number
+  soutenances: number
+}
 
-  const classes = ref<ClassData[]>([]);
-  const soutenances = ref<ApiSoutenanceData[]>([]);
+const classes = ref<ClassData[]>([])
+const soutenances = ref<ApiSoutenanceData[]>([])
 
-  async function load(departement: number) {
-    const data = await $fetch<ApiClassData[]>('/api/classes/summary/stages', {
-      query: { idDepartement: departement }
-    });
+async function load(departement: number) {
+  const data = await $fetch<ApiClassData[]>('/api/classes/summary/stages', {
+    query: { idDepartement: departement }
+  })
 
-    classes.value = data.map(classData => ({
-      ...classData,
-      name: classData.name ?? 'Formation sans nom'
-    }));
+  classes.value = data.map(classData => ({
+    ...classData,
+    name: classData.name ?? 'Formation sans nom'
+  }))
 
-    const data2 = await $fetch<ApiSoutenanceData[]>('/api/classes/summary/soutenances', {
-      query: { idDepartement: departement }
-    });
-    console.log(data2);
+  const data2 = await $fetch<ApiSoutenanceData[]>('/api/classes/summary/soutenances', {
+    query: { idDepartement: departement }
+  })
 
-    soutenances.value = data2.map(soutenanceData => ({
-      ...soutenanceData,
-      name: soutenanceData.name ?? 'Formation sans nom'
-    }));
-  }
+  soutenances.value = data2.map(soutenanceData => ({
+    ...soutenanceData,
+    name: soutenanceData.name ?? 'Formation sans nom'
+  }))
+}
 
-  await load(idDepartement);
-
+await load(idDepartement)
 </script>
 
 <template>
-  <UDashboardPanel :ui="{body:'m-0 sm:p-0 sm:pt-2 sm:pb-5 overflow-y-auto gap-2'}">
+  <UDashboardPanel :ui="{ body: 'm-0 sm:p-0 sm:pt-2 sm:pb-5 overflow-y-auto gap-2' }">
     <template #header>
       <UDashboardNavbar :title="'Tableau de bord'">
         <template #leading>
@@ -61,35 +59,51 @@
       </UDashboardNavbar>
     </template>
     <template #body>
-      <UCard variant="outline" class="m-0 sm:m-3 md:m-4 shadow-md min-h-38 h-auto shrink-0" :ui="{body:'sm:pt-2 md:p-4 md:pb-1 sm:p-2'}">
+      <UCard
+        variant="outline"
+        class="m-0 sm:m-3 md:m-4 shadow-md min-h-38 h-auto shrink-0"
+        :ui="{ body: 'sm:pt-2 md:p-4 md:pb-1 sm:p-2' }"
+      >
         <p>Étudiants</p>
         <div class="md:flex">
-          <ClassCard v-for="item in classes"
-          :class_name="item.name ?? 'Formation sans nom'"
-          :alternance=item.alternance
-          :nb_etudiants=item.etudiants
-          :nb_stages=item.stages
-          class="mt-2"
+          <ClassCard
+            v-for="item in classes"
+            :key="item.name"
+            :class-name="item.name ?? 'Formation sans nom'"
+            :alternance="item.alternance"
+            :nb-etudiants="item.etudiants"
+            :nb-stages="item.stages"
+            class="mt-2"
           />
         </div>
       </UCard>
 
-      <UCard variant="outline" class="m-0 sm:m-3 md:m-4 shadow-md min-h-38 h-auto shrink-0" :ui="{body:'sm:pt-2 md:p-4 md:pb-1 sm:p-2'}">
+      <UCard
+        variant="outline"
+        class="m-0 sm:m-3 md:m-4 shadow-md min-h-38 h-auto shrink-0"
+        :ui="{ body: 'sm:pt-2 md:p-4 md:pb-1 sm:p-2' }"
+      >
         <p>Soutenances</p>
         <div class="md:flex">
-          <SoutenanceCard v-for="item in soutenances"
-          :class_name="item.name ?? 'Formation sans nom'"
-          :alternance=item.alternance
-          :stages=item.stages
-          :soutenances=item.soutenances
+          <SoutenanceCard
+            v-for="item in soutenances"
+            :key="item.name ?? 'Formation sans nom'"
+            :class-name="item.name ?? 'Formation sans nom'"
+            :alternance="item.alternance"
+            :stages="item.stages"
+            :soutenances="item.soutenances"
           />
         </div>
       </UCard>
 
-      <UCard variant="outline" class="m-0 sm:m-3 md:m-4 shadow-md overflow-visible" :ui="{body:'sm:pt-1 sm:pb-1'}">
+      <UCard
+        variant="outline"
+        class="m-0 sm:m-3 md:m-4 shadow-md overflow-visible"
+        :ui="{ body: 'sm:pt-1 sm:pb-1' }"
+      >
         <!-- <UTable sticky :data="enseignants" :columns="columns" class="max-h-100 overflow-auto whitespace-pre-line" /> -->
-        <TableSoutenances :departementId="'1'"/>
+        <TableSoutenances :departement-id="'1'" />
       </UCard>
     </template>
   </UDashboardPanel>
-</template>²
+</template>
