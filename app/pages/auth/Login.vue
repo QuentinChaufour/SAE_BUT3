@@ -56,16 +56,18 @@ async function onSubmit(payload: FormSubmitEvent<Schema>) {
         color: 'success',
         title: 'Connexion réussi !'
       })
-
-      // TODO redirect the user to a main page based on his role
-      await navigateTo('/example')
     }
   } catch {
     toaster.add({
       color: 'error',
       title: 'Connexion échoué !'
     })
+
+    return
   }
+
+  // TODO redirect the user to a main page based on his role
+  await navigateTo('/example')
 }
 </script>
 

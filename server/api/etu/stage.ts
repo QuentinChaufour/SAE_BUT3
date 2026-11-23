@@ -1,15 +1,14 @@
 import { prisma } from '~~/server/utils/prisma'
 
 export default defineEventHandler(async (event) => {
-
-  const query = getQuery(event);
-  const etu = String(query.elem);
+  const query = getQuery(event)
+  const etu = String(query.elem)
   // const currentYear = String(query.year);
 
   const latestYear = await prisma.anneeUniversitaire.findFirst({
     orderBy: {
-      annee: 'desc',
-    },
+      annee: 'desc'
+    }
   })
 
   if (!latestYear) {
@@ -20,15 +19,15 @@ export default defineEventHandler(async (event) => {
   }
 
   const stage = await prisma.stage.findMany({
-    where : {
+    where: {
       numEtu: etu,
-      annee: latestYear.annee,
+      annee: latestYear.annee
     },
 
     include: {
       TuteurEntreprise: {
         include: {
-          Entreprise: true,
+          Entreprise: true
         }
       },
       Enseignant: true,
