@@ -1,15 +1,6 @@
 import { email } from "zod/v4";
 
 export default defineEventHandler(async () => {
-  // Sécurité : jamais en production
-  if (!import.meta.dev) {
-    throw createError({ statusCode: 404 });
-  }
-  // const anneeBD = await prisma.anneeUniversitaire.create({
-  //   data: {
-  //     annee: "2026",
-  //   },
-  // });
 
   // const newSoutenance = await prisma.soutenance.create({
   //   data: {
@@ -19,6 +10,46 @@ export default defineEventHandler(async () => {
   //     dateDebut: ,
   //   },
   // });
+
+  // const newSoutenanceStage = await prisma.soutenanceStage.create({
+  //   data: {
+  //     idStage: ,
+  //     idSoutenance: ,
+  //   },
+  // });
+
+  // const newSoutenanceProf = await prisma.enseignantSoutenance.create({
+  //   data: {
+  //     idStage: ,
+  //     idSoutenance: ,
+  //   },
+  // });
+
+//   async function changeThat(payload: FormSubmitEvent<Schema>) {   // fonction de fetch
+//   let response: LoginResponse
+
+//   try {
+//     response = await $fetch<LoginResponse>(`/api/etu/calendar-event`, {
+//       method: 'POST',
+//       body: { salle: '', annee: '', dateFin: '', dateDebut: '' }
+//     })
+
+//     if ('success' in response && response.success) {
+//       toaster.add({
+//         color: 'success',
+//         title: 'Connexion réussi !'
+//       })
+
+//       // TODO redirect the user to a main page based on his role
+//       await navigateTo('/example')
+//     }
+//   } catch {
+//     toaster.add({
+//       color: 'error',
+//       title: 'Connexion échoué !'
+//     })
+//   }
+// }
 
   const stageBD = await prisma.stage.create({
     data: {

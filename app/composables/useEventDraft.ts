@@ -9,7 +9,7 @@ import { minutesInColumn, SNAP_MINUTES, DRAG_THRESHOLD, DRAFT_EVENT_ID } from '.
 import { useEventListener } from '@vueuse/core'
 import { createAppComposable } from './createAppComposable'
 
-export interface EventDraft {
+export interface EventDraft { // creation de la stucture du brouillon d'un event
   start: Date
   end: Date
   allDay: boolean

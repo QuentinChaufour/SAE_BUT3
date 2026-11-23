@@ -25,19 +25,23 @@ const calendars: Calendar[] = [
 function at(day: Date, hours: number, minutes = 0): Date {
   return set(day, { hours, minutes, seconds: 0, milliseconds: 0 })
 }
-
-function timed(id: string, calendarId: string, title: string, start: Date, durationMinutes: number, description?: string): CalendarEvent {
+function timed(id: string, calendarId: string, title: string, start: Date, durationMinutes: number, description?: string, salle = '', etu = '', tuteur = '', candideUn?: string, candideDeux?: string): CalendarEvent {
   return {
     id,
     calendarId,
     title,
     description,
     start: toLocalISO(start),
-    end: toLocalISO(addMinutes(start, durationMinutes))
+    end: toLocalISO(addMinutes(start, durationMinutes)),
+    salle,
+    etu,
+    tuteur,
+    candideUn,
+    candideDeux,
   }
 }
 
-function allDay(id: string, calendarId: string, title: string, start: Date, days = 1, description?: string): CalendarEvent {
+function allDay(id: string, calendarId: string, title: string, start: Date, days = 1, description?: string, salle = '', etu = '', tuteur = ''): CalendarEvent {
   return {
     id,
     calendarId,
@@ -45,7 +49,10 @@ function allDay(id: string, calendarId: string, title: string, start: Date, days
     description,
     start: toLocalISO(at(start, 0)),
     end: toLocalISO(at(addDays(start, days), 0)),
-    allDay: true
+    allDay: true,
+    salle,
+    etu,
+    tuteur,
   }
 }
 
@@ -72,81 +79,8 @@ function pick<T>(week: number, key: string, options: T[]): T {
 // Deterministic seed relative to now so the demo is always populated,
 // same trick as the dashboard template's notifications endpoint
 function seed(): Map<string, CalendarEvent> {
-  const events: CalendarEvent[] = []
-  const now = new Date()
-  const currentWeek = startOfWeek(now, { weekStartsOn: 1 })
-
-  for (let offset = -WEEKS_AROUND; offset <= WEEKS_AROUND; offset++) {
-    const week = addWeeks(currentWeek, offset)
-    const id = (name: string) => `seed-${offset}-${name}`
-    const [mon, tue, wed, thu, fri, sat, sun] = eachDayOfWeek(week)
-
-    // The weekly rhythm, everything below it varies
-    for (const [index, day] of [mon, tue, wed, thu, fri].entries()) {
-      events.push(timed(id(`standup-${index}`), 'work', 'Daily stand-up', at(day!, 9, 15), 15))
-    }
-
-    events.push(
-      timed(id('one-on-one'), 'work', '1:1 with Sam', at(thu!, 11), 30),
-      timed(id('ship'), 'side-project', 'Ship weekly update', at(fri!, 17), 30),
-      timed(id('run'), 'personal', 'Long run', at(pick(offset, 'run-day', [sat!, sun!]), pick(offset, 'run-time', [8, 9])), 60)
-    )
-
-    // Sprints run fortnightly, so planning and retro come in pairs
-    if (offset % 2 === 0) {
-      events.push(
-        timed(id('planning'), 'work', 'Sprint planning', at(mon!, 10), 90, 'Plan the sprint with the team.'),
-        timed(id('retro'), 'work', 'Sprint retro', at(fri!, 16), 45)
-      )
-    }
-
-    // Drawn per week, each picking its own day, hour or title per week too,
-    // so the calendar has quiet stretches, busy ones and no two months alike.
-    // Closures so an event that does not come up is never built
-    const optional: [string, number, () => CalendarEvent][] = [
-      ['design-review', 0.5, () => timed(id('design-review'), 'work', 'Design review', at(pick(offset, 'design-review-day', [tue!, wed!]), 14), 60)],
-      ['pairing', 0.4, () => timed(id('pairing'), 'work', 'Pair on API caching', at(pick(offset, 'pairing-day', [wed!, thu!]), pick(offset, 'pairing-time', [10, 14])), 120)],
-      ['roadmap', 0.25, () => timed(id('roadmap'), 'work', 'Roadmap review', at(wed!, 15), 60)],
-      ['interview', 0.2, () => timed(id('interview'), 'work', 'Interview', at(pick(offset, 'interview-day', [tue!, fri!]), 11), 45)],
-      ['gym-1', 0.7, () => timed(id('gym-1'), 'personal', 'Gym', at(tue!, pick(offset, 'gym-1-time', [7, 18])), 60)],
-      ['gym-2', 0.7, () => timed(id('gym-2'), 'personal', 'Gym', at(thu!, pick(offset, 'gym-2-time', [7, 18])), 60)],
-      ['lunch', 0.35, () => timed(id('lunch'), 'personal', pick(offset, 'lunch-title', ['Lunch with Alex', 'Lunch with Maria', 'Team lunch']), at(pick(offset, 'lunch-day', [tue!, thu!]), 12, 30), 60)],
-      ['dinner', 0.35, () => timed(id('dinner'), 'personal', pick(offset, 'dinner-title', ['Dinner with friends', 'Date night', 'Team dinner']), at(pick(offset, 'dinner-day', [fri!, sat!]), 19, 30), 150)],
-      ['market', 0.35, () => timed(id('market'), 'personal', 'Farmers market', at(pick(offset, 'market-day', [sat!, sun!]), 10, 30), 60)],
-      ['plants', 0.5, () => timed(id('plants'), 'personal', 'Water plants', at(sun!, 10), 15)],
-      ['errand', 0.25, () => timed(id('errand'), 'personal', pick(offset, 'errand-title', ['Dentist', 'Haircut', 'Car service', 'Pick up package']), at(pick(offset, 'errand-day', [mon!, wed!, sat!]), pick(offset, 'errand-time', [9, 16, 17])), 45)],
-      ['evening-out', 0.2, () => timed(id('evening-out'), 'personal', pick(offset, 'evening-out-title', ['Concert', 'Movie night', 'Board games']), at(pick(offset, 'evening-out-day', [thu!, fri!, sat!]), 20), 180)],
-      ['focus-1', 0.5, () => timed(id('focus-1'), 'side-project', 'Focus time', at(pick(offset, 'focus-1-day', [mon!, tue!]), 20), 120, 'Deep work on the side project.')],
-      ['focus-2', 0.4, () => timed(id('focus-2'), 'side-project', 'Focus time', at(pick(offset, 'focus-2-day', [wed!, thu!]), 20), 120)],
-      ['stream', 0.15, () => timed(id('stream'), 'side-project', 'Live stream', at(pick(offset, 'stream-day', [tue!, wed!]), 18), 90)],
-      ['offsite', 0.07, () => allDay(id('offsite'), 'work', 'Team offsite', pick(offset, 'offsite-day', [tue!, wed!]), 2)],
-      ['launch', 0.06, () => allDay(id('launch'), 'side-project', 'Launch day', thu!)],
-      ['holiday', 0.05, () => allDay(id('holiday'), 'personal', 'Time off', mon!, 5, 'Out of office, back next week.')]
-    ]
-
-    for (const [key, probability, make] of optional) {
-      if (chance(offset, key) < probability) {
-        events.push(make())
-      }
-    }
-  }
-
-  // Overlapping events on "today" so the layout algorithm is visibly exercised
-  events.push(
-    timed('seed-today-focus', 'side-project', 'Focus time', at(now, 9), 120),
-    timed('seed-today-review', 'work', 'Code review', at(now, 9, 30), 60),
-    timed('seed-today-coffee', 'personal', 'Coffee chat', at(now, 10), 45),
-    timed('seed-today-brief', 'work', 'Product brief', at(now, 13), 60),
-    timed('seed-today-sync', 'work', 'Marketing sync', at(now, 13, 45), 75)
-  )
-
-  // Anchored near today so the all-day row is always part of the demo
-  events.push(
-    allDay('seed-conference', 'work', 'Nuxt Conf', addDays(addWeeks(currentWeek, 1), 1), 3, 'Three days of talks and workshops.'),
-    allDay('seed-birthday', 'personal', 'Anna\'s birthday', addDays(currentWeek, 5))
-  )
-
-  return new Map(events.map(event => [event.id, event]))
+// Give the calendar a blank map =====
+  return new Map()
 }
 
 function eachDayOfWeek(start: Date): Date[] {

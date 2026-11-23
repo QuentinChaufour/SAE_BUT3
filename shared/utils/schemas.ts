@@ -8,14 +8,19 @@ import { toLocalISO } from './time'
 export const localDatetime = z.iso.datetime({ local: true })
   .transform(value => value.length === 19 ? value : toLocalISO(new Date(value)))
 
-export const eventSchema = z.object({
+export const eventSchema = z.object({ // Schema des données souhaitées
   id: z.string().min(1),
   calendarId: z.string().min(1, 'Calendar is required'),
   title: z.string().min(1, 'Title is required').max(100),
   description: z.string().max(1000).optional(),
   start: localDatetime,
   end: localDatetime,
-  allDay: z.boolean().optional()
+  allDay: z.boolean().optional(),
+  salle: z.string().min(1, 'Room is required'),
+  etu: z.string().min(1, 'Student number is required'),
+  tuteur: z.string().min(1, 'Supervisor teacher number is required'),
+  candideUn: z.string().optional(),
+  candideDeux: z.string().optional()
 }).refine(event => new Date(event.end) > new Date(event.start), {
   message: 'End must be after start',
   path: ['end']
