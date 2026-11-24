@@ -63,7 +63,7 @@ export const useConnectedPersonnelStore = defineStore('connectedPersonnel', {
      * Indique si l'année en cours est en lecture seule. L'année est considérée comme en lecture seule si elle n'est pas la dernière année du département sélectionné.
      * @returns true si l'année en cours est en lecture seule, false sinon.
      */
-    isReadOnlyYear(): boolean {
+    isreadOnlyYear(): boolean {
       const selectedDepartment = this.getSelectedDepartment
       if (!selectedDepartment) return false
 

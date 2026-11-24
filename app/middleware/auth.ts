@@ -1,4 +1,6 @@
 import UserRole from '~~/shared/types/role'
+import { useConnectedPersonnelStore } from '~/stores/connectedPersonnel'
+import { useConnectedStudentStore } from '~/stores/connectedStudent'
 
 /**
  * Middleware assurant que l'utilisateur est authentifiée lors de l'accès a une page intégrant celui-ci
@@ -6,6 +8,7 @@ import UserRole from '~~/shared/types/role'
  */
 export default defineNuxtRouteMiddleware(async (_to, from) => {
   const session = useUserSession()
+  await session.fetch()
 
   if (!session.loggedIn.value) {
     const userWantedPath = from.fullPath === '/' ? undefined : from.fullPath

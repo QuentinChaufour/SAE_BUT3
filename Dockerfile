@@ -18,6 +18,9 @@ COPY shared ./shared
 COPY tsconfig.json nuxt.config.ts prisma7.config.ts ./
 COPY prisma ./prisma
 
+RUN mkdir -p /data/uploads && chown -R node:node /data/uploads
+ENV NUXT_UPLOAD_DIR=/data/uploads
+
 RUN pnpm exec prisma generate
 
 # Développement
@@ -42,7 +45,6 @@ COPY --from=build /src/.output ./.output
 
 EXPOSE 3000
 ENV NODE_ENV=production
-
 USER node
 
 CMD ["node", ".output/server/index.mjs"]

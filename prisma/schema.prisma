@@ -59,12 +59,15 @@ model DemarcheContact {
   fonction                 String?                    @db.VarChar
   email                    String?                    @db.VarChar
   telephone                String?                    @db.VarChar
+  idRecherche              Int?
+  RechercheStage           RechercheStage?            @relation(fields: [idRecherche], references: [idRecherche], onDelete: NoAction, onUpdate: NoAction)
   DemarcheRechercheContact DemarcheRechercheContact[]
 }
 
 /// This model has constraints using non-default deferring rules and requires additional setup for migrations. Visit https://pris.ly/d/constraint-deferring for more info.
 model DemarcheEvenement {
   idDemarche               Int                        @id @default(autoincrement())
+  titre                    String?
   description              String?
   date                     DateTime                   @default(now()) @db.Date
   status                   Recherche_Stage_Status
@@ -161,7 +164,7 @@ model Entreprise {
   codePostal       String?            @db.VarChar
   ville            String             @db.VarChar
   siret            String?            @db.VarChar
-  pays             String?            @db.VarChar
+  pays             String             @db.VarChar
   RechercheStage   RechercheStage[]
   TuteurEntreprise TuteurEntreprise[]
 }
@@ -208,6 +211,8 @@ model Inscription {
 model LienPj {
   idPieceJointe     Int
   idDemarche        Int
+  idRecherche       Int
+  RechercheStage    RechercheStage    @relation(fields: [idRecherche], references: [idRecherche], onDelete: Cascade, onUpdate: NoAction)
   DemarcheEvenement DemarcheEvenement @relation(fields: [idDemarche], references: [idDemarche], onDelete: Cascade, onUpdate: NoAction)
   PieceJointe       PieceJointe       @relation(fields: [idPieceJointe], references: [idPieceJointe], onDelete: NoAction, onUpdate: NoAction)
 
@@ -226,8 +231,10 @@ model Personnel {
 
 model PieceJointe {
   idPieceJointe Int      @id @default(autoincrement())
-  nom           String   @db.VarChar
-  chemin        String   @db.VarChar
+  nom           String  @db.VarChar
+  chemin        String  @db.VarChar
+  type          String?  @db.VarChar
+  taille        Int?
   LienPj        LienPj[]
 }
 
@@ -267,8 +274,10 @@ model RechercheStage {
   dateDerniereModification DateTime                  @updatedAt
   idInscription            Int
   status                   Recherche_Stage_Status    @default(AttenteEnvoi)
+  DemarcheContact          DemarcheContact[]
   DemarcheEvenement        DemarcheEvenement[]
   DepartementTagRecherche  DepartementTagRecherche[]
+  LienPj                   LienPj[]
   Entreprise               Entreprise                @relation(fields: [idEntreprise], references: [idEntreprise], onDelete: NoAction, onUpdate: NoAction)
   Inscription              Inscription               @relation(fields: [idInscription], references: [idInscription], onDelete: NoAction, onUpdate: NoAction)
 }
@@ -339,6 +348,7 @@ enum Demarche_Source {
   Telephone
   Presentiel
   Visio
+  Autre
 }
 
 enum Personnel_Role {

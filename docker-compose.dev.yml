@@ -8,14 +8,16 @@ services:
       - HOST=0.0.0.0
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
+      - UPLOAD_DIR=/data/uploads
     volumes:
       - ./.nuxt:/src/.nuxt
       - ./app:/src/app
       - ./public:/src/public
       - ./server:/src/server
       - ./shared:/src/shared
-      - ./nuxt.config.ts:/src/nuxt.config.ts
       - ./prisma:/src/prisma
+      - ./nuxt.config.ts:/src/nuxt.config.ts
+      - ./uploads:/data/uploads
     env_file:
       - .env
     ports:

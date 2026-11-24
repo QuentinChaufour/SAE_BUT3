@@ -2,7 +2,8 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import PasswordUpdate from '~/components/common/PasswordUpdate.vue'
+import PasswordUpdate from '~/components/forms/PasswordUpdate.vue'
+import ConfirmModal from '~/components/common/ConfirmModal.vue'
 import { resetNuxtMocks } from '../../../utils/utils'
 
 const mocks = vi.hoisted(() => ({
@@ -16,9 +17,6 @@ mockNuxtImport('$fetch', () => mocks.fetch)
 mockNuxtImport('useToast', () => () => mocks.toast)
 mockNuxtImport('definePageMeta', () => vi.fn())
 mockNuxtImport('navigateTo', () => mocks.navigateTo)
-
-const confirmMock = vi.fn()
-vi.stubGlobal('confirm', confirmMock)
 
 // the form with filled values
 const UAuthFormStub = {
@@ -56,8 +54,6 @@ describe('PasswordUpdate', () => {
   it('POSTs the password change credentials to the API', async () => {
     mocks.fetch.mockResolvedValue({ success: true })
     mocks.navigateTo.mockResolvedValue(undefined)
-    confirmMock.mockReturnValue(true)
-
     const wrapper = mountPassword()
     const authForm = wrapper.findComponent({ name: 'UAuthForm' })
 
@@ -71,11 +67,8 @@ describe('PasswordUpdate', () => {
       }
     })
 
+    wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
     await flushPromises()
-
-    expect(confirmMock).toHaveBeenCalledWith(
-      'Voulez-vous vraiment modifier votre mot de passe ?'
-    )
 
     expect(mocks.fetch).toHaveBeenCalledWith('/api/auth/password', {
       method: 'POST',
@@ -94,8 +87,6 @@ describe('PasswordUpdate', () => {
 
   it('displays an error when the password change request fails', async () => {
     mocks.fetch.mockRejectedValue(new Error('Unauthorised'))
-    confirmMock.mockReturnValue(true)
-
     const wrapper = mountPassword()
     const authForm = wrapper.findComponent({ name: 'UAuthForm' })
 
@@ -109,6 +100,7 @@ describe('PasswordUpdate', () => {
       }
     })
 
+    wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
     await flushPromises()
 
     expect(mocks.fetch).toHaveBeenCalledWith('/api/auth/password', {
@@ -131,8 +123,6 @@ describe('PasswordUpdate', () => {
 
   it('does not emit success when the API returns an error response', async () => {
     mocks.fetch.mockResolvedValue({ error: false, message: 'Invalid password' })
-    confirmMock.mockReturnValue(true)
-
     const wrapper = mountPassword()
     const authForm = wrapper.findComponent({ name: 'UAuthForm' })
 
@@ -144,6 +134,7 @@ describe('PasswordUpdate', () => {
       }
     })
 
+    wrapper.findComponent(ConfirmModal).vm.$emit('confirm')
     await flushPromises()
 
     expect(wrapper.emitted('passwordUpdated')).toBeUndefined()
@@ -157,8 +148,6 @@ describe('PasswordUpdate', () => {
     const wrapper = mountPassword()
     const authForm = wrapper.findComponent({ name: 'UAuthForm' })
     const schema = authForm.props('schema')
-    confirmMock.mockReturnValue(true)
-
     const result = schema.safeParse({
       login: 'o00000001',
       oldPassword: 'password123',
@@ -176,9 +165,7 @@ describe('PasswordUpdate', () => {
     }
   })
 
-  it('prevent password modification if canceled', async () => {
-    confirmMock.mockReturnValue(false)
-
+  it('prevents password modification if canceled', async () => {
     const wrapper = mountPassword()
     const authForm = wrapper.findComponent({ name: 'UAuthForm' })
 
@@ -190,6 +177,7 @@ describe('PasswordUpdate', () => {
       }
     })
 
+    wrapper.findComponent(ConfirmModal).vm.$emit('cancel')
     expect(mocks.fetch).not.toHaveBeenCalled()
   })
 })

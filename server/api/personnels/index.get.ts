@@ -1,7 +1,7 @@
 import { prisma } from '~~/server/utils/prisma'
 import UserRole from '~~/shared/types/role'
 import { checkAuth } from '~~/server/utils/middleware'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import { Personnel_Role } from '~~/generated/prisma/enums'
 import type { PersonnelWhereInput } from '~~/generated/prisma/models'
 import { idDepartementSchema } from '~~/shared/schemas/department'

@@ -21,7 +21,7 @@ const student = {
 
 const mockStore = {
   getSelectedPromotion: { idInscription: 123 },
-  isReadOnlyYear: false
+  isreadOnlyYear: false
 }
 
 mockNuxtImport('useUserSession', () => mocks.userSession)
@@ -57,6 +57,6 @@ describe('Student Search Index Page', () => {
     expect(searchTable.exists()).toBe(true)
     expect(searchTable.props('numEtu')).toBe(student.numId)
     expect(searchTable.props('idInscription')).toBe(mockStore.getSelectedPromotion.idInscription)
-    expect(searchTable.props('readOnly')).toBe(mockStore.isReadOnlyYear)
+    expect(searchTable.props('readOnly')).toBe(mockStore.isreadOnlyYear)
   })
 })
